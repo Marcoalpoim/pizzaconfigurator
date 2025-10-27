@@ -4,7 +4,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-
+import "./App.css";
 
 /* Ingredients list */
 const INGREDIENTS = [
@@ -637,7 +637,7 @@ const removeAllToppings = () => {
   return (
     <div style={{ height: "100vh", display: "flex", overflow: "hidden" }}>
       {/* LEFT Panel */}
-      <aside style={{ width: 200, padding: 16, borderRight: "1px solid #2b2b2b", background: "#111" }}>
+     <aside className="left-panel">
         <h2 style={{ color: "#fff", marginBottom: 12 }}>Ingredients</h2>
         <div style={{ display: "grid", gap: 8, height: 200, overflowY: "scroll", marginBottom: 20 }}>
           {INGREDIENTS.map((ing) => (
