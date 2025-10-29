@@ -1,69 +1,72 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --bg: #111;
+  --panel: #222;
+  --muted: #999;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-body {
-margin: 0;
-
+body, html, #root {
+  height: 100%;
+  margin: 0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: var(--bg);
+  color: #eee;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+.app-root {
+  height: 100%;
 }
 
-button {
+/* Auth bar */
+.auth-bar {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  align-items: center;
+  color: #eee;
+  background: #0b0b0b;
+  border-bottom: 1px solid #222;
+}
+
+.auth-form input {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #333;
+  background: #111;
+  color: #fff;
+}
+
+.auth-form button {
+  padding: 6px 8px;
+}
+
+/* Feed panel */
+.feed-panel {
+  position: fixed;
+  right: 0;
+  top: 56px;
+  width: 280px;
+  padding: 12px;
+  background: #0d0d0d;
+  border-left: 1px solid #222;
+  height: calc(100% - 56px);
+  overflow: auto;
+}
+
+.feed-item {
+  margin-bottom: 10px;
+  padding: 8px;
   border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  background: #141414;
+  border: 1px solid #222;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+/* left panel class used in some code samples */
+.left-panel {
+  width: 230px;
+  padding: 16px;
+  background: #111;
+  color: #fff;
 }
