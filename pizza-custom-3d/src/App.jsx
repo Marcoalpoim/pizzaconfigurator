@@ -40,6 +40,11 @@ export default function App() {
     setView("feed"); // 👈 show feed after publishing
   };
 
+ 
+const deleteFromFeed = (id) => {
+  setFeed((prev) => prev.filter((item) => item.id !== id));
+};
+
   const toggleBookmark = (id) => {
     setBookmarks((prev) =>
       prev.includes(id) ? prev.filter((b) => b !== id) : [...prev, id]
@@ -78,7 +83,8 @@ export default function App() {
               feed={feed}
               onSave={publishToFeed}
               onToggleBookmark={toggleBookmark}
-              bookmarks={bookmarks}
+              bookmarks={bookmarks}   
+              onDelete={deleteFromFeed}
             />
           )}
 
@@ -88,6 +94,7 @@ export default function App() {
               feed={feed}
               bookmarks={bookmarks}
               onToggleBookmark={toggleBookmark}
+          
             />
           )}
         </>

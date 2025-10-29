@@ -7,15 +7,16 @@ import { saveRecipeToUser } from "../utils/storage";
 
 const INGREDIENTS = [
   { id: "pepperoni", name: "Pepperoni", color: 0xb23d3d, kind: "cylinder" },
-  { id: "mushroom", name: "Mushroom", color: 0xdcd2c1, kind: "mushroom" },
+  { id: "cogumelos", name: "cogumelos", color: 0xdcd2c1, kind: "mushroom" },
   { id: "olive", name: "Olive", color: 0x2a3a2a, kind: "torus" },
   { id: "basil", name: "Basil", color: 0x3c7a3c, kind: "leaf" },
-  { id: "pineapple", name: "Pineapple", color: 0xffe7a3, kind: "cube" },
-  { id: "onion", name: "Onion", color: 0xe6b0ff, kind: "sphere" },
+  { id: "ananás", name: "ananás", color: 0xffe7a3, kind: "cube" },
+  { id: "cebola", name: "cebola", color: 0xe6b0ff, kind: "sphere" },
 ];
 
 export default function PizzaBuilder({ user, publishToFeed }) {
   // UI state
+   const [sauceType, setSauceType] = useState("tomate");
   const [baseType, setBaseType] = useState("medium");
   const [baseSize, setBaseSize] = useState(33);
   const [snapToRings, setSnapToRings] = useState(true);
@@ -93,20 +94,51 @@ export default function PizzaBuilder({ user, publishToFeed }) {
     return mesh;
   }
 
-  function createSauce(type, size) {
-    const { height, radius } = getBaseDims(type, size);
-    const geom = new THREE.CircleGeometry(radius * 0.95, 64);
-    const mat = new THREE.MeshStandardMaterial({
-      color: 0xc23b22,
-      roughness: 0.6,
-      metalness: 0.1,
-      side: THREE.DoubleSide,
-    });
-    const mesh = new THREE.Mesh(geom, mat);
-    mesh.rotation.x = -Math.PI / 2;
-    mesh.position.y = height - 0.01;
-    return mesh;
+function createSauce(type, size, sauceType) {
+  const { height, radius } = getBaseDims(type, size);
+  const geom = new THREE.CircleGeometry(radius * 0.95, 64);
+
+  // Choose sauce color / texture
+  const loader = new THREE.TextureLoader();
+  let color, texture;
+
+  switch (sauceType.toLowerCase()) {
+    case "carbonara":
+      color = 0xf5deb3; // creamy beige
+      texture = loader.load("/textures/dough-texture.jpg");
+      break;
+    case "pesto":
+      color = 0x4f7942; // greenish
+      texture = loader.load("/textures/dough-texture.jpg");
+      break;
+    case "barbecue":
+      color = 0x5c1b00; // dark brown-red
+      texture = loader.load("/textures/dough-texture.jpg");
+      break;
+    default:
+      color = 0xc23b22; // tomato red
+      texture = loader.load("/textures/dough-texture.jpg");
   }
+
+  if (texture) {
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(2, 2);
+  }
+
+  const mat = new THREE.MeshStandardMaterial({
+    map: texture,
+    color,
+    roughness: 0.6,
+    metalness: 0.1,
+    side: THREE.DoubleSide,
+  });
+
+  const mesh = new THREE.Mesh(geom, mat);
+  mesh.rotation.x = -Math.PI / 2;
+  mesh.position.y = height - 0.01;
+  return mesh;
+}
+
 
   function createCheeseBlob(radius, y) {
     const geom = new THREE.SphereGeometry(0.12 + Math.random() * 0.05, 8, 8);
@@ -149,7 +181,7 @@ export default function PizzaBuilder({ user, publishToFeed }) {
       case "cylinder":
         mesh = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.06, 16), mat);
         break;
-      case "mushroom":
+      case "cogumelos":
         mesh = new THREE.Mesh(new THREE.SphereGeometry(0.18, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), mat);
         break;
       case "torus":
@@ -260,7 +292,8 @@ export default function PizzaBuilder({ user, publishToFeed }) {
     scene.add(base);
     baseRef.current = base;
 
-    const sauce = createSauce(baseType, baseSize);
+    const sauce = createSauce(baseType, baseSize, sauceType);
+
     scene.add(sauce);
     sauceRef.current = sauce;
 
@@ -436,7 +469,8 @@ export default function PizzaBuilder({ user, publishToFeed }) {
     scene.add(base);
     baseRef.current = base;
 
-    const sauce = createSauce(baseType, baseSize);
+    const sauce = createSauce(baseType, baseSize, sauceType);
+
     scene.add(sauce);
     sauceRef.current = sauce;
 
@@ -452,7 +486,7 @@ export default function PizzaBuilder({ user, publishToFeed }) {
         child.position.y = toppingY;
       });
     }
-  }, [baseType, baseSize]);
+  }, [baseType, baseSize, sauceType]);
 
   // cheese rebuild
   useEffect(() => {
@@ -512,21 +546,13 @@ export default function PizzaBuilder({ user, publishToFeed }) {
     publishToFeed && publishToFeed(recipe);
   };
 
-  // Save to user profile (local storage)
-  const handleSaveToProfile = async () => {
-    const toppings = (toppingsGroupRef.current?.children || []).map((c) => ({
-      ingId: c.userData.ing?.id,
-      pos: { x: c.position.x, y: c.position.y, z: c.position.z },
-    }));
-    const recipe = { baseType, baseSize, cheeseAmount, toppings, createdAt: new Date().toISOString() };
-    await saveRecipeToUser(user.id, recipe);
-    alert("Saved to your profile (local)");
-  };
+ 
+
 
   // UI: left panel + canvas + small feed controls
   return (
     <div style={{ height: "100vh", display: "flex", overflow: "hidden" }}>
-      <aside style={{ width: 230, padding: 16, borderRight: "1px solid #2b2b2b", background: "#111", color: "#fff" }}>
+      <aside style={{ maxHeight:500, overflowY: scroll,  width: 230, padding: 16, borderRight: "1px solid #2b2b2b", background: "#111", color: "#fff" }}>
         <h2 style={{ marginBottom: 12 }}>Ingredients</h2>
         <div style={{ display: "grid", gap: 8, height: 220, overflowY: "auto", marginBottom: 14 }}>
           {INGREDIENTS.map((ing) => (
@@ -543,6 +569,15 @@ export default function PizzaBuilder({ user, publishToFeed }) {
         </div>
 
         <div style={{ marginTop: 6 }}>
+        <div style={{ marginBottom: 8 }}>Sauce Type</div>
+          <select
+          value={sauceType} onChange={(e) => setSauceType(e.target.value)} style={{ width: "100%", padding: 8 }}>
+                <option value="tomate">Tomate</option>
+                <option value="carbonara">Carbonara</option>
+                <option value="pesto">Pesto</option>
+                <option value="barbecue">Barbecue</option>
+        </select>
+
           <div style={{ marginBottom: 8 }}>Base Type</div>
           <select value={baseType} onChange={(e) => setBaseType(e.target.value)} style={{ width: "100%", padding: 8 }}>
             <option value="thin">Thin</option>
@@ -565,8 +600,7 @@ export default function PizzaBuilder({ user, publishToFeed }) {
           <div style={{ display: "flex", gap: 8, marginTop: 12, flexDirection: "column" }}>
             <button onClick={downloadSnapshot} style={{ padding: "8px 12px" }}>Snapshot</button>
             <button onClick={handlePublish} style={{ padding: "8px 12px" }}>Publish to feed</button>
-            <button onClick={handleSaveToProfile} style={{ padding: "8px 12px", background: "#5a1c1c", color: "#fff" }}>Save to profile</button>
-            <button onClick={removeAllToppings} style={{ padding: "8px 12px" }}> Remove Toppings </button>
+          <button onClick={removeAllToppings} style={{ padding: "8px 12px" }}> Remove Toppings </button>
           </div>
 
           <div style={{ marginTop: 16 }}>
