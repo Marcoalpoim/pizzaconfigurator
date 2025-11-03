@@ -3,20 +3,19 @@ import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { mergeVertices } from "three/examples/jsm/utils/BufferGeometryUtils.js";
-import { saveRecipeToUser } from "../utils/storage";
 
 const INGREDIENTS = [
   { id: "pepperoni", name: "Pepperoni", color: 0xb23d3d, kind: "cylinder" },
-  { id: "cogumelos", name: "cogumelos", color: 0xdcd2c1, kind: "mushroom" },
+  { id: "cogumelos", name: "Cogumelos", color: 0xdcd2c1, kind: "mushroom" },
   { id: "olive", name: "Olive", color: 0x2a3a2a, kind: "torus" },
   { id: "basil", name: "Basil", color: 0x3c7a3c, kind: "leaf" },
-  { id: "ananás", name: "ananás", color: 0xffe7a3, kind: "cube" },
-  { id: "cebola", name: "cebola", color: 0xe6b0ff, kind: "sphere" },
+  { id: "ananas", name: "Ananás", color: 0xffe7a3, kind: "cube" },
+  { id: "cebola", name: "Cebola", color: 0xe6b0ff, kind: "sphere" },
 ];
 
 export default function PizzaBuilder({ user, publishToFeed }) {
   // UI state
-   const [sauceType, setSauceType] = useState("tomate");
+  const [sauceType, setSauceType] = useState("tomate");
   const [baseType, setBaseType] = useState("medium");
   const [baseSize, setBaseSize] = useState(33);
   const [snapToRings, setSnapToRings] = useState(true);
@@ -34,7 +33,7 @@ export default function PizzaBuilder({ user, publishToFeed }) {
   const cheeseGroupRef = useRef(null);
   const toppingsGroupRef = useRef(null);
 
-  // helper: dims
+  // helper dims
   const getBaseDims = (type, size) => {
     const height = type === "thin" ? 0.04 : type === "medium" ? 0.08 : 0.15;
     const radius = size === 28 ? 1.9 : size === 33 ? 2.2 : 2.7;
@@ -42,12 +41,12 @@ export default function PizzaBuilder({ user, publishToFeed }) {
   };
 
   function createBase(type, size) {
-    const { height, radius } = getBaseDims(type, size);
+    const { height } = getBaseDims(type, size);
     const segments = 128;
     const points = [];
-    const innerRadius = radius * 0.9;
+    const innerRadius = (getBaseDims(type, size).radius) * 0.9;
     const crustThickness = height * 2.2;
-    const crustDepth = radius * 0.15;
+    const crustDepth = getBaseDims(type, size).radius * 0.15;
 
     points.push(new THREE.Vector2(innerRadius, 0));
     for (let i = 0; i <= 16; i++) {
@@ -94,61 +93,47 @@ export default function PizzaBuilder({ user, publishToFeed }) {
     return mesh;
   }
 
-function createSauce(type, size, sauceType) {
-  const { height, radius } = getBaseDims(type, size);
-  const geom = new THREE.CircleGeometry(radius * 0.95, 64);
+  function createSauce(type, size, sType) {
+    const { height, radius } = getBaseDims(type, size);
+    const geom = new THREE.CircleGeometry(radius * 0.95, 64);
+    const loader = new THREE.TextureLoader();
 
-  // Choose sauce color / texture
-  const loader = new THREE.TextureLoader();
-  let color, texture;
+    let color = 0xc23b22;
+    // Normalize sauce key to lowercase simple tokens
+    const key = String(sType || "").toLowerCase();
+    if (key.includes("carbon") || key === "carbonara") {
+      color = 0xf5deb3;
+    } else if (key.includes("pesto")) {
+      color = 0x4f7942;
+    } else if (key.includes("barb") || key === "barbecue" || key === "barbeque") {
+      color = 0x5c1b00;
+    } else {
+      color = 0xc23b22;
+    }
 
-  switch (sauceType.toLowerCase()) {
-    case "carbonara":
-      color = 0xf5deb3; // creamy beige
-      texture = loader.load("/textures/dough-texture.jpg");
-      break;
-    case "pesto":
-      color = 0x4f7942; // greenish
-      texture = loader.load("/textures/dough-texture.jpg");
-      break;
-    case "barbecue":
-      color = 0x5c1b00; // dark brown-red
-      texture = loader.load("/textures/dough-texture.jpg");
-      break;
-    default:
-      color = 0xc23b22; // tomato red
-      texture = loader.load("/textures/dough-texture.jpg");
-  }
-
-  if (texture) {
+    const texture = loader.load("/textures/dough-texture.jpg", () => {});
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(2, 2);
+
+    const mat = new THREE.MeshStandardMaterial({
+      map: texture,
+      color,
+      roughness: 0.6,
+      metalness: 0.1,
+      side: THREE.DoubleSide,
+    });
+
+    const mesh = new THREE.Mesh(geom, mat);
+    mesh.rotation.x = -Math.PI / 2;
+    mesh.position.y = height - 0.01;
+    return mesh;
   }
-
-  const mat = new THREE.MeshStandardMaterial({
-    map: texture,
-    color,
-    roughness: 0.6,
-    metalness: 0.1,
-    side: THREE.DoubleSide,
-  });
-
-  const mesh = new THREE.Mesh(geom, mat);
-  mesh.rotation.x = -Math.PI / 2;
-  mesh.position.y = height - 0.01;
-  return mesh;
-}
-
 
   function createCheeseBlob(radius, y) {
     const geom = new THREE.SphereGeometry(0.12 + Math.random() * 0.05, 8, 8);
     const baseColor = new THREE.Color(0xfff2a1);
     baseColor.offsetHSL((Math.random() - 0.5) * 0.05, (Math.random() - 0.5) * 0.1, 0);
-    const mat = new THREE.MeshStandardMaterial({
-      color: baseColor,
-      roughness: 0.8,
-      metalness: 0.05,
-    });
+    const mat = new THREE.MeshStandardMaterial({ color: baseColor, roughness: 0.8, metalness: 0.05 });
     const mesh = new THREE.Mesh(geom, mat);
     mesh.scale.set(1.0 + Math.random() * 0.5, 0.15 + Math.random() * 0.08, 1.0 + Math.random() * 0.5);
     const angle = Math.random() * Math.PI * 2;
@@ -159,7 +144,6 @@ function createSauce(type, size, sauceType) {
     return mesh;
   }
 
-  // Topping surface Y: prefer sauce position; fallback to base top
   function getToppingSurfaceY() {
     if (sauceRef.current) {
       return sauceRef.current.position.y + 0.02;
@@ -181,6 +165,7 @@ function createSauce(type, size, sauceType) {
       case "cylinder":
         mesh = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.06, 16), mat);
         break;
+      case "mushroom":
       case "cogumelos":
         mesh = new THREE.Mesh(new THREE.SphereGeometry(0.18, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), mat);
         break;
@@ -199,7 +184,7 @@ function createSauce(type, size, sauceType) {
         mesh = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), mat);
     }
     mesh.userData.baseScale = mesh.scale.clone();
-    mesh.userData.ing = ing;
+    // mesh.userData.ing must be set by caller (addIngredientAtWorldPos) to guarantee full ingredient info
     mesh.castShadow = true;
     return mesh;
   }
@@ -207,7 +192,7 @@ function createSauce(type, size, sauceType) {
   function snapToRingsIfNeeded(posVec) {
     if (!snapToRings) return posVec;
     const base = baseRef.current;
-    if (!base) return posVec;
+    if (!base || !base.geometry) return posVec;
     const radius = (base.geometry.parameters?.radiusTop ?? 2.2) * base.scale.x;
     const dx = posVec.x;
     const dz = posVec.z;
@@ -233,7 +218,11 @@ function createSauce(type, size, sauceType) {
   }
 
   function addIngredientAtWorldPos(ing, worldPos) {
-    const mesh = createMeshForIngredient(ing);
+    // ensure we have full ingredient object from INGREDIENTS if possible
+    const fullIng = INGREDIENTS.find((i) => i.id === ing.id) || ing;
+    const mesh = createMeshForIngredient(fullIng);
+    // store the ingredient data on the mesh so saves can read it later
+    mesh.userData.ing = { ...fullIng };
     const pos = snapToRingsIfNeeded(worldPos);
     const toppingY = getToppingSurfaceY();
     mesh.position.set(pos.x, toppingY, pos.z);
@@ -293,20 +282,19 @@ function createSauce(type, size, sauceType) {
     baseRef.current = base;
 
     const sauce = createSauce(baseType, baseSize, sauceType);
-
     scene.add(sauce);
     sauceRef.current = sauce;
 
-    // cheese & toppings groups
+    // groups
     const cheeseGroup = new THREE.Group();
-    scene.add(cheeseGroup);
     cheeseGroupRef.current = cheeseGroup;
+    scene.add(cheeseGroup);
 
     const toppingsGroup = new THREE.Group();
-    scene.add(toppingsGroup);
     toppingsGroupRef.current = toppingsGroup;
+    scene.add(toppingsGroup);
 
-    // raycaster + plane + drop helpers
+    // raycaster + plane + helpers
     const raycaster = new THREE.Raycaster();
     const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
     const dropPoint = new THREE.Vector3();
@@ -314,13 +302,39 @@ function createSauce(type, size, sauceType) {
     const pointerState = { dragging: false, offset: new THREE.Vector3() };
     let selected = null;
 
-    // handlers (define here so we can remove later)
+    // Robust JSON parse helper
+    const safeParse = (raw) => {
+      try {
+        return JSON.parse(raw);
+      } catch {
+        return null;
+      }
+    };
+
+    // Drag handlers: ensure fullIng resolved from INGREDIENTS
     const handleDragOver = (e) => e.preventDefault();
     const handleDrop = (e) => {
       e.preventDefault();
       try {
-        const raw = e.dataTransfer.getData("application/json") || e.dataTransfer.getData("text/plain");
-        const ing = JSON.parse(raw);
+        // try a few types to maximize compatibility
+        const rawJson = e.dataTransfer.getData("application/json");
+        const rawText = e.dataTransfer.getData("text/plain");
+        let ing = safeParse(rawJson) || safeParse(rawText);
+
+        // If we couldn't parse, try reading plain text as an id
+        if (!ing && rawText) {
+          // maybe rawText is just an id string
+          ing = { id: rawText.trim() };
+        }
+        // fallback: abort
+        if (!ing) {
+          console.warn("Unable to parse ingredient from drop data:", { rawJson, rawText });
+          return;
+        }
+
+        // Find full ingredient info from INGREDIENTS
+        const fullIng = INGREDIENTS.find((i) => i.id === ing.id) || ing;
+
         const rect = renderer.domElement.getBoundingClientRect();
         const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
         const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
@@ -334,12 +348,12 @@ function createSauce(type, size, sauceType) {
         if (hits.length > 0) {
           const hp = hits[0].point;
           const toppingY = getToppingSurfaceY();
-          addIngredientAtWorldPos(ing, new THREE.Vector3(hp.x, toppingY, hp.z));
+          addIngredientAtWorldPos(fullIng, new THREE.Vector3(hp.x, toppingY, hp.z));
         } else {
           const planePoint = new THREE.Vector3();
           if (raycaster.ray.intersectPlane(plane, planePoint)) {
             const toppingY = getToppingSurfaceY();
-            addIngredientAtWorldPos(ing, new THREE.Vector3(planePoint.x, toppingY, planePoint.z));
+            addIngredientAtWorldPos(fullIng, new THREE.Vector3(planePoint.x, toppingY, planePoint.z));
           }
         }
       } catch (err) {
@@ -347,6 +361,7 @@ function createSauce(type, size, sauceType) {
       }
     };
 
+    // pointer & dragging handlers
     const onPointerMove = (e) => {
       if (!pointerState.dragging || !selected) return;
       const rect = renderer.domElement.getBoundingClientRect();
@@ -430,7 +445,7 @@ function createSauce(type, size, sauceType) {
     };
     animate();
 
-    // cleanup on unmount
+    // cleanup
     return () => {
       resizeObserver.disconnect();
       controls.dispose();
@@ -445,14 +460,13 @@ function createSauce(type, size, sauceType) {
       window.removeEventListener("keydown", onKeyDown);
       if (renderer.domElement && container.contains(renderer.domElement)) container.removeChild(renderer.domElement);
     };
-  }, []); // one-time scene init
+  }, []); // initial scene setup
 
-  // When baseType or baseSize changes, rebuild base & sauce and realign toppings
+  // rebuild base/sauce when size/type/sauce changes and realign toppings
   useEffect(() => {
     const scene = sceneRef.current;
     if (!scene) return;
 
-    // remove old base & sauce
     if (baseRef.current) {
       scene.remove(baseRef.current);
       try { baseRef.current.geometry.dispose(); baseRef.current.material.dispose(); } catch {}
@@ -464,18 +478,15 @@ function createSauce(type, size, sauceType) {
       sauceRef.current = null;
     }
 
-    // create new base & sauce
     const base = createBase(baseType, baseSize);
     scene.add(base);
     baseRef.current = base;
 
     const sauce = createSauce(baseType, baseSize, sauceType);
-
     scene.add(sauce);
     sauceRef.current = sauce;
 
-    // Force world matrices then realign toppings to new topping surface height
-    // Small timeout sometimes helps but updateMatrixWorld should suffice.
+    // update world matrices so world-space queries are correct
     if (baseRef.current) baseRef.current.updateMatrixWorld(true);
     if (sauceRef.current) sauceRef.current.updateMatrixWorld(true);
 
@@ -500,13 +511,13 @@ function createSauce(type, size, sauceType) {
     }
   }, [cheeseAmount, baseType, baseSize]);
 
-  // UI handlers for drag start (left panel)
+  // UI handlers
   const handleDragStart = (e, ing) => {
+    // store a minimal id string too — some browsers only keep text/plain
     e.dataTransfer.setData("application/json", JSON.stringify(ing));
-    e.dataTransfer.setData("text/plain", JSON.stringify(ing));
+    e.dataTransfer.setData("text/plain", ing.id);
   };
 
-  // Snapshot function
   const downloadSnapshot = () => {
     const renderer = rendererRef.current;
     if (!renderer) return;
@@ -523,36 +534,73 @@ function createSauce(type, size, sauceType) {
       while (group.children.length > 0) {
         const child = group.children.pop();
         if (child.geometry) child.geometry.dispose();
+        if (child.material && child.material.map) child.material.map.dispose();
         if (child.material) child.material.dispose();
       }
     }
   };
 
-  // Publish: gather minimal recipe metadata and publish via prop
   const handlePublish = () => {
-    const toppings = (toppingsGroupRef.current?.children || []).map((c) => ({
-      ingId: c.userData.ing?.id,
-      pos: { x: c.position.x, y: c.position.y, z: c.position.z },
-    }));
+    const toppings = (toppingsGroupRef.current?.children || []).map((c) => {
+      const ing = c.userData.ing || {};
+      return {
+        id: ing.id || Math.random().toString(36).slice(2),
+        name: ing.name || "Unknown",
+        color: ing.color ?? 0xffffff,
+        pos: { x: c.position.x, y: c.position.y, z: c.position.z },
+      };
+    });
     const recipe = {
-      author: user.displayName,
-      userId: user.id,
+      author: user?.displayName || user?.name || "Anonymous Chef",
+      userId: user?.uid || user?.id || "guest",
       baseType,
       baseSize,
       cheeseAmount,
+      sauceType,
       toppings,
       createdAt: new Date().toISOString(),
     };
     publishToFeed && publishToFeed(recipe);
   };
 
- 
+  const handleSaveToProfile = () => {
+    if (!user) {
+      alert("Please log in first!");
+      return;
+    }
 
+    const toppings = Array.from(toppingsGroupRef.current?.children || []).map((c) => {
+      const ing = c.userData.ing || {};
+      return {
+        id: ing.id || Math.random().toString(36).slice(2),
+        name: ing.name || "Unknown",
+        color: ing.color ?? 0xffffff,
+        pos: { x: c.position.x, y: c.position.y, z: c.position.z },
+      };
+    });
 
-  // UI: left panel + canvas + small feed controls
+    const recipe = {
+      id: Date.now(),
+      userId: user?.uid || user?.id || "guest",
+      author: user?.displayName || user?.name || "Anonymous Chef",
+      baseType,
+      baseSize,
+      cheeseAmount,
+      sauceType,
+      toppings,
+      createdAt: new Date().toISOString(),
+    };
+
+    const stored = JSON.parse(localStorage.getItem("userRecipes") || "[]");
+    const updated = [...stored, recipe];
+    localStorage.setItem("userRecipes", JSON.stringify(updated));
+    alert("✅ Recipe saved to your profile!");
+  };
+
+  // UI render
   return (
     <div style={{ height: "100vh", display: "flex", overflow: "hidden" }}>
-      <aside style={{ maxHeight:500, overflowY: scroll,  width: 230, padding: 16, borderRight: "1px solid #2b2b2b", background: "#111", color: "#fff" }}>
+      <aside style={{ width: 230, padding: 16, borderRight: "1px solid #2b2b2b", background: "#111", color: "#fff" }}>
         <h2 style={{ marginBottom: 12 }}>Ingredients</h2>
         <div style={{ display: "grid", gap: 8, height: 220, overflowY: "auto", marginBottom: 14 }}>
           {INGREDIENTS.map((ing) => (
@@ -569,16 +617,15 @@ function createSauce(type, size, sauceType) {
         </div>
 
         <div style={{ marginTop: 6 }}>
-        <div style={{ marginBottom: 8 }}>Sauce Type</div>
-          <select
-          value={sauceType} onChange={(e) => setSauceType(e.target.value)} style={{ width: "100%", padding: 8 }}>
-                <option value="tomate">Tomate</option>
-                <option value="carbonara">Carbonara</option>
-                <option value="pesto">Pesto</option>
-                <option value="barbecue">Barbecue</option>
-        </select>
+          <div style={{ marginBottom: 8 }}>Sauce Type</div>
+          <select value={sauceType} onChange={(e) => setSauceType(e.target.value)} style={{ width: "100%", padding: 8 }}>
+            <option value="tomate">Tomate</option>
+            <option value="carbonara">Carbonara</option>
+            <option value="pesto">Pesto</option>
+            <option value="barbecue">Barbecue</option>
+          </select>
 
-          <div style={{ marginBottom: 8 }}>Base Type</div>
+          <div style={{ marginBottom: 8, marginTop: 12 }}>Base Type</div>
           <select value={baseType} onChange={(e) => setBaseType(e.target.value)} style={{ width: "100%", padding: 8 }}>
             <option value="thin">Thin</option>
             <option value="medium">Medium</option>
@@ -600,7 +647,8 @@ function createSauce(type, size, sauceType) {
           <div style={{ display: "flex", gap: 8, marginTop: 12, flexDirection: "column" }}>
             <button onClick={downloadSnapshot} style={{ padding: "8px 12px" }}>Snapshot</button>
             <button onClick={handlePublish} style={{ padding: "8px 12px" }}>Publish to feed</button>
-          <button onClick={removeAllToppings} style={{ padding: "8px 12px" }}> Remove Toppings </button>
+            <button onClick={handleSaveToProfile} style={{ padding: "8px 12px", background: "#5a1c1c", color: "#fff" }}>Save to profile</button>
+            <button onClick={removeAllToppings} style={{ padding: "8px 12px" }}>Remove Toppings</button>
           </div>
 
           <div style={{ marginTop: 16 }}>

@@ -37,21 +37,75 @@ export default function Feed({ feed = [], onSave, onBookmark, onDelete }) {
             className="feed-item"
             style={{
               position: "relative",
-              padding: 10,
+              padding: 12,
               border: "1px solid #222",
-              marginBottom: 8,
+              marginBottom: 10,
               borderRadius: 8,
               background: "#181818",
+              color: "#eee",
             }}
           >
-            <div style={{ fontWeight: 600 }}>{item.author || "anon"}</div>
-            <div style={{ fontSize: 12, color: "#bbb" }}>
-              {item.baseType} — {item.baseSize} cm
+            {/* Author & base info */}
+            <div style={{ fontWeight: 600, fontSize: 15 }}>
+              {item.author || "Anonymous"}
+            </div>
+            <div style={{ fontSize: 13, color: "#bbb" }}>
+              {item.baseType} base — {item.baseSize} cm
             </div>
 
-            {/* Buttons */}
-            <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
-              <button onClick={() => onSave?.(item)}>Republish</button>
+            {/* Ingredients */}
+            <div style={{ marginTop: 8, fontSize: 13, color: "#ccc" }}>
+              <strong>Cheese:</strong> {item.cheeseAmount || 0} blobs <br />
+              <strong>Sauce:</strong> {item.sauceType || "Tomato"}
+            </div>
+
+            {item.toppings?.length > 0 && (
+              <div style={{ marginTop: 8 }}>
+                <strong style={{ fontSize: 13 }}>Toppings:</strong>
+                <ul style={{ marginTop: 4, paddingLeft: 18 }}>
+                  {item.toppings.map((t, i) => (
+                    <li key={i} style={{ fontSize: 13 }}>
+                      <span
+                        style={{
+                          display: "inline-block",
+                          width: 10,
+                          height: 10,
+                          borderRadius: "50%",
+                          background: `#${t.color
+                            ?.toString(16)
+                            .padStart(6, "0")}`,
+                          marginRight: 6,
+                        }}
+                      />
+                      {t.name || "Unknown ingredient"}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Action buttons */}
+            <div
+              style={{
+                marginTop: 10,
+                display: "flex",
+                gap: 8,
+                flexWrap: "wrap",
+              }}
+            >
+              <button
+                onClick={() => onSave?.(item)}
+                style={{
+                  background: "#5a1c1c",
+                  color: "#fff",
+                  border: "none",
+                  padding: "6px 10px",
+                  borderRadius: 6,
+                  cursor: "pointer",
+                }}
+              >
+                Republish
+              </button>
 
               <button
                 onClick={() => {
@@ -79,8 +133,8 @@ export default function Feed({ feed = [], onSave, onBookmark, onDelete }) {
               onClick={() => onDelete?.(item.id)}
               style={{
                 position: "absolute",
-                top: 6,
-                right: 6,
+                top: 8,
+                right: 8,
                 background: "transparent",
                 border: "none",
                 cursor: "pointer",
