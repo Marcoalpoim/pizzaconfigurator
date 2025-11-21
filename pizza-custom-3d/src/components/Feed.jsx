@@ -45,8 +45,24 @@ export default function Feed({ feed = [], onSave, onBookmark, onDelete }) {
               color: "#eee",
             }}
           >
+
+
             {/* Author & base info */}
-            <div style={{ fontWeight: 600, fontSize: 15 }}>
+
+{item.image && (
+  <img
+    src={item.image}
+    alt="Pizza Preview"
+    style={{
+      width: "100%",
+      borderRadius: 8,
+      marginTop: 8,
+      objectFit: "cover",
+      maxHeight: 200,
+    }}
+  />
+)}
+         <div style={{ fontWeight: 600, fontSize: 15 }}>
               {item.author || "Anonymous"}
             </div>
             <div style={{ fontSize: 13, color: "#bbb" }}>

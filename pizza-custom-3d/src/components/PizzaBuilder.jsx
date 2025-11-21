@@ -563,39 +563,64 @@ export default function PizzaBuilder({ user, publishToFeed }) {
     publishToFeed && publishToFeed(recipe);
   };
 
-  const handleSaveToProfile = () => {
-    if (!user) {
-      alert("Please log in first!");
-      return;
-    }
 
-    const toppings = Array.from(toppingsGroupRef.current?.children || []).map((c) => {
-      const ing = c.userData.ing || {};
-      return {
-        id: ing.id || Math.random().toString(36).slice(2),
-        name: ing.name || "Unknown",
-        color: ing.color ?? 0xffffff,
-        pos: { x: c.position.x, y: c.position.y, z: c.position.z },
-      };
-    });
+  
+const handleSaveToProfile = () => {
+  if (!user) {
+    alert("Please log in first!");
+    return;
+  }
 
-    const recipe = {
-      id: Date.now(),
-      userId: user?.uid || user?.id || "guest",
-      author: user?.displayName || user?.name || "Anonymous Chef",
-      baseType,
-      baseSize,
-      cheeseAmount,
-      sauceType,
-      toppings,
-      createdAt: new Date().toISOString(),
+  // 🍕 Collect toppings safely
+  const toppings = Array.from(toppingsGroupRef.current?.children || []).map((c) => {
+    const ing = c.userData?.ing || {};
+    return {
+      id: ing.id || c.uuid || Math.random().toString(36).slice(2),
+      name: ing.name || c.name || "Unknown ingredient",
+      color: ing.color || 0xffffff,
+      pos: { x: c.position.x, y: c.position.y, z: c.position.z },
     };
+  });
 
-    const stored = JSON.parse(localStorage.getItem("userRecipes") || "[]");
-    const updated = [...stored, recipe];
-    localStorage.setItem("userRecipes", JSON.stringify(updated));
-    alert("✅ Recipe saved to your profile!");
+  // 🔹 Try to capture the canvas image, but fall back if it fails
+  let imageData = null;
+  try {
+    const canvas = document.querySelector("canvas");
+    if (canvas) {
+      imageData = canvas.toDataURL("image/png");
+    }
+  } catch (e) {
+    console.warn("⚠️ Couldn't capture 3D canvas snapshot, using fallback preview.");
+  }
+
+  // 🧀 Create the recipe object
+  const recipe = {
+    id: Date.now(),
+    userId: user?.uid || user?.id || "guest",
+    author: user?.displayName || user?.name || "Anonymous Chef",
+    baseType,
+    baseSize,
+    cheeseAmount,
+    sauceType,
+    toppings,
+    image:
+      imageData ||
+      `https://api.dicebear.com/9.x/shapes/svg?seed=${baseType}-${baseSize}-${cheeseAmount}-${sauceType}`,
+    // 👆 fallback placeholder from Dicebear (always unique!)
+    createdAt: new Date().toISOString(),
   };
+
+  // 💾 Save to localStorage
+  const stored = localStorage.getItem("userRecipes");
+  const existing = stored ? JSON.parse(stored) : [];
+  const updated = [...existing, recipe];
+  localStorage.setItem("userRecipes", JSON.stringify(updated));
+
+  alert("✅ Pizza saved to your profile!");
+};
+
+
+
 
   // UI render
   return (
