@@ -51,6 +51,17 @@ const deleteFromFeed = (id) => {
     );
   };
 
+// Delete a published recipe from the feed
+const deletePublishedRecipe = (id) => {
+  setFeed((prev) => prev.filter((item) => item.id !== id));
+};
+
+// Delete a bookmarked recipe
+const deleteBookmarkRecipe = (id) => {
+  setBookmarks((prev) => prev.filter((b) => b !== id));
+};
+
+
   return (
     <div className="app-root">
       <Auth user={user} setUser={setUser} />
@@ -88,15 +99,17 @@ const deleteFromFeed = (id) => {
             />
           )}
 
-          {view === "profile" && (
+         {view === "profile" && (
             <Profile
               user={user}
               feed={feed}
               bookmarks={bookmarks}
               onToggleBookmark={toggleBookmark}
-          
+              onDeletePublished={deletePublishedRecipe}
+              onDeleteBookmark={deleteBookmarkRecipe}
             />
           )}
+
         </>
       ) : (
         <div style={{ color: "white", padding: 20 }}>

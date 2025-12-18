@@ -49,19 +49,26 @@ export default function Feed({ feed = [], onSave, onBookmark, onDelete }) {
 
             {/* Author & base info */}
 
-{item.image && (
-  <img
-    src={item.image}
-    alt="Pizza Preview"
-    style={{
-      width: "100%",
-      borderRadius: 8,
-      marginTop: 8,
-      objectFit: "cover",
-      maxHeight: 200,
-    }}
-  />
-)}
+{/* Preview Image (with fallback + lazy load) */}
+<img
+  src={
+    item.image ||
+    "/placeholder-pizza.png" // <-- Use your own placeholder path here
+  }
+  alt="Pizza Preview"
+  loading="lazy"
+  style={{
+    width: "100%",
+    borderRadius: 8,
+    marginTop: 8,
+    objectFit: "cover",
+    maxHeight: 200,
+    opacity: item.image ? 1 : 0.5, // dim placeholder
+    filter: item.image ? "none" : "grayscale(40%)",
+    background: "#222",
+  }}
+/>
+
          <div style={{ fontWeight: 600, fontSize: 15 }}>
               {item.author || "Anonymous"}
             </div>
@@ -75,30 +82,42 @@ export default function Feed({ feed = [], onSave, onBookmark, onDelete }) {
               <strong>Sauce:</strong> {item.sauceType || "Tomato"}
             </div>
 
-            {item.toppings?.length > 0 && (
-              <div style={{ marginTop: 8 }}>
-                <strong style={{ fontSize: 13 }}>Toppings:</strong>
-                <ul style={{ marginTop: 4, paddingLeft: 18 }}>
-                  {item.toppings.map((t, i) => (
-                    <li key={i} style={{ fontSize: 13 }}>
-                      <span
-                        style={{
-                          display: "inline-block",
-                          width: 10,
-                          height: 10,
-                          borderRadius: "50%",
-                          background: `#${t.color
-                            ?.toString(16)
-                            .padStart(6, "0")}`,
-                          marginRight: 6,
-                        }}
-                      />
-                      {t.name || "Unknown ingredient"}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+          {item.toppings?.length > 0 && (() => {
+  // Group toppings by name
+  const grouped = item.toppings.reduce((acc, t) => {
+    const key = t.name || "Unknown ingredient";
+    if (!acc[key]) {
+      acc[key] = { count: 0, color: t.color };
+    }
+    acc[key].count++;
+    return acc;
+  }, {});
+
+  return (
+    <div style={{ marginTop: 8 }}>
+      <strong style={{ fontSize: 13 }}>Toppings:</strong>
+
+      <div style={{ marginTop: 4, fontSize: 13 }}>
+        {Object.entries(grouped).map(([name, info], idx) => (
+          <span key={idx} style={{ marginRight: 10 }}>
+            <span
+              style={{
+                display: "inline-block",
+                width: 10,
+                height: 10,
+                borderRadius: "50%",
+                background: `#${info.color?.toString(16).padStart(6, "0")}`,
+                marginRight: 4,
+              }}
+            />
+            {name} ×{info.count}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+})()}
+
 
             {/* Action buttons */}
             <div

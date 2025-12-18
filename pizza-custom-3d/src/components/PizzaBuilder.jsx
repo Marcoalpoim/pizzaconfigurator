@@ -19,7 +19,6 @@ export default function PizzaBuilder({ user, publishToFeed }) {
   const [baseType, setBaseType] = useState("medium");
   const [baseSize, setBaseSize] = useState(33);
   const [snapToRings, setSnapToRings] = useState(true);
-  const [feedLocal, setFeedLocal] = useState([]);
   const [cheeseAmount, setCheeseAmount] = useState(250);
 
   // refs
@@ -44,7 +43,7 @@ export default function PizzaBuilder({ user, publishToFeed }) {
     const { height } = getBaseDims(type, size);
     const segments = 128;
     const points = [];
-    const innerRadius = (getBaseDims(type, size).radius) * 0.9;
+    const innerRadius = getBaseDims(type, size).radius * 0.9;
     const crustThickness = height * 2.2;
     const crustDepth = getBaseDims(type, size).radius * 0.15;
 
@@ -70,6 +69,8 @@ export default function PizzaBuilder({ user, publishToFeed }) {
     geom.center();
 
     const loader = new THREE.TextureLoader();
+    // <- IMPORTANT: allow crossOrigin to avoid tainting canvas
+    loader.crossOrigin = "anonymous";
     const doughTexture = loader.load("/textures/dough-texture.jpg", () => {});
     doughTexture.wrapS = doughTexture.wrapT = THREE.RepeatWrapping;
     doughTexture.repeat.set(3, 3);
@@ -97,23 +98,22 @@ export default function PizzaBuilder({ user, publishToFeed }) {
     const { height, radius } = getBaseDims(type, size);
     const geom = new THREE.CircleGeometry(radius * 0.95, 64);
     const loader = new THREE.TextureLoader();
+    loader.crossOrigin = "anonymous";
+    const texture = loader.load("/textures/dough-texture.jpg", () => {});
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(2, 2);
 
     let color = 0xc23b22;
-    // Normalize sauce key to lowercase simple tokens
     const key = String(sType || "").toLowerCase();
     if (key.includes("carbon") || key === "carbonara") {
       color = 0xf5deb3;
     } else if (key.includes("pesto")) {
       color = 0x4f7942;
-    } else if (key.includes("barb") || key === "barbecue" || key === "barbeque") {
+    } else if (key.includes("barb") || key === "barbecue") {
       color = 0x5c1b00;
     } else {
       color = 0xc23b22;
     }
-
-    const texture = loader.load("/textures/dough-texture.jpg", () => {});
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(2, 2);
 
     const mat = new THREE.MeshStandardMaterial({
       map: texture,
@@ -184,7 +184,6 @@ export default function PizzaBuilder({ user, publishToFeed }) {
         mesh = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), mat);
     }
     mesh.userData.baseScale = mesh.scale.clone();
-    // mesh.userData.ing must be set by caller (addIngredientAtWorldPos) to guarantee full ingredient info
     mesh.castShadow = true;
     return mesh;
   }
@@ -218,10 +217,9 @@ export default function PizzaBuilder({ user, publishToFeed }) {
   }
 
   function addIngredientAtWorldPos(ing, worldPos) {
-    // ensure we have full ingredient object from INGREDIENTS if possible
+    // ensure we have complete ingredient info
     const fullIng = INGREDIENTS.find((i) => i.id === ing.id) || ing;
     const mesh = createMeshForIngredient(fullIng);
-    // store the ingredient data on the mesh so saves can read it later
     mesh.userData.ing = { ...fullIng };
     const pos = snapToRingsIfNeeded(worldPos);
     const toppingY = getToppingSurfaceY();
@@ -246,7 +244,8 @@ export default function PizzaBuilder({ user, publishToFeed }) {
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+    // preserveDrawingBuffer helps keep canvas readable for toDataURL. It's OK here.
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.shadowMap.enabled = true;
@@ -316,23 +315,18 @@ export default function PizzaBuilder({ user, publishToFeed }) {
     const handleDrop = (e) => {
       e.preventDefault();
       try {
-        // try a few types to maximize compatibility
         const rawJson = e.dataTransfer.getData("application/json");
         const rawText = e.dataTransfer.getData("text/plain");
         let ing = safeParse(rawJson) || safeParse(rawText);
 
-        // If we couldn't parse, try reading plain text as an id
         if (!ing && rawText) {
-          // maybe rawText is just an id string
           ing = { id: rawText.trim() };
         }
-        // fallback: abort
         if (!ing) {
           console.warn("Unable to parse ingredient from drop data:", { rawJson, rawText });
           return;
         }
 
-        // Find full ingredient info from INGREDIENTS
         const fullIng = INGREDIENTS.find((i) => i.id === ing.id) || ing;
 
         const rect = renderer.domElement.getBoundingClientRect();
@@ -518,10 +512,67 @@ export default function PizzaBuilder({ user, publishToFeed }) {
     e.dataTransfer.setData("text/plain", ing.id);
   };
 
-  const downloadSnapshot = () => {
+  // helper: capture snapshot of renderer canvas
+  // scale = 1 => normal; scale >1 => higher resolution (e.g. 2 or 4)
+  async function captureSnapshot({ scale = 1 } = {}) {
     const renderer = rendererRef.current;
-    if (!renderer) return;
-    const data = renderer.domElement.toDataURL("image/png");
+    const scene = sceneRef.current;
+    const camera = cameraRef.current;
+    if (!renderer || !scene || !camera) return null;
+
+    // base sizes to restore later
+    const canvas = renderer.domElement;
+    const prevWidth = canvas.clientWidth;
+    const prevHeight = canvas.clientHeight;
+    const prevPixelRatio = renderer.getPixelRatio();
+
+    try {
+      if (scale > 1) {
+        // For high-res snapshot: temporarily bump pixel ratio and size
+        const w = Math.floor(prevWidth * scale);
+        const h = Math.floor(prevHeight * scale);
+
+        // set high pixel ratio and size
+        renderer.setPixelRatio(1); // use explicit size instead of devicePixelRatio
+        renderer.setSize(w, h);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.render(scene, camera);
+        const data = canvas.toDataURL("image/png");
+        return data;
+      } else {
+        // normal snapshot
+        renderer.setPixelRatio(prevPixelRatio);
+        renderer.setSize(prevWidth, prevHeight);
+        camera.aspect = prevWidth / prevHeight;
+        camera.updateProjectionMatrix();
+        renderer.render(scene, camera);
+        const data = canvas.toDataURL("image/png");
+        return data;
+      }
+    } catch (err) {
+      console.warn("Snapshot capture failed:", err);
+      return null;
+    } finally {
+      // restore original size & pixel ratio
+      try {
+        renderer.setPixelRatio(prevPixelRatio);
+        renderer.setSize(prevWidth, prevHeight);
+        camera.aspect = prevWidth / prevHeight;
+        camera.updateProjectionMatrix();
+      } catch (e) {
+        // ignore restore errors
+      }
+    }
+  }
+
+  const downloadSnapshot = async (highRes = false) => {
+    const scale = highRes ? 2 : 1; // 2x for higher resolution (you can increase to 3 or 4)
+    const data = await captureSnapshot({ scale });
+    if (!data) {
+      alert("Snapshot failed. See console for details.");
+      return;
+    }
     const a = document.createElement("a");
     a.href = data;
     a.download = `pizza-${Date.now()}.png`;
@@ -540,7 +591,8 @@ export default function PizzaBuilder({ user, publishToFeed }) {
     }
   };
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
+    // minimal toppings metadata
     const toppings = (toppingsGroupRef.current?.children || []).map((c) => {
       const ing = c.userData.ing || {};
       return {
@@ -550,7 +602,18 @@ export default function PizzaBuilder({ user, publishToFeed }) {
         pos: { x: c.position.x, y: c.position.y, z: c.position.z },
       };
     });
+
+    // try capture thumbnail (normal resolution)
+    let image = null;
+    try {
+      image = await captureSnapshot({ scale: 1 });
+    } catch (err) {
+      console.warn("Publish snapshot failed:", err);
+      image = null;
+    }
+
     const recipe = {
+      id: Date.now(),
       author: user?.displayName || user?.name || "Anonymous Chef",
       userId: user?.uid || user?.id || "guest",
       baseType,
@@ -558,69 +621,59 @@ export default function PizzaBuilder({ user, publishToFeed }) {
       cheeseAmount,
       sauceType,
       toppings,
+      image: image || null, // attach image if available
       createdAt: new Date().toISOString(),
     };
+
     publishToFeed && publishToFeed(recipe);
   };
 
-
-  
-const handleSaveToProfile = () => {
-  if (!user) {
-    alert("Please log in first!");
-    return;
-  }
-
-  // 🍕 Collect toppings safely
-  const toppings = Array.from(toppingsGroupRef.current?.children || []).map((c) => {
-    const ing = c.userData?.ing || {};
-    return {
-      id: ing.id || c.uuid || Math.random().toString(36).slice(2),
-      name: ing.name || c.name || "Unknown ingredient",
-      color: ing.color || 0xffffff,
-      pos: { x: c.position.x, y: c.position.y, z: c.position.z },
-    };
-  });
-
-  // 🔹 Try to capture the canvas image, but fall back if it fails
-  let imageData = null;
-  try {
-    const canvas = document.querySelector("canvas");
-    if (canvas) {
-      imageData = canvas.toDataURL("image/png");
+  const handleSaveToProfile = async () => {
+    if (!user) {
+      alert("Please log in first!");
+      return;
     }
-  } catch (e) {
-    console.warn("⚠️ Couldn't capture 3D canvas snapshot, using fallback preview.");
-  }
 
-  // 🧀 Create the recipe object
-  const recipe = {
-    id: Date.now(),
-    userId: user?.uid || user?.id || "guest",
-    author: user?.displayName || user?.name || "Anonymous Chef",
-    baseType,
-    baseSize,
-    cheeseAmount,
-    sauceType,
-    toppings,
-    image:
-      imageData ||
-      `https://api.dicebear.com/9.x/shapes/svg?seed=${baseType}-${baseSize}-${cheeseAmount}-${sauceType}`,
-    // 👆 fallback placeholder from Dicebear (always unique!)
-    createdAt: new Date().toISOString(),
+    const toppings = Array.from(toppingsGroupRef.current?.children || []).map((c) => {
+      const ing = c.userData?.ing || {};
+      return {
+        id: ing.id || c.uuid || Math.random().toString(36).slice(2),
+        name: ing.name || c.name || "Unknown ingredient",
+        color: ing.color || 0xffffff,
+        pos: { x: c.position.x, y: c.position.y, z: c.position.z },
+      };
+    });
+
+    // try to capture a high-res thumbnail for profile
+    let imageData = null;
+    try {
+      imageData = await captureSnapshot({ scale: 2 }); // 2x snapshot for thumbnail
+    } catch (e) {
+      console.warn("Could not capture high-res snapshot:", e);
+      imageData = null;
+    }
+
+    const recipe = {
+      id: Date.now(),
+      userId: user?.uid || user?.id || "guest",
+      author: user?.displayName || user?.name || "Anonymous Chef",
+      baseType,
+      baseSize,
+      cheeseAmount,
+      sauceType,
+      toppings,
+      image: imageData || null,
+      createdAt: new Date().toISOString(),
+    };
+
+    // save to localStorage userRecipes array (append)
+    const stored = localStorage.getItem("userRecipes");
+    const existing = stored ? JSON.parse(stored) : [];
+    const updated = [...existing, recipe];
+    localStorage.setItem("userRecipes", JSON.stringify(updated));
+
+    alert("✅ Recipe saved to your profile!");
   };
-
-  // 💾 Save to localStorage
-  const stored = localStorage.getItem("userRecipes");
-  const existing = stored ? JSON.parse(stored) : [];
-  const updated = [...existing, recipe];
-  localStorage.setItem("userRecipes", JSON.stringify(updated));
-
-  alert("✅ Pizza saved to your profile!");
-};
-
-
-
 
   // UI render
   return (
@@ -663,14 +716,16 @@ const handleSaveToProfile = () => {
             <option value={33}>33 cm</option>
             <option value={40}>40 cm</option>
           </select>
-
+ 
+   {/* This is a comment 
           <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12 }}>
             <input type="checkbox" checked={snapToRings} onChange={(e) => setSnapToRings(e.target.checked)} />
             Snap to rings
           </label>
-
+ */}
           <div style={{ display: "flex", gap: 8, marginTop: 12, flexDirection: "column" }}>
-            <button onClick={downloadSnapshot} style={{ padding: "8px 12px" }}>Snapshot</button>
+ 
+            <button onClick={() => downloadSnapshot(true)} style={{ padding: "8px 12px" }}>Snapshot (High-res)</button>
             <button onClick={handlePublish} style={{ padding: "8px 12px" }}>Publish to feed</button>
             <button onClick={handleSaveToProfile} style={{ padding: "8px 12px", background: "#5a1c1c", color: "#fff" }}>Save to profile</button>
             <button onClick={removeAllToppings} style={{ padding: "8px 12px" }}>Remove Toppings</button>
@@ -687,11 +742,6 @@ const handleSaveToProfile = () => {
       <main style={{ flex: 1, position: "relative", background: "#222" }}>
         <div ref={mountRef} style={{ position: "absolute", inset: 0 }} />
       </main>
-
-      <aside style={{ width: 120, padding: 16, borderLeft: "1px solid #2b2b2b", background: "#111", color: "#eee" }}>
-        <h3>Local feed</h3>
-        {feedLocal.length === 0 ? <div style={{ marginTop: 8, color: "#999" }}> — no local posts —</div> : null}
-      </aside>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 
-cd ~/Desktop/webfrontend-Projeto/pizza-custom-3d
+cd ~/Desktop/PG-2025-webfrontend/webfrontend-Projeto/pizza-custom-3d
 git add -A
 git commit -m "Fix: remove submodule and add project files"
 
