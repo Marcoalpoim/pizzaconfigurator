@@ -7,3 +7,5 @@ git commit -m "Fix: remove submodule and add project files"
 
 PUSH TO GITHUB
 git push -u origin main --force
+
+...
