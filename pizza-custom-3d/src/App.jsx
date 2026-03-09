@@ -8,6 +8,10 @@ import "./index.css";
 
 export default function App() {
   const [user, setUser] = useState(null);
+  const [showConfig, setShowConfig] = useState(() => {
+  const saved = localStorage.getItem("pizzaBuilderConfigOpen");
+  return saved ? JSON.parse(saved) : true; // default open
+});
   const [feed, setFeed] = useState(() => loadFeedFromStorage() || []);
   const [view, setView] = useState("builder"); // 👈 "builder" | "feed" | "profile"
   const [bookmarks, setBookmarks] = useState(() => {
@@ -22,6 +26,12 @@ export default function App() {
   useEffect(() => {
     saveFeedToStorage(feed);
   }, [feed]);
+
+useEffect(() => {
+  if (view === "builder") {
+    localStorage.setItem("pizzaBuilderConfigOpen", JSON.stringify(showConfig));
+  }
+}, [showConfig, view]);
 
   useEffect(() => {
     localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
@@ -40,27 +50,25 @@ export default function App() {
     setView("feed"); // 👈 show feed after publishing
   };
 
- 
-const deleteFromFeed = (id) => {
-  setFeed((prev) => prev.filter((item) => item.id !== id));
-};
+  const deleteFromFeed = (id) => {
+    setFeed((prev) => prev.filter((item) => item.id !== id));
+  };
 
   const toggleBookmark = (id) => {
     setBookmarks((prev) =>
-      prev.includes(id) ? prev.filter((b) => b !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((b) => b !== id) : [...prev, id],
     );
   };
 
-// Delete a published recipe from the feed
-const deletePublishedRecipe = (id) => {
-  setFeed((prev) => prev.filter((item) => item.id !== id));
-};
+  // Delete a published recipe from the feed
+  const deletePublishedRecipe = (id) => {
+    setFeed((prev) => prev.filter((item) => item.id !== id));
+  };
 
-// Delete a bookmarked recipe
-const deleteBookmarkRecipe = (id) => {
-  setBookmarks((prev) => prev.filter((b) => b !== id));
-};
-
+  // Delete a bookmarked recipe
+  const deleteBookmarkRecipe = (id) => {
+    setBookmarks((prev) => prev.filter((b) => b !== id));
+  };
 
   return (
     <div className="app-root">
@@ -69,24 +77,27 @@ const deleteBookmarkRecipe = (id) => {
       {user ? (
         <>
           {/* 🧭 Simple nav bar */}
-          <nav
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              gap: 16,
-              background: "#111",
-              color: "#fff",
-              padding: "10px 0",
-            }}
-          >
-            <button onClick={() => setView("builder")}>🍕 Builder</button>
+          <nav className="mainnav-container">
+            <button onClick={() => setView("builder")}>📰</button>
+            <button
+              onClick={() => {
+                setView("builder");
+                setShowConfig((prev) => !prev);
+              }}
+            >
+              🍕 Builder
+            </button>
             <button onClick={() => setView("feed")}>📰 Feed</button>
             <button onClick={() => setView("profile")}>👤 Profile</button>
           </nav>
 
           {/* 🪄 Render the current view */}
           {view === "builder" && (
-            <PizzaBuilder user={user} publishToFeed={publishToFeed} />
+            <PizzaBuilder
+              user={user}
+              publishToFeed={publishToFeed}
+              showConfig={showConfig}
+            />
           )}
 
           {view === "feed" && (
@@ -94,12 +105,12 @@ const deleteBookmarkRecipe = (id) => {
               feed={feed}
               onSave={publishToFeed}
               onToggleBookmark={toggleBookmark}
-              bookmarks={bookmarks}   
+              bookmarks={bookmarks}
               onDelete={deleteFromFeed}
             />
           )}
 
-         {view === "profile" && (
+          {view === "profile" && (
             <Profile
               user={user}
               feed={feed}
@@ -109,7 +120,6 @@ const deleteBookmarkRecipe = (id) => {
               onDeleteBookmark={deleteBookmarkRecipe}
             />
           )}
-
         </>
       ) : (
         <div style={{ color: "white", padding: 20 }}>

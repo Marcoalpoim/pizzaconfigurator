@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { mergeVertices } from "three/examples/jsm/utils/BufferGeometryUtils.js";
+ 
 
 const INGREDIENTS = [
   { id: "pepperoni", name: "Pepperoni", color: 0xb23d3d, kind: "cylinder" },
@@ -13,7 +14,7 @@ const INGREDIENTS = [
   { id: "cebola", name: "Cebola", color: 0xe6b0ff, kind: "sphere" },
 ];
 
-export default function PizzaBuilder({ user, publishToFeed }) {
+export default function PizzaBuilder({ user, publishToFeed, showConfig }) {
   // UI state
   const [sauceType, setSauceType] = useState("tomate");
   const [baseType, setBaseType] = useState("medium");
@@ -73,15 +74,17 @@ export default function PizzaBuilder({ user, publishToFeed }) {
     loader.crossOrigin = "anonymous";
     const doughTexture = loader.load("/textures/dough-texture.jpg", () => {});
     doughTexture.wrapS = doughTexture.wrapT = THREE.RepeatWrapping;
-    doughTexture.repeat.set(3, 3);
+    doughTexture.repeat.set(10, 1);
 
+   
     const mat = new THREE.MeshStandardMaterial({
-      map: doughTexture,
-      color: 0xf5deb3,
-      roughness: 0.8,
-      metalness: 0,
-      side: THREE.DoubleSide,
-    });
+  map: doughTexture,
+  color: 0xf2c27b,
+  roughness: 0.85,
+  metalness: 0,
+  side: THREE.DoubleSide,
+});
+
 
     const mesh = new THREE.Mesh(geom, mat);
     mesh.castShadow = true;
@@ -236,11 +239,84 @@ export default function PizzaBuilder({ user, publishToFeed }) {
     while (container.firstChild) container.removeChild(container.firstChild);
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x222222);
+   scene.background = new THREE.Color(0x111111);
     sceneRef.current = scene;
 
+
+// ----- ENVIRONMENT -----
+
+// Floor
+const textureLoader = new THREE.TextureLoader();
+
+const floorTexture = textureLoader.load("/textures/floor.jpg");
+
+floorTexture.wrapS = THREE.RepeatWrapping;
+floorTexture.wrapT = THREE.RepeatWrapping;
+floorTexture.repeat.set(10,10);
+
+const floor = new THREE.Mesh(
+  new THREE.PlaneGeometry(50,50),
+  new THREE.MeshStandardMaterial({
+    map: floorTexture
+  })
+);
+
+floor.rotation.x = -Math.PI / 2;
+floor.position.y = -0.02;
+floor.receiveShadow = true;
+
+scene.add(floor);
+
+
+// Back wall
+const backWall = new THREE.Mesh(
+  new THREE.PlaneGeometry(50, 20),
+  new THREE.MeshStandardMaterial({
+    color: 0xf5e9d7
+  })
+);
+
+backWall.position.set(0, 10, -15);
+scene.add(backWall);
+
+
+// Left wall
+const leftWall = new THREE.Mesh(
+  new THREE.PlaneGeometry(50, 20),
+  new THREE.MeshStandardMaterial({
+    color: 0xf0e4d0
+  })
+);
+
+leftWall.rotation.y = Math.PI / 2;
+leftWall.position.set(-25, 10, 0);
+
+scene.add(leftWall);
+
+
+// Right wall
+const rightWall = new THREE.Mesh(
+  new THREE.PlaneGeometry(50, 20),
+  new THREE.MeshStandardMaterial({
+    color: 0xf0e4d0
+  })
+);
+
+rightWall.rotation.y = -Math.PI / 2;
+rightWall.position.set(25, 10, 0);
+
+scene.add(rightWall);
+
+
+ 
+
+
+
+
+
+
     const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
-    camera.position.set(0, 3.8, 5.2);
+    camera.position.set(0, 6, 12);
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
@@ -268,6 +344,19 @@ export default function PizzaBuilder({ user, publishToFeed }) {
     fillLight.position.set(-3, 4, -2);
     scene.add(fillLight);
 
+    // 🍕 Spotlight for the pizza
+const pizzaSpot = new THREE.SpotLight(0xfff2cc, 3);
+
+pizzaSpot.position.set(0, 6, 2);   // above the pizza
+pizzaSpot.angle = Math.PI / 6;
+pizzaSpot.penumbra = 0.6;
+pizzaSpot.decay = 2;
+pizzaSpot.distance = 20;
+
+pizzaSpot.castShadow = true;
+
+scene.add(pizzaSpot);
+
     // table
     const table = new THREE.Mesh(new THREE.CircleGeometry(2.8, 64), new THREE.MeshStandardMaterial({ color: 0xe3dfd7, roughness: 0.9, opacity: 0.5, transparent: true }));
     table.rotation.x = -Math.PI / 2;
@@ -279,6 +368,8 @@ export default function PizzaBuilder({ user, publishToFeed }) {
     const base = createBase(baseType, baseSize);
     scene.add(base);
     baseRef.current = base;
+    pizzaSpot.target = base;
+scene.add(pizzaSpot.target);
 
     const sauce = createSauce(baseType, baseSize, sauceType);
     scene.add(sauce);
@@ -431,13 +522,39 @@ export default function PizzaBuilder({ user, publishToFeed }) {
     resizeObserver.observe(container);
 
     // animation
-    const animate = () => {
-      requestAnimationFrame(animate);
-      if (baseRef.current) baseRef.current.rotation.y += 0.0001;
-      controls.update();
-      renderer.render(scene, camera);
-    };
-    animate();
+let zoomProgress = 0;
+
+const startPos = new THREE.Vector3(0, 8, 18);
+const endPos = new THREE.Vector3(0.5, 3.6, 5);
+
+function easeInOut(t) {
+  return t * t * (3 - 2 * t); // smoothstep easing
+}
+
+const animate = () => {
+  requestAnimationFrame(animate);
+
+  if (zoomProgress < 1) {
+    zoomProgress += 0.005; // slower movement
+
+    const eased = easeInOut(zoomProgress);
+
+    const currentPos = startPos.clone().lerp(endPos, eased);
+    camera.position.copy(currentPos);
+
+    camera.lookAt(0, 0, 0);
+
+    controls.enabled = false;
+  } else {
+    controls.enabled = true;
+  }
+
+  controls.update();
+  renderer.render(scene, camera);
+};
+
+animate();
+
 
     // cleanup
     return () => {
@@ -628,57 +745,58 @@ export default function PizzaBuilder({ user, publishToFeed }) {
     publishToFeed && publishToFeed(recipe);
   };
 
-  const handleSaveToProfile = async () => {
-    if (!user) {
-      alert("Please log in first!");
-      return;
-    }
+const handleSaveToProfile = async () => {
+  console.log("Save clicked");
 
-    const toppings = Array.from(toppingsGroupRef.current?.children || []).map((c) => {
-      const ing = c.userData?.ing || {};
-      return {
-        id: ing.id || c.uuid || Math.random().toString(36).slice(2),
-        name: ing.name || c.name || "Unknown ingredient",
-        color: ing.color || 0xffffff,
-        pos: { x: c.position.x, y: c.position.y, z: c.position.z },
-      };
-    });
+  if (!user) {
+    alert("Please log in first!");
+    return;
+  }
 
-    // try to capture a high-res thumbnail for profile
-    let imageData = null;
-    try {
-      imageData = await captureSnapshot({ scale: 2 }); // 2x snapshot for thumbnail
-    } catch (e) {
-      console.warn("Could not capture high-res snapshot:", e);
-      imageData = null;
-    }
-
-    const recipe = {
-      id: Date.now(),
-      userId: user?.uid || user?.id || "guest",
-      author: user?.displayName || user?.name || "Anonymous Chef",
-      baseType,
-      baseSize,
-      cheeseAmount,
-      sauceType,
-      toppings,
-      image: imageData || null,
-      createdAt: new Date().toISOString(),
+  const toppings = Array.from(toppingsGroupRef.current?.children || []).map((c) => {
+    const ing = c.userData?.ing || {};
+    return {
+      id: ing.id || c.uuid,
+      name: ing.name || c.name || "Unknown ingredient",
+      color: ing.color || 0xffffff,
+      pos: { x: c.position.x, y: c.position.y, z: c.position.z },
     };
+  });
 
-    // save to localStorage userRecipes array (append)
-    const stored = localStorage.getItem("userRecipes");
-    const existing = stored ? JSON.parse(stored) : [];
-    const updated = [...existing, recipe];
-    localStorage.setItem("userRecipes", JSON.stringify(updated));
+  // capture snapshot (same as publish)
+  let image = null;
+  try {
+    image = await captureSnapshot({ scale: 1 });
+  } catch (err) {
+    console.warn("Snapshot failed:", err);
+  }
 
-    alert("✅ Recipe saved to your profile!");
+  const recipe = {
+    id: Date.now(),
+    userId: user.uid,
+    author: user.displayName || "Anonymous Chef",
+    baseType,
+    baseSize,
+    cheeseAmount,
+    sauceType,
+    toppings,
+    image: image || null, // ✅ ADD THIS
+    createdAt: new Date().toISOString(),
   };
+
+  const stored = JSON.parse(localStorage.getItem("userRecipes") || "[]");
+  stored.push(recipe);
+  localStorage.setItem("userRecipes", JSON.stringify(stored));
+
+  console.log("Saved:", recipe);
+
+  alert("✅ Recipe saved to your profile!");
+};
 
   // UI render
   return (
-    <div style={{ height: "100vh", display: "flex", overflow: "hidden" }}>
-      <aside style={{ width: 230, padding: 16, borderRight: "1px solid #2b2b2b", background: "#111", color: "#fff" }}>
+    <div className="config-container"  >
+     <aside className={`config-modal ${showConfig ? "open" : "closed"}`}>
         <h2 style={{ marginBottom: 12 }}>Ingredients</h2>
         <div style={{ display: "grid", gap: 8, height: 220, overflowY: "auto", marginBottom: 14 }}>
           {INGREDIENTS.map((ing) => (
@@ -717,12 +835,7 @@ export default function PizzaBuilder({ user, publishToFeed }) {
             <option value={40}>40 cm</option>
           </select>
  
-   {/* This is a comment 
-          <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12 }}>
-            <input type="checkbox" checked={snapToRings} onChange={(e) => setSnapToRings(e.target.checked)} />
-            Snap to rings
-          </label>
- */}
+   
           <div style={{ display: "flex", gap: 8, marginTop: 12, flexDirection: "column" }}>
  
             <button onClick={() => downloadSnapshot(true)} style={{ padding: "8px 12px" }}>Snapshot (High-res)</button>
@@ -739,9 +852,9 @@ export default function PizzaBuilder({ user, publishToFeed }) {
         </div>
       </aside>
 
-      <main style={{ flex: 1, position: "relative", background: "#222" }}>
-        <div ref={mountRef} style={{ position: "absolute", inset: 0 }} />
-      </main>
+     <main style={{ width: "100%", height: "100%" }}>
+  <div ref={mountRef} className="three-root" />
+</main>
     </div>
   );
 }

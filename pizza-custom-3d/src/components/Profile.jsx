@@ -11,20 +11,33 @@ export default function Profile({
   const [localRecipes, setLocalRecipes] = useState([]);
 
   // Load saved recipes
-  useEffect(() => {
+useEffect(() => {
+  const loadRecipes = () => {
     const stored = JSON.parse(localStorage.getItem("userRecipes") || "[]");
     const mine = stored.filter(
-      (r) => r.userId === user?.uid || r.userId === user?.id
+      (r) => r.userId === (user?.uid || user?.id)
     );
     setLocalRecipes(mine);
-  }, [user]);
-
-  // Delete saved profile recipe
-  const handleDeleteRecipe = (id) => {
-    const updated = localRecipes.filter((r) => r.id !== id);
-    setLocalRecipes(updated);
-    localStorage.setItem("userRecipes", JSON.stringify(updated));
   };
+
+  loadRecipes();
+
+  window.addEventListener("storage", loadRecipes);
+
+  return () => window.removeEventListener("storage", loadRecipes);
+}, [user]);
+  // Delete saved profile recipe
+ const handleDeleteRecipe = (id) => {
+  const stored = JSON.parse(localStorage.getItem("userRecipes") || "[]");
+
+  const updated = stored.filter((r) => r.id !== id);
+
+  localStorage.setItem("userRecipes", JSON.stringify(updated));
+
+  setLocalRecipes(updated.filter(
+    (r) => r.userId === (user?.uid || user?.id)
+  ));
+};
 
   // Published recipes by this user
   const userRecipes = feed.filter((p) => p.userId === user?.uid);

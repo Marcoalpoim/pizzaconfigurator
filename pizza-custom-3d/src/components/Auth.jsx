@@ -16,7 +16,7 @@ export default function Auth({ user, setUser }) {
   if (loading) return <p style={{ color: "white", padding: 10 }}>Loading...</p>;
 
   return (
-    <div style={{ padding: 10, color: "white" }}>
+    <div  className="auth-container"  >
       {user ? (
         <>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -25,7 +25,7 @@ export default function Auth({ user, setUser }) {
               alt="avatar"
               style={{ width: 40, height: 40, borderRadius: "50%" }}
             />
-            <span>Hi, {user.displayName} 👋</span>
+           {/* <span>Hi, {user.displayName} 👋</span> */} 
           </div>
           <button
             onClick={logout}
