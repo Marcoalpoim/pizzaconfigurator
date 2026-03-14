@@ -698,7 +698,7 @@ mesh.scale.set(s, s, s);
     };
 
     // attach listeners
-    // renderer.domElement.addEventListener("dragover", handleDragOver);
+     renderer.domElement.addEventListener("dragover", handleDragOver);
     renderer.domElement.addEventListener("drop", handleDrop);
     renderer.domElement.addEventListener("pointerdown", onPointerDown);
     window.addEventListener("pointermove", onPointerMove);
@@ -763,8 +763,8 @@ mesh.scale.set(s, s, s);
       controls.dispose();
       renderer.dispose();
       try {
-        //   renderer.domElement.removeEventListener("dragover", handleDragOver);
-        //   renderer.domElement.removeEventListener("drop", handleDrop);
+          renderer.domElement.removeEventListener("dragover", handleDragOver);
+       renderer.domElement.removeEventListener("drop", handleDrop);
         renderer.domElement.removeEventListener("pointerdown", onPointerDown);
       } catch (e) {}
       window.removeEventListener("pointermove", onPointerMove);
@@ -921,7 +921,7 @@ mesh.scale.set(s, s, s);
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
         renderer.render(scene, camera);
-        const data = canvas.toDataURL("image/png");
+       const data = renderer.domElement.toDataURL("image/jpeg", 0.3); 
         return data;
       } else {
         // normal snapshot
@@ -930,9 +930,10 @@ mesh.scale.set(s, s, s);
         camera.aspect = prevWidth / prevHeight;
         camera.updateProjectionMatrix();
         renderer.render(scene, camera);
-        const data = canvas.toDataURL("image/png");
+  const data = renderer.domElement.toDataURL("image/jpeg", 0.3); 
         return data;
       }
+      
     } catch (err) {
       console.warn("Snapshot capture failed:", err);
       return null;
@@ -1005,63 +1006,65 @@ mesh.scale.set(s, s, s);
       cheeseType,
       sauceType,
       toppings,
-      image: image || null, // attach image if available
+    image: image || null, // attach image if available
       createdAt: new Date().toISOString(),
     };
 
     publishToFeed && publishToFeed(recipe);
   };
 
-  const handleSaveToProfile = async () => {
-    console.log("Save clicked");
+ const handleSaveToProfile = async () => {
+  console.log("Save clicked");
 
-    if (!user) {
-      alert("Please log in first!");
-      return;
-    }
+  if (!user) {
+    alert("Please log in first!");
+    return;
+  }
 
-    const toppings = Array.from(toppingsGroupRef.current?.children || []).map(
-      (c) => {
-        const ing = c.userData?.ing || {};
-        return {
-          id: ing.id || c.uuid,
-          name: ing.name || c.name || "Unknown ingredient",
-          color: ing.color || 0xffffff,
-          pos: { x: c.position.x, y: c.position.y, z: c.position.z },
-        };
-      },
-    );
+  const toppings = Array.from(toppingsGroupRef.current?.children || []).map((c) => ({
+    id: c.userData?.ing?.id || c.uuid,
+    name: c.userData?.ing?.name || c.name || "Unknown ingredient",
+    color: c.userData?.ing?.color || 0xffffff,
+    pos: { x: c.position.x, y: c.position.y, z: c.position.z },
+  }));
 
-    // capture snapshot (same as publish)
-    let image = null;
-    try {
-      image = await captureSnapshot({ scale: 1 });
-    } catch (err) {
-      console.warn("Snapshot failed:", err);
-    }
+  let image = null;
 
-    const recipe = {
-      id: Date.now(),
-      userId: user.uid,
-      author: user.displayName || "Anonymous Chef",
-      baseType,
-      baseSize,
-      hasCheese,
-      cheeseType,
-      sauceType,
-      toppings,
-      image: image || null, // ✅ ADD THIS
-      createdAt: new Date().toISOString(),
-    };
+  try {
+    image = await captureSnapshot({ scale: 1 });
+  } catch (err) {
+    console.warn("Snapshot failed:", err);
+  }
 
-    const stored = JSON.parse(localStorage.getItem("userRecipes") || "[]");
-    stored.push(recipe);
-    localStorage.setItem("userRecipes", JSON.stringify(stored));
-
-    console.log("Saved:", recipe);
-
-    alert("✅ Recipe saved to your profile!");
+  const recipe = {
+    id: Date.now(),
+    userId: user.uid,
+    author: user.displayName || "Anonymous Chef",
+    baseType,
+    baseSize,
+    hasCheese,
+    cheeseType,
+    sauceType,
+    toppings,
+    image,
+    createdAt: new Date().toISOString(),
   };
+
+  let stored = [];
+
+  try {
+    stored = JSON.parse(localStorage.getItem("userRecipes")) || [];
+  } catch {
+    stored = [];
+  }
+
+  stored.push(recipe);
+  localStorage.setItem("userRecipes", JSON.stringify(stored));
+
+  console.log("Saved:", recipe);
+
+  alert("✅ Recipe saved to your profile!");
+};
 
   // UI render
   return (

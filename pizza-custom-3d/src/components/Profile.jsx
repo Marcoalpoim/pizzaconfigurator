@@ -26,6 +26,19 @@ useEffect(() => {
 
   return () => window.removeEventListener("storage", loadRecipes);
 }, [user]);
+
+useEffect(() => {
+  const loadBookmarks = () => {
+    const saved = JSON.parse(localStorage.getItem("bookmarkedRecipes") || "[]");
+    setLocalBookmarks(saved);
+  };
+
+  loadBookmarks();
+
+  window.addEventListener("storage", loadBookmarks);
+
+  return () => window.removeEventListener("storage", loadBookmarks);
+}, []);
   // Delete saved profile recipe
  const handleDeleteRecipe = (id) => {
   const stored = JSON.parse(localStorage.getItem("userRecipes") || "[]");
@@ -43,8 +56,7 @@ useEffect(() => {
   const userRecipes = feed.filter((p) => p.userId === user?.uid);
 
   // Bookmarked recipes
-  const localBookmarks =
-    JSON.parse(localStorage.getItem("bookmarkedRecipes") || "[]");
+const [localBookmarks, setLocalBookmarks] = useState([]);
 
   return (
     <section
@@ -186,8 +198,11 @@ useEffect(() => {
               }}
             >
               {/* DELETE BOOKMARK */}
-              <button
-                onClick={() => onDeleteBookmark?.(r.id)}
+                  <button
+                 onClick={() => {
+    onDeleteBookmark?.(r.id);
+    setLocalBookmarks((prev) => prev.filter((b) => b.id !== r.id));
+  }}
                 style={{
                   position: "absolute",
                   top: 8,
