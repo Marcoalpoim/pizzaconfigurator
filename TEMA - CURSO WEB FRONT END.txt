@@ -1,12 +1,15 @@
 TITULO: CUSTOMIZAGRAM
 
-Uma rede social em que tu crias a tua receita de pizza e podes coloca-la à venda
+Uma rede social em que tu crias a tua receita de pizza e podes coloca-la à venda;
+o estilo de customização será interativo, dinâmico e 3D e através do react js
 
 
 chatgpt prompt 
 
 chat ajuda-me a criar um relatório detalhado para apresentar o meu projeto web,
 começo por mostrar as minhas ideias iniciais, queria uma espécie de rede social estilo minimalista onde fosse possível ao utilizador fazer as suas receitas de pizza, partilhar num feed social e também poder guardar outras receitas no perfil pessoal.
+o estilo de customização será interativo, dinâmico e 3D e através do react js
+
 
 este relatório tem varias fases:
 

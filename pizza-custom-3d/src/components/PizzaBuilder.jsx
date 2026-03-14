@@ -3,16 +3,10 @@ import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { mergeVertices } from "three/examples/jsm/utils/BufferGeometryUtils.js";
- 
-
-const INGREDIENTS = [
-  { id: "pepperoni", name: "Pepperoni", color: 0xb23d3d, kind: "cylinder" },
-  { id: "cogumelos", name: "Cogumelos", color: 0xdcd2c1, kind: "mushroom" },
-  { id: "olive", name: "Olive", color: 0x2a3a2a, kind: "torus" },
-  { id: "basil", name: "Basil", color: 0x3c7a3c, kind: "leaf" },
-  { id: "ananas", name: "Ananás", color: 0xffe7a3, kind: "cube" },
-  { id: "cebola", name: "Cebola", color: 0xe6b0ff, kind: "sphere" },
-];
+import IngredientPanel from "./PizzaBuilder/IngredientsPanel";
+import PizzaControls from "./PizzaBuilder/PizzaControls";
+import { INGREDIENTS } from "../data/ingredients";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 export default function PizzaBuilder({ user, publishToFeed, showConfig }) {
   // UI state
@@ -20,7 +14,11 @@ export default function PizzaBuilder({ user, publishToFeed, showConfig }) {
   const [baseType, setBaseType] = useState("medium");
   const [baseSize, setBaseSize] = useState(33);
   const [snapToRings, setSnapToRings] = useState(true);
-  const [cheeseAmount, setCheeseAmount] = useState(250);
+  //const [cheeseAmount, setCheeseAmount] = useState(250);
+  const [hasCheese, setHasCheese] = useState(true);
+  const [cheeseType, setCheeseType] = useState("mozzarella");
+  const [ingredientCounts, setIngredientCounts] = useState({});
+  const modelsRef = useRef({});
 
   // refs
   const mountRef = useRef(null);
@@ -76,15 +74,13 @@ export default function PizzaBuilder({ user, publishToFeed, showConfig }) {
     doughTexture.wrapS = doughTexture.wrapT = THREE.RepeatWrapping;
     doughTexture.repeat.set(10, 1);
 
-   
     const mat = new THREE.MeshStandardMaterial({
-  map: doughTexture,
-  color: 0xf2c27b,
-  roughness: 0.85,
-  metalness: 0,
-  side: THREE.DoubleSide,
-});
-
+      map: doughTexture,
+      color: 0xf2c27b,
+      roughness: 0.85,
+      metalness: 0,
+      side: THREE.DoubleSide,
+    });
 
     const mesh = new THREE.Mesh(geom, mat);
     mesh.castShadow = true;
@@ -132,19 +128,69 @@ export default function PizzaBuilder({ user, publishToFeed, showConfig }) {
     return mesh;
   }
 
-  function createCheeseBlob(radius, y) {
-    const geom = new THREE.SphereGeometry(0.12 + Math.random() * 0.05, 8, 8);
-    const baseColor = new THREE.Color(0xfff2a1);
-    baseColor.offsetHSL((Math.random() - 0.5) * 0.05, (Math.random() - 0.5) * 0.1, 0);
-    const mat = new THREE.MeshStandardMaterial({ color: baseColor, roughness: 0.8, metalness: 0.05 });
+  // queijo
+  function createCheeseBlob(radius, y, cheeseType) {
+    const geom = new THREE.SphereGeometry(0.18 + Math.random() * 0.05, 12, 8);
+    const loader = new THREE.TextureLoader();
+
+    let texturePath = "/textures/dough-texture.jpg";
+
+    if (cheeseType === "cheddar") texturePath = "/textures/cheddar.jpg";
+    if (cheeseType === "parmesan") texturePath = "/textures/parmesan.jpg";
+    if (cheeseType === "gorgonzola") texturePath = "/textures/gorgonzola.jpg";
+
+    const cheeseTexture = loader.load(texturePath);
+
+    const baseColor = new THREE.Color(0xffffff); // ✅ adicionar isto
+    const normal = loader.load("/textures/dough-texture.jpg");
+    const mat = new THREE.MeshStandardMaterial({
+      map: cheeseTexture,
+      normalMap: normal,
+      normalScale: new THREE.Vector2(0.4, 0.4),
+      color: baseColor,
+      roughness: 0.55,
+      metalness: 0.02,
+    });
+
     const mesh = new THREE.Mesh(geom, mat);
-    mesh.scale.set(1.0 + Math.random() * 0.5, 0.15 + Math.random() * 0.08, 1.0 + Math.random() * 0.5);
+
+    mesh.scale.set(
+      1.0 + Math.random() * 0.4, // width
+      0.06 + Math.random() * 0.04, // thickness (flatter)
+      1.0 + Math.random() * 0.4, // depth
+    );
+
     const angle = Math.random() * Math.PI * 2;
-    const r = Math.random() * radius * 0.9;
-    mesh.position.set(Math.cos(angle) * r, y, Math.sin(angle) * r);
+    const r = Math.sqrt(Math.random()) * radius * 0.85;
+
+    mesh.position.set(
+      Math.cos(angle) * r,
+      y + Math.random() * 0.01,
+      Math.sin(angle) * r,
+    );
+
     mesh.castShadow = true;
     mesh.receiveShadow = true;
+
     return mesh;
+  }
+
+  function addIngredient(id) {
+    setIngredientCounts((prev) => ({
+      ...prev,
+      [id]: (prev[id] || 0) + 1,
+    }));
+  }
+
+  function removeIngredient(id) {
+    setIngredientCounts((prev) => {
+      const newValue = Math.max((prev[id] || 0) - 1, 0);
+
+      return {
+        ...prev,
+        [id]: newValue,
+      };
+    });
   }
 
   function getToppingSurfaceY() {
@@ -162,33 +208,171 @@ export default function PizzaBuilder({ user, publishToFeed, showConfig }) {
   }
 
   function createMeshForIngredient(ing) {
-    const mat = new THREE.MeshStandardMaterial({ color: ing.color, roughness: 0.75 });
     let mesh;
-    switch (ing.kind) {
-      case "cylinder":
-        mesh = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.06, 16), mat);
-        break;
-      case "mushroom":
-      case "cogumelos":
-        mesh = new THREE.Mesh(new THREE.SphereGeometry(0.18, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), mat);
-        break;
-      case "torus":
-        mesh = new THREE.Mesh(new THREE.TorusGeometry(0.09, 0.035, 6, 12), mat);
-        mesh.rotation.x = Math.PI / 2;
-        break;
-      case "leaf":
-        mesh = new THREE.Mesh(new THREE.CircleGeometry(0.14, 8), mat);
-        mesh.rotation.x = -Math.PI / 2;
-        break;
-      case "cube":
-        mesh = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.06, 0.22), mat);
-        break;
-      default:
-        mesh = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), mat);
+
+    // ----- try to use 3D models first -----
+
+    if (ing.id === "pepperoni" && modelsRef.current.pepperoni) {
+      mesh = modelsRef.current.pepperoni.clone();
+
+      const s = 0.08;
+      mesh.scale.set(s, s, s);
+    } else if (
+      (ing.id === "mushroom" || ing.id === "cogumelos") &&
+      modelsRef.current.mushroom
+    ) {
+      mesh = modelsRef.current.mushroom.clone();
+    } else if (ing.id === "olive" && modelsRef.current.olive) {
+      mesh = modelsRef.current.olive.clone();
     }
+
+    // ----- fallback to procedural geometry -----
+    else {
+      const mat = new THREE.MeshStandardMaterial({
+        color: ing.color,
+        roughness: 0.75,
+      });
+
+      switch (ing.kind) {
+        case "cylinder":
+          mesh = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.18, 0.18, 0.01, 16),
+            mat,
+          );
+          break;
+
+        case "mushroom":
+        case "cogumelos":
+          mesh = new THREE.Mesh(
+            new THREE.SphereGeometry(
+              0.18,
+              12,
+              8,
+              0,
+              Math.PI * 2,
+              0,
+              Math.PI / 2,
+            ),
+            mat,
+          );
+          break;
+
+        case "torus":
+          mesh = new THREE.Mesh(
+            new THREE.TorusGeometry(0.09, 0.035, 6, 12),
+            mat,
+          );
+          mesh.rotation.x = Math.PI / 2;
+          break;
+
+        case "leaf":
+          mesh = new THREE.Mesh(new THREE.CircleGeometry(0.14, 8), mat);
+          mesh.rotation.x = -Math.PI / 2;
+          break;
+
+case "pineapple":
+
+  const radius = 0.28;
+
+  const shape = new THREE.Shape();
+
+  const start = -Math.PI / 6;
+  const end = Math.PI / 6;
+
+  shape.moveTo(0, 0);
+  shape.absarc(0, 0, radius, start, end, false);
+  shape.lineTo(0, 0);
+
+  const geom = new THREE.ExtrudeGeometry(shape, {
+    depth: 0.05,     // height of the pineapple
+    bevelEnabled: false,
+    curveSegments: 16
+  });
+
+  geom.rotateX(-Math.PI / 2);
+
+  const loader = new THREE.TextureLoader();
+  const pineappleTexture = loader.load("/textures/pineapple.jpg");
+
+  const pineappleMat = new THREE.MeshStandardMaterial({
+    map: pineappleTexture,
+    roughness: 0.55,
+    metalness: 0.02
+  });
+
+ mesh = new THREE.Mesh(geom, pineappleMat);
+
+ 
+
+const s = 0.7 + Math.random() * 0.5;
+mesh.scale.set(s, s, s);
+
+  break;
+
+        default:
+          mesh = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), mat);
+      }
+    }
+
+    // small random rotation so toppings don't look identical
+    mesh.rotation.y = Math.random() * Math.PI * 2;
+
     mesh.userData.baseScale = mesh.scale.clone();
     mesh.castShadow = true;
+    mesh.receiveShadow = true;
+
     return mesh;
+  }
+
+  // receita random
+
+  function generateRandomPizza() {
+    const bases = ["thin", "medium", "thick"];
+    const sizes = [28, 33, 40];
+    const sauces = ["tomato", "carbonara", "pesto", "barbecue"];
+
+    const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+    setBaseType(rand(bases));
+    setBaseSize(rand(sizes));
+    setSauceType(rand(sauces));
+
+    const MIN_TOPPINGS = 35;
+
+    let remaining = MIN_TOPPINGS;
+    const randomCounts = {};
+
+    // shuffle ingredients for randomness
+    const shuffled = [...INGREDIENTS].sort(() => Math.random() - 0.5);
+
+    for (let i = 0; i < shuffled.length; i++) {
+      if (remaining <= 0) break;
+
+      const ing = shuffled[i];
+
+      // decide if this ingredient participates
+      const useIngredient = Math.random() > 0.4;
+
+      if (!useIngredient && i !== shuffled.length - 1) continue;
+
+      const amount =
+        i === shuffled.length - 1
+          ? remaining
+          : Math.floor(Math.random() * remaining);
+
+      if (amount > 0) {
+        randomCounts[ing.id] = amount;
+        remaining -= amount;
+      }
+    }
+
+    // fallback if none were added
+    if (Object.keys(randomCounts).length === 0) {
+      const ing = rand(INGREDIENTS);
+      randomCounts[ing.id] = MIN_TOPPINGS;
+    }
+
+    setIngredientCounts(randomCounts);
   }
 
   function snapToRingsIfNeeded(posVec) {
@@ -239,88 +423,84 @@ export default function PizzaBuilder({ user, publishToFeed, showConfig }) {
     while (container.firstChild) container.removeChild(container.firstChild);
 
     const scene = new THREE.Scene();
-   scene.background = new THREE.Color(0x111111);
+    scene.background = new THREE.Color(0x111111);
     sceneRef.current = scene;
 
+    // ----- ENVIRONMENT -----
 
-// ----- ENVIRONMENT -----
+    // Floor
+    const textureLoader = new THREE.TextureLoader();
 
-// Floor
-const textureLoader = new THREE.TextureLoader();
+    const floorTexture = textureLoader.load("/textures/woodtable.jpg");
 
-const floorTexture = textureLoader.load("/textures/floor.jpg");
+    floorTexture.wrapS = THREE.RepeatWrapping;
+    floorTexture.wrapT = THREE.RepeatWrapping;
+    floorTexture.repeat.set(10, 10);
 
-floorTexture.wrapS = THREE.RepeatWrapping;
-floorTexture.wrapT = THREE.RepeatWrapping;
-floorTexture.repeat.set(10,10);
+    const floor = new THREE.Mesh(
+      new THREE.PlaneGeometry(50, 50),
+      new THREE.MeshStandardMaterial({
+        map: floorTexture,
+      }),
+    );
 
-const floor = new THREE.Mesh(
-  new THREE.PlaneGeometry(50,50),
-  new THREE.MeshStandardMaterial({
-    map: floorTexture
-  })
-);
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -0.02;
+    floor.receiveShadow = true;
 
-floor.rotation.x = -Math.PI / 2;
-floor.position.y = -0.02;
-floor.receiveShadow = true;
+    scene.add(floor);
 
-scene.add(floor);
+    // Back wall
+    const backWall = new THREE.Mesh(
+      new THREE.PlaneGeometry(50, 20),
+      new THREE.MeshStandardMaterial({
+        color: 0xf5e9d7,
+      }),
+    );
 
+    backWall.position.set(0, 10, -15);
+    scene.add(backWall);
 
-// Back wall
-const backWall = new THREE.Mesh(
-  new THREE.PlaneGeometry(50, 20),
-  new THREE.MeshStandardMaterial({
-    color: 0xf5e9d7
-  })
-);
+    // Left wall
+    const leftWall = new THREE.Mesh(
+      new THREE.PlaneGeometry(50, 20),
+      new THREE.MeshStandardMaterial({
+        color: 0xf0e4d0,
+      }),
+    );
 
-backWall.position.set(0, 10, -15);
-scene.add(backWall);
+    leftWall.rotation.y = Math.PI / 2;
+    leftWall.position.set(-25, 10, 0);
 
+    scene.add(leftWall);
 
-// Left wall
-const leftWall = new THREE.Mesh(
-  new THREE.PlaneGeometry(50, 20),
-  new THREE.MeshStandardMaterial({
-    color: 0xf0e4d0
-  })
-);
+    // Right wall
+    const rightWall = new THREE.Mesh(
+      new THREE.PlaneGeometry(50, 20),
+      new THREE.MeshStandardMaterial({
+        color: 0xf0e4d0,
+      }),
+    );
 
-leftWall.rotation.y = Math.PI / 2;
-leftWall.position.set(-25, 10, 0);
+    rightWall.rotation.y = -Math.PI / 2;
+    rightWall.position.set(25, 10, 0);
 
-scene.add(leftWall);
+    scene.add(rightWall);
 
-
-// Right wall
-const rightWall = new THREE.Mesh(
-  new THREE.PlaneGeometry(50, 20),
-  new THREE.MeshStandardMaterial({
-    color: 0xf0e4d0
-  })
-);
-
-rightWall.rotation.y = -Math.PI / 2;
-rightWall.position.set(25, 10, 0);
-
-scene.add(rightWall);
-
-
- 
-
-
-
-
-
-
-    const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(
+      50,
+      container.clientWidth / container.clientHeight,
+      0.1,
+      1000,
+    );
     camera.position.set(0, 6, 12);
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      preserveDrawingBuffer: true,
+    });
     // preserveDrawingBuffer helps keep canvas readable for toDataURL. It's OK here.
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -345,20 +525,28 @@ scene.add(rightWall);
     scene.add(fillLight);
 
     // 🍕 Spotlight for the pizza
-const pizzaSpot = new THREE.SpotLight(0xfff2cc, 3);
+    const pizzaSpot = new THREE.SpotLight(0xfff2cc, 3);
 
-pizzaSpot.position.set(0, 6, 2);   // above the pizza
-pizzaSpot.angle = Math.PI / 6;
-pizzaSpot.penumbra = 0.6;
-pizzaSpot.decay = 2;
-pizzaSpot.distance = 20;
+    pizzaSpot.position.set(0, 6, 2); // above the pizza
+    pizzaSpot.angle = Math.PI / 6;
+    pizzaSpot.penumbra = 0.6;
+    pizzaSpot.decay = 2;
+    pizzaSpot.distance = 20;
 
-pizzaSpot.castShadow = true;
+    pizzaSpot.castShadow = true;
 
-scene.add(pizzaSpot);
+    scene.add(pizzaSpot);
 
     // table
-    const table = new THREE.Mesh(new THREE.CircleGeometry(2.8, 64), new THREE.MeshStandardMaterial({ color: 0xe3dfd7, roughness: 0.9, opacity: 0.5, transparent: true }));
+    const table = new THREE.Mesh(
+      new THREE.CircleGeometry(2.8, 64),
+      new THREE.MeshStandardMaterial({
+        color: 0xe3dfd7,
+        roughness: 0.9,
+        opacity: 0.5,
+        transparent: true,
+      }),
+    );
     table.rotation.x = -Math.PI / 2;
     table.position.y = 0;
     table.receiveShadow = true;
@@ -369,7 +557,7 @@ scene.add(pizzaSpot);
     scene.add(base);
     baseRef.current = base;
     pizzaSpot.target = base;
-scene.add(pizzaSpot.target);
+    scene.add(pizzaSpot.target);
 
     const sauce = createSauce(baseType, baseSize, sauceType);
     scene.add(sauce);
@@ -414,7 +602,10 @@ scene.add(pizzaSpot.target);
           ing = { id: rawText.trim() };
         }
         if (!ing) {
-          console.warn("Unable to parse ingredient from drop data:", { rawJson, rawText });
+          console.warn("Unable to parse ingredient from drop data:", {
+            rawJson,
+            rawText,
+          });
           return;
         }
 
@@ -433,12 +624,18 @@ scene.add(pizzaSpot.target);
         if (hits.length > 0) {
           const hp = hits[0].point;
           const toppingY = getToppingSurfaceY();
-          addIngredientAtWorldPos(fullIng, new THREE.Vector3(hp.x, toppingY, hp.z));
+          addIngredientAtWorldPos(
+            fullIng,
+            new THREE.Vector3(hp.x, toppingY, hp.z),
+          );
         } else {
           const planePoint = new THREE.Vector3();
           if (raycaster.ray.intersectPlane(plane, planePoint)) {
             const toppingY = getToppingSurfaceY();
-            addIngredientAtWorldPos(fullIng, new THREE.Vector3(planePoint.x, toppingY, planePoint.z));
+            addIngredientAtWorldPos(
+              fullIng,
+              new THREE.Vector3(planePoint.x, toppingY, planePoint.z),
+            );
           }
         }
       } catch (err) {
@@ -467,7 +664,10 @@ scene.add(pizzaSpot.target);
       pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
       raycaster.setFromCamera(pointer, cameraRef.current);
-      const intersects = raycaster.intersectObjects(toppingsGroup.children, true);
+      const intersects = raycaster.intersectObjects(
+        toppingsGroup.children,
+        true,
+      );
       if (intersects.length > 0) {
         selected = intersects[0].object;
         selected.userData.originalScale = selected.scale.clone();
@@ -477,7 +677,8 @@ scene.add(pizzaSpot.target);
         pointerState.offset.copy(selected.position).sub(hitPoint);
       } else {
         if (selected) {
-          if (selected.userData.originalScale) selected.scale.copy(selected.userData.originalScale);
+          if (selected.userData.originalScale)
+            selected.scale.copy(selected.userData.originalScale);
           selected = null;
         }
       }
@@ -485,7 +686,8 @@ scene.add(pizzaSpot.target);
 
     const onPointerUp = () => {
       pointerState.dragging = false;
-      if (selected && selected.userData.originalScale) selected.scale.copy(selected.userData.originalScale);
+      if (selected && selected.userData.originalScale)
+        selected.scale.copy(selected.userData.originalScale);
     };
 
     const onKeyDown = (e) => {
@@ -496,7 +698,7 @@ scene.add(pizzaSpot.target);
     };
 
     // attach listeners
-    renderer.domElement.addEventListener("dragover", handleDragOver);
+    // renderer.domElement.addEventListener("dragover", handleDragOver);
     renderer.domElement.addEventListener("drop", handleDrop);
     renderer.domElement.addEventListener("pointerdown", onPointerDown);
     window.addEventListener("pointermove", onPointerMove);
@@ -522,39 +724,38 @@ scene.add(pizzaSpot.target);
     resizeObserver.observe(container);
 
     // animation
-let zoomProgress = 0;
+    let zoomProgress = 0;
 
-const startPos = new THREE.Vector3(0, 8, 18);
-const endPos = new THREE.Vector3(0.5, 3.6, 5);
+    const startPos = new THREE.Vector3(0, 8, 18);
+    const endPos = new THREE.Vector3(0.5, 3.6, 5);
 
-function easeInOut(t) {
-  return t * t * (3 - 2 * t); // smoothstep easing
-}
+    function easeInOut(t) {
+      return t * t * (3 - 2 * t); // smoothstep easing
+    }
 
-const animate = () => {
-  requestAnimationFrame(animate);
+    const animate = () => {
+      requestAnimationFrame(animate);
 
-  if (zoomProgress < 1) {
-    zoomProgress += 0.005; // slower movement
+      if (zoomProgress < 1) {
+        zoomProgress += 0.005; // slower movement
 
-    const eased = easeInOut(zoomProgress);
+        const eased = easeInOut(zoomProgress);
 
-    const currentPos = startPos.clone().lerp(endPos, eased);
-    camera.position.copy(currentPos);
+        const currentPos = startPos.clone().lerp(endPos, eased);
+        camera.position.copy(currentPos);
 
-    camera.lookAt(0, 0, 0);
+        camera.lookAt(0, 0, 0);
 
-    controls.enabled = false;
-  } else {
-    controls.enabled = true;
-  }
+        controls.enabled = false;
+      } else {
+        controls.enabled = true;
+      }
 
-  controls.update();
-  renderer.render(scene, camera);
-};
+      controls.update();
+      renderer.render(scene, camera);
+    };
 
-animate();
-
+    animate();
 
     // cleanup
     return () => {
@@ -562,16 +763,45 @@ animate();
       controls.dispose();
       renderer.dispose();
       try {
-        renderer.domElement.removeEventListener("dragover", handleDragOver);
-        renderer.domElement.removeEventListener("drop", handleDrop);
+        //   renderer.domElement.removeEventListener("dragover", handleDragOver);
+        //   renderer.domElement.removeEventListener("drop", handleDrop);
         renderer.domElement.removeEventListener("pointerdown", onPointerDown);
       } catch (e) {}
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("keydown", onKeyDown);
-      if (renderer.domElement && container.contains(renderer.domElement)) container.removeChild(renderer.domElement);
+      if (renderer.domElement && container.contains(renderer.domElement))
+        container.removeChild(renderer.domElement);
     };
   }, []); // initial scene setup
+
+  // 🍕 rebuild toppings when ingredientCounts change
+  useEffect(() => {
+    const group = toppingsGroupRef.current;
+    if (!group) return;
+
+    group.clear();
+
+    const toppingY = getToppingSurfaceY();
+    const { radius } = getBaseDims(baseType, baseSize);
+
+    Object.entries(ingredientCounts).forEach(([id, count]) => {
+      const ing = INGREDIENTS.find((i) => i.id === id);
+      if (!ing) return;
+
+      for (let i = 0; i < count; i++) {
+        const angle = (i / count) * Math.PI * 2;
+
+        const ring = 0.3 + Math.random() * 0.5;
+        const r = radius * ring;
+
+        const x = Math.cos(angle) * r;
+        const z = Math.sin(angle) * r;
+
+        addIngredientAtWorldPos(ing, new THREE.Vector3(x, toppingY, z));
+      }
+    });
+  }, [ingredientCounts, baseType, baseSize]);
 
   // rebuild base/sauce when size/type/sauce changes and realign toppings
   useEffect(() => {
@@ -580,12 +810,18 @@ animate();
 
     if (baseRef.current) {
       scene.remove(baseRef.current);
-      try { baseRef.current.geometry.dispose(); baseRef.current.material.dispose(); } catch {}
+      try {
+        baseRef.current.geometry.dispose();
+        baseRef.current.material.dispose();
+      } catch {}
       baseRef.current = null;
     }
     if (sauceRef.current) {
       scene.remove(sauceRef.current);
-      try { sauceRef.current.geometry.dispose(); sauceRef.current.material.dispose(); } catch {}
+      try {
+        sauceRef.current.geometry.dispose();
+        sauceRef.current.material.dispose();
+      } catch {}
       sauceRef.current = null;
     }
 
@@ -614,21 +850,51 @@ animate();
   useEffect(() => {
     const group = cheeseGroupRef.current;
     if (!group) return;
+
     group.clear();
+
+    if (!hasCheese) return;
+
     const { height, radius } = getBaseDims(baseType, baseSize);
     const cheeseY = height - 0.02;
-    for (let i = 0; i < cheeseAmount; i++) {
-      group.add(createCheeseBlob(radius, cheeseY));
-    }
-  }, [cheeseAmount, baseType, baseSize]);
 
+    const amount = 300;
+
+    for (let i = 0; i < amount; i++) {
+      group.add(createCheeseBlob(radius, cheeseY, cheeseType));
+    }
+  }, [hasCheese, cheeseType, baseType, baseSize]);
+
+  useEffect(() => {
+    const loader = new GLTFLoader();
+
+    loader.load("/models/pepperoni.glb", (gltf) => {
+      const model = gltf.scene;
+      model.scale.set(0.25, 0.25, 0.25);
+      modelsRef.current.pepperoni = model;
+    });
+
+    loader.load("/models/mushroom.glb", (gltf) => {
+      const model = gltf.scene;
+      model.scale.set(0.25, 0.25, 0.25);
+      modelsRef.current.mushroom = model;
+    });
+
+    loader.load("/models/olive.glb", (gltf) => {
+      const model = gltf.scene;
+      model.scale.set(0.25, 0.25, 0.25);
+      modelsRef.current.olive = model;
+    });
+  }, []);
+
+  /*
   // UI handlers
   const handleDragStart = (e, ing) => {
     // store a minimal id string too — some browsers only keep text/plain
     e.dataTransfer.setData("application/json", JSON.stringify(ing));
     e.dataTransfer.setData("text/plain", ing.id);
   };
-
+*/
   // helper: capture snapshot of renderer canvas
   // scale = 1 => normal; scale >1 => higher resolution (e.g. 2 or 4)
   async function captureSnapshot({ scale = 1 } = {}) {
@@ -735,7 +1001,8 @@ animate();
       userId: user?.uid || user?.id || "guest",
       baseType,
       baseSize,
-      cheeseAmount,
+      hasCheese,
+      cheeseType,
       sauceType,
       toppings,
       image: image || null, // attach image if available
@@ -745,116 +1012,91 @@ animate();
     publishToFeed && publishToFeed(recipe);
   };
 
-const handleSaveToProfile = async () => {
-  console.log("Save clicked");
+  const handleSaveToProfile = async () => {
+    console.log("Save clicked");
 
-  if (!user) {
-    alert("Please log in first!");
-    return;
-  }
+    if (!user) {
+      alert("Please log in first!");
+      return;
+    }
 
-  const toppings = Array.from(toppingsGroupRef.current?.children || []).map((c) => {
-    const ing = c.userData?.ing || {};
-    return {
-      id: ing.id || c.uuid,
-      name: ing.name || c.name || "Unknown ingredient",
-      color: ing.color || 0xffffff,
-      pos: { x: c.position.x, y: c.position.y, z: c.position.z },
+    const toppings = Array.from(toppingsGroupRef.current?.children || []).map(
+      (c) => {
+        const ing = c.userData?.ing || {};
+        return {
+          id: ing.id || c.uuid,
+          name: ing.name || c.name || "Unknown ingredient",
+          color: ing.color || 0xffffff,
+          pos: { x: c.position.x, y: c.position.y, z: c.position.z },
+        };
+      },
+    );
+
+    // capture snapshot (same as publish)
+    let image = null;
+    try {
+      image = await captureSnapshot({ scale: 1 });
+    } catch (err) {
+      console.warn("Snapshot failed:", err);
+    }
+
+    const recipe = {
+      id: Date.now(),
+      userId: user.uid,
+      author: user.displayName || "Anonymous Chef",
+      baseType,
+      baseSize,
+      hasCheese,
+      cheeseType,
+      sauceType,
+      toppings,
+      image: image || null, // ✅ ADD THIS
+      createdAt: new Date().toISOString(),
     };
-  });
 
-  // capture snapshot (same as publish)
-  let image = null;
-  try {
-    image = await captureSnapshot({ scale: 1 });
-  } catch (err) {
-    console.warn("Snapshot failed:", err);
-  }
+    const stored = JSON.parse(localStorage.getItem("userRecipes") || "[]");
+    stored.push(recipe);
+    localStorage.setItem("userRecipes", JSON.stringify(stored));
 
-  const recipe = {
-    id: Date.now(),
-    userId: user.uid,
-    author: user.displayName || "Anonymous Chef",
-    baseType,
-    baseSize,
-    cheeseAmount,
-    sauceType,
-    toppings,
-    image: image || null, // ✅ ADD THIS
-    createdAt: new Date().toISOString(),
+    console.log("Saved:", recipe);
+
+    alert("✅ Recipe saved to your profile!");
   };
-
-  const stored = JSON.parse(localStorage.getItem("userRecipes") || "[]");
-  stored.push(recipe);
-  localStorage.setItem("userRecipes", JSON.stringify(stored));
-
-  console.log("Saved:", recipe);
-
-  alert("✅ Recipe saved to your profile!");
-};
 
   // UI render
   return (
-    <div className="config-container"  >
-     <aside className={`config-modal ${showConfig ? "open" : "closed"}`}>
-        <h2 style={{ marginBottom: 12 }}>Ingredients</h2>
-        <div style={{ display: "grid", gap: 8, height: 220, overflowY: "auto", marginBottom: 14 }}>
-          {INGREDIENTS.map((ing) => (
-            <div
-              key={ing.id}
-              draggable
-              onDragStart={(e) => handleDragStart(e, ing)}
-              style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", borderRadius: 6, background: "#222", cursor: "grab" }}
-            >
-              <div style={{ width: 36, height: 36, background: `#${ing.color.toString(16).padStart(6, "0")}`, borderRadius: 6 }} />
-              <div>{ing.name}</div>
-            </div>
-          ))}
-        </div>
+    <div className="config-container">
+      <aside className={`config-modal ${showConfig ? "open" : "closed"}`}>
+        <button onClick={generateRandomPizza} style={{ padding: "8px 12px" }}>
+          Generate Recipe
+        </button>
 
-        <div style={{ marginTop: 6 }}>
-          <div style={{ marginBottom: 8 }}>Sauce Type</div>
-          <select value={sauceType} onChange={(e) => setSauceType(e.target.value)} style={{ width: "100%", padding: 8 }}>
-            <option value="tomate">Tomate</option>
-            <option value="carbonara">Carbonara</option>
-            <option value="pesto">Pesto</option>
-            <option value="barbecue">Barbecue</option>
-          </select>
-
-          <div style={{ marginBottom: 8, marginTop: 12 }}>Base Type</div>
-          <select value={baseType} onChange={(e) => setBaseType(e.target.value)} style={{ width: "100%", padding: 8 }}>
-            <option value="thin">Thin</option>
-            <option value="medium">Medium</option>
-            <option value="thick">Thick</option>
-          </select>
-
-          <div style={{ marginTop: 12, marginBottom: 8 }}>Size</div>
-          <select value={baseSize} onChange={(e) => setBaseSize(parseInt(e.target.value))} style={{ width: "100%", padding: 8 }}>
-            <option value={28}>28 cm</option>
-            <option value={33}>33 cm</option>
-            <option value={40}>40 cm</option>
-          </select>
- 
-   
-          <div style={{ display: "flex", gap: 8, marginTop: 12, flexDirection: "column" }}>
- 
-            <button onClick={() => downloadSnapshot(true)} style={{ padding: "8px 12px" }}>Snapshot (High-res)</button>
-            <button onClick={handlePublish} style={{ padding: "8px 12px" }}>Publish to feed</button>
-            <button onClick={handleSaveToProfile} style={{ padding: "8px 12px", background: "#5a1c1c", color: "#fff" }}>Save to profile</button>
-            <button onClick={removeAllToppings} style={{ padding: "8px 12px" }}>Remove Toppings</button>
-          </div>
-
-          <div style={{ marginTop: 16 }}>
-            <div style={{ marginBottom: 8 }}>Cheese Amount</div>
-            <input type="range" min={200} max={750} value={cheeseAmount} onChange={(e) => setCheeseAmount(parseInt(e.target.value))} style={{ width: "100%" }} />
-            <div style={{ fontSize: 12, color: "#aaa" }}>{cheeseAmount} blobs</div>
-          </div>
-        </div>
+        <IngredientPanel
+          addIngredient={addIngredient}
+          removeIngredient={removeIngredient}
+          ingredientCounts={ingredientCounts}
+        />
+        <PizzaControls
+          sauceType={sauceType}
+          setSauceType={setSauceType}
+          baseType={baseType}
+          setBaseType={setBaseType}
+          baseSize={baseSize}
+          setBaseSize={setBaseSize}
+          hasCheese={hasCheese}
+          setHasCheese={setHasCheese}
+          cheeseType={cheeseType}
+          setCheeseType={setCheeseType}
+          downloadSnapshot={downloadSnapshot}
+          handlePublish={handlePublish}
+          handleSaveToProfile={handleSaveToProfile}
+          removeAllToppings={removeAllToppings}
+        />
       </aside>
 
-     <main style={{ width: "100%", height: "100%" }}>
-  <div ref={mountRef} className="three-root" />
-</main>
+      <main style={{ width: "100%", height: "100%" }}>
+        <div ref={mountRef} className="three-root" />
+      </main>
     </div>
   );
 }

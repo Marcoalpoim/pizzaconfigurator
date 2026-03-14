@@ -21,14 +21,14 @@ export default function Auth({ user, setUser }) {
         <>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <img
-              src={user.photoURL}
+              src={user.photoURL || "https://via.placeholder.com/40"}
               alt="avatar"
               style={{ width: 40, height: 40, borderRadius: "50%" }}
             />
            {/* <span>Hi, {user.displayName} 👋</span> */} 
           </div>
           <button
-            onClick={logout}
+           onClick={() => logout()}
             style={{
               marginTop: 10,
               padding: "6px 12px",

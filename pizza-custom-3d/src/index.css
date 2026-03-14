@@ -113,12 +113,16 @@ html,
 .config-modal {
   width: 300px;
   height: 400px;
+  position: absolute;
+    left: 10px;
       overflow-y: scroll;
-  overflow: hidden;
+  overflow-x: hidden;
+   overflow-y: scroll;
   padding: 16px;
-  background: #111;
+  background: #d1ab72;
   color: white;
-  border-right: 1px solid #2b2b2b;
+  border: 2px solid #ffffff;
+  border-radius: 15px;
     z-index: 1;
   transform: translateX(0);
   transition: transform 0.35s ease;
