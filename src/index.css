@@ -1,0 +1,145 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #111;
+  --panel: #222;
+  --muted: #999;
+}
+
+body,
+html,
+#root {
+  height: 100%;
+  margin: 0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: var(--bg);
+  color: #eee;
+}
+
+.app-root {
+  height: 100%;
+}
+
+/* Auth bar */
+.auth-bar {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  align-items: center;
+  color: #eee;
+  background: #0b0b0b;
+  border-bottom: 1px solid #222;
+}
+
+.auth-form input {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #333;
+  background: #111;
+  color: #fff;
+}
+
+.auth-form button {
+  padding: 6px 8px;
+}
+
+
+.auth-container {
+  padding: 10px;
+  color: white;
+  position: absolute;
+  right: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 10px;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.mainnav-container {
+  position: absolute;
+  bottom: 0px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  background: rgba(17, 17, 17, 0);
+  color: rgb(255, 255, 255);
+  padding: 10px 0px;
+  z-index: 1;
+}
+
+
+
+
+/* Feed panel */
+.feed-panel {
+  position: fixed;
+  right: 0;
+  top: 56px;
+  width: 280px;
+  padding: 12px;
+  background: #0d0d0d;
+  border-left: 1px solid #222;
+  height: calc(100% - 56px);
+  overflow: auto;
+}
+
+.feed-item {
+  margin-bottom: 10px;
+  padding: 8px;
+  border-radius: 8px;
+  background: #141414;
+  border: 1px solid #222;
+}
+
+/* left panel class used in some code samples */
+.left-panel {
+  width: 230px;
+  padding: 16px;
+  background: #111;
+  color: #fff;
+}
+.config-container{
+  height: 100vh;
+    display: flex;
+    overflow: hidden;
+    align-items: center;
+}
+
+.config-modal {
+  width: 300px;
+  height: 400px;
+  position: absolute;
+    left: 10px;
+      overflow-y: scroll;
+  overflow-x: hidden;
+   overflow-y: scroll;
+  padding: 16px;
+  background: #d1ab72;
+  color: white;
+  border: 2px solid #ffffff;
+  border-radius: 15px;
+    z-index: 1;
+  transform: translateX(0);
+  transition: transform 0.35s ease;
+}
+
+.config-modal.closed {
+  transform: translateX(-100%);
+}
+
+.three-root {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.three-root canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
