@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { logout } from "../firebase";
 
 export default function Profile({
   user,
@@ -38,8 +39,27 @@ useEffect(() => {
 
 
 
+const handleLogout = async () => {
+  try {
+    await logout();
+  } catch (err) {
+    console.error("Logout error:", err);
+  }
+};
+const handleShare = () => {
+  const url = window.location.href;
 
-
+  if (navigator.share) {
+    navigator.share({
+      title: "My Pizza Profile 🍕",
+      text: "Check out my pizza creations!",
+      url,
+    });
+  } else {
+    navigator.clipboard.writeText(url);
+    alert("Profile link copied!");
+  }
+};
   // Delete saved profile recipe
  const handleDeleteRecipe = (id) => {
   const stored = JSON.parse(localStorage.getItem("userRecipes") || "[]");
@@ -83,14 +103,16 @@ useEffect(() => {
 >
   {/* LEFT */}
   <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-    <div
-      style={{
-        width: 60,
-        height: 60,
-        borderRadius: "50%",
-        background: "#ccc",
-      }}
-    />
+   <img
+  src={user?.photoURL || "/default-avatar.png"}
+  alt="Profile"
+  style={{
+    width: 60,
+    height: 60,
+    borderRadius: "50%",
+    objectFit: "cover",
+  }}
+/>
 
     <div>
       <div style={{ fontSize: 18, fontWeight: "bold" }}>
@@ -107,8 +129,8 @@ useEffect(() => {
 
   {/* RIGHT */}
   <div style={{ display: "flex", gap: 10 }}>
-    <button>📤 Share</button>
-    <button>🚪 Logout</button>
+   <button onClick={handleShare}>📤 Share</button>
+<button onClick={handleLogout}>🚪 Logout</button>
   </div>
 </div>
 {/* 🧭 TABS */}

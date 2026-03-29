@@ -51,10 +51,14 @@ export default function App() {
     setFeed((prev) => [newPost, ...prev]);
     setView("feed"); // 👈 show feed after publishing
   };
-
+/*
   const deleteFromFeed = (id) => {
     setFeed((prev) => prev.filter((item) => item.id !== id));
   };
+*/
+  const handleLogout = () => {
+  setUser(null);
+};
 
   const toggleBookmark = (id) => {
     setBookmarks((prev) =>
@@ -66,12 +70,12 @@ export default function App() {
   const deletePublishedRecipe = (id) => {
     setFeed((prev) => prev.filter((item) => item.id !== id));
   };
-
+/*
   // Delete a bookmarked recipe
   const deleteBookmarkRecipe = (id) => {
     setBookmarks((prev) => prev.filter((b) => b !== id));
   };
-
+*/
   return (
     <BrowserRouter>
       <div className="app-root">
@@ -118,6 +122,7 @@ export default function App() {
                     bookmarks={bookmarks}
                     onToggleBookmark={toggleBookmark}
                     onDeletePublished={deletePublishedRecipe}
+                    onLogout={handleLogout}
                   />
                 }
               />
