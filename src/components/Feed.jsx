@@ -1,188 +1,293 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-// --- Helper: Bookmark Handler ---
-function handleBookmark(recipe) {
-  if (!recipe) return;
+// --- Bookmark Handler ---
 
-  const saved = JSON.parse(localStorage.getItem("bookmarkedRecipes") || "[]");
-  const already = saved.find((r) => r.id === recipe.id);
+function downloadRecipe(recipe) {
+  const downloads = JSON.parse(localStorage.getItem("downloads") || "{}");
 
-  if (!already) {
-    saved.push(recipe);
-    localStorage.setItem("bookmarkedRecipes", JSON.stringify(saved));
-    console.log("✅ Recipe bookmarked:", recipe.id);
-  } else {
-    console.log("⚠️ Already bookmarked:", recipe.id);
-  }
+  downloads[recipe.id] = (downloads[recipe.id] || 0) + 1;
+
+  localStorage.setItem("downloads", JSON.stringify(downloads));
+
+  const dataStr = JSON.stringify(recipe, null, 2);
+  const blob = new Blob([dataStr], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `pizza-${recipe.id}.json`;
+  a.click();
+
+  URL.revokeObjectURL(url);
 }
+export default function Feed({ feed = [], onBookmark, bookmarks }) {
+  const [search, setSearch] = useState("");
+  const [activeTags, setActiveTags] = useState([]);
+  const downloadCounts = useMemo(() => {
+    return JSON.parse(localStorage.getItem("downloads") || "{}");
+  }, [feed]);
+  const navigate = useNavigate();
+  const bookmarkCounts = useMemo(() => {
+    const counts = {};
 
-// --- Feed Component ---
-export default function Feed({ feed = [], onSave, onBookmark, onDelete }) {
+    bookmarks.forEach((id) => {
+      counts[id] = (counts[id] || 0) + 1;
+    });
+
+    return counts;
+  }, [bookmarks]);
+  // --- Extract Popular Tags ---
+  const popularTags = useMemo(() => {
+    const tagCounts = {};
+
+    feed.forEach((item) => {
+      item.toppings?.forEach((t) => {
+        const key = t.name?.toLowerCase();
+        if (!key) return;
+        tagCounts[key] = (tagCounts[key] || 0) + 1;
+      });
+    });
+
+    return Object.entries(tagCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 12);
+  }, [feed]);
+
+  // --- Filtered Feed ---
+  const filteredFeed = useMemo(() => {
+    return feed.filter((item) => {
+      const text = (
+        (item.author || "") +
+        " " +
+        (item.baseType || "") +
+        " " +
+        (item.sauceType || "") +
+        " " +
+        (item.toppings?.map((t) => t.name).join(" ") || "")
+      ).toLowerCase();
+
+      const matchesSearch = text.includes(search.toLowerCase());
+
+      const matchesTag =
+        activeTags.length > 0
+          ? activeTags.every((tag) =>
+              item.toppings?.some((t) => t.name?.toLowerCase().includes(tag)),
+            )
+          : true;
+
+      return matchesSearch && matchesTag;
+    });
+  }, [feed, search, activeTags]);
+
   if (!feed) return null;
 
   return (
-    <aside className="feed-panel">
-      <h3>Feed (local)</h3>
-
-      {feed.length === 0 ? (
-        <div style={{ marginTop: 8, color: "#999" }}>
-          No posts yet — publish a pizza.
+    <div className="feed-layout">
+      {/* LEFT SIDE */}
+      <div className="feed-main">
+        <div className="feed-search">
+          <input
+            placeholder="🔍 Procurar..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
-      ) : null}
 
-      <ul style={{ listStyle: "none", padding: 0 }}>
-        {feed.map((item) => (
-          <li
-            key={item.id}
-            className="feed-item"
-            style={{
-              position: "relative",
-              padding: 12,
-              border: "1px solid #222",
-              marginBottom: 10,
-              borderRadius: 8,
-              background: "#181818",
-              color: "#eee",
-            }}
-          >
+         <div className="feed-tags mobile-only">
+        <h4>AS TAGS DO MOMENTO</h4>
 
+        <div className="tags-list">
+          {popularTags.map(([tag]) => (
+            <button
+              key={tag}
+              className={`tag ${activeTags.includes(tag) ? "active" : ""}`}
+              onClick={() =>
+                setActiveTags((prev) =>
+                  prev.includes(tag)
+                    ? prev.filter((t) => t !== tag)
+                    : [...prev, tag],
+                )
+              }
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
 
-            {/* Author & base info */}
+        {/* RESET */}
+        <button
+          style={{ marginTop: 12 }}
+          onClick={() => {
+            setSearch("");
+            setActiveTags([]);
+          }}
+        >
+          Reset Filters
+        </button>
+      </div>
 
-{/* Preview Image (with fallback + lazy load) */}
-<img
-  src={
-    item.image ||
-    "/placeholder-pizza.png" // <-- Use your own placeholder path here
-  }
-  alt="Pizza Preview"
-  loading="lazy"
-  style={{
-    width: "100%",
-    borderRadius: 8,
-    marginTop: 8,
-    objectFit: "cover",
-    maxHeight: 200,
-    opacity: item.image ? 1 : 0.5, // dim placeholder
-    filter: item.image ? "none" : "grayscale(40%)",
-    background: "#222",
-  }}
-/>
+        {/* GRID */}
+        <div className="feed-grid">
+          {filteredFeed.map((item) => {
+            // group toppings
+            const grouped = item.toppings?.reduce((acc, t) => {
+              const key = t.name || "Unknown";
+              if (!acc[key]) {
+                acc[key] = { count: 0, color: t.color };
+              }
+              acc[key].count++;
+              return acc;
+            }, {});
 
-         <div style={{ fontWeight: 600, fontSize: 15 }}>
-              {item.author || "Anonymous"}
-            </div>
-            <div style={{ fontSize: 13, color: "#bbb" }}>
-              {item.baseType} base — {item.baseSize} cm
-            </div>
+            return (
+              <div
+                key={item.id}
+                className="feed-card"
+                onClick={() => navigate(`/recipe/${item.id}`)}
+                style={{ cursor: "pointer" }}
+              >
+                {/* IMAGE */}
+                <img
+                  src={item.image || "/placeholder-pizza.png"}
+                  alt="Pizza"
+                  loading="lazy"
+                  style={{
+                    width: "100%",
+                    borderRadius: 12,
+                    objectFit: "cover",
+                    height: 180,
+                    background: "#222",
+                  }}
+                />
 
-            {/* Ingredients */}
-            <div style={{ marginTop: 8, fontSize: 13, color: "#ccc" }}>
-              <strong>Cheese:</strong> {item.cheeseAmount || 0} blobs <br />
-              <strong>Sauce:</strong> {item.sauceType || "Tomato"}
-            </div>
+                {/* AUTHOR */}
+                <div style={{ marginTop: 8, fontWeight: 600 }}>
+                  {item.author || "Anonymous"}
+                </div>
 
-          {item.toppings?.length > 0 && (() => {
-  // Group toppings by name
-  const grouped = item.toppings.reduce((acc, t) => {
-    const key = t.name || "Unknown ingredient";
-    if (!acc[key]) {
-      acc[key] = { count: 0, color: t.color };
-    }
-    acc[key].count++;
-    return acc;
-  }, {});
+                {/* INFO */}
+                <div style={{ fontSize: 13, color: "#aaa" }}>
+                  {item.baseType} — {item.baseSize} cm
+                </div>
 
-  return (
-    <div style={{ marginTop: 8 }}>
-      <strong style={{ fontSize: 13 }}>Toppings:</strong>
+                {/* TAGS */}
+                <div
+                  style={{
+                    marginTop: 8,
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 6,
+                  }}
+                >
+                  {grouped &&
+                    Object.entries(grouped).map(([name, info], idx) => (
+                      <span
+                        key={idx}
+                        className="tag"
+                        onClick={() => {
+                          const tag = name.toLowerCase();
 
-      <div style={{ marginTop: 4, fontSize: 13 }}>
-        {Object.entries(grouped).map(([name, info], idx) => (
-          <span key={idx} style={{ marginRight: 10 }}>
-            <span
-              style={{
-                display: "inline-block",
-                width: 10,
-                height: 10,
-                borderRadius: "50%",
-                background: `#${info.color?.toString(16).padStart(6, "0")}`,
-                marginRight: 4,
-              }}
-            />
-            {name} ×{info.count}
-          </span>
-        ))}
+                          setActiveTags((prev) =>
+                            prev.includes(tag)
+                              ? prev.filter((t) => t !== tag)
+                              : [...prev, tag],
+                          );
+                        }}
+                        style={{
+                          cursor: "pointer",
+                          fontSize: 12,
+                          border: "1px solid #777",
+                          padding: "4px 8px",
+                          borderRadius: 999,
+                        }}
+                      >
+                        {name} ×{info.count}
+                      </span>
+                    ))}
+                </div>
+
+                {/* ACTIONS */}
+                <div
+                  style={{
+                    marginTop: 12,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  {/* ⭐ Bookmark */}
+                  <div
+                    onClick={() => onBookmark(item.id)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                      cursor: "pointer",
+                      color: bookmarks.includes(item.id) ? "#ffd700" : "#fff",
+                    }}
+                  >
+                    ⭐ <span>{bookmarkCounts[item.id] || 0}</span>
+                  </div>
+
+                  {/* ⬇️ Download */}
+                  <button
+                    onClick={() => downloadRecipe(item)}
+                    style={{
+                      background: "#222",
+                      border: "1px solid #444",
+                      color: "#fff",
+                      padding: "6px 10px",
+                      borderRadius: 6,
+                      cursor: "pointer",
+                      fontSize: 12,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                    }}
+                  >
+                    ⬇ {downloadCounts[item.id] || 0}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* RIGHT SIDE - TAGS */}
+      <div className="feed-tags desktop-only">
+        <h4>AS TAGS DO MOMENTO</h4>
+
+        <div className="tags-list">
+          {popularTags.map(([tag]) => (
+            <button
+              key={tag}
+              className={`tag ${activeTags.includes(tag) ? "active" : ""}`}
+              onClick={() =>
+                setActiveTags((prev) =>
+                  prev.includes(tag)
+                    ? prev.filter((t) => t !== tag)
+                    : [...prev, tag],
+                )
+              }
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+
+        {/* RESET */}
+        <button
+          style={{ marginTop: 12 }}
+          onClick={() => {
+            setSearch("");
+            setActiveTags([]);
+          }}
+        >
+          Reset Filters
+        </button>
       </div>
     </div>
-  );
-})()}
-
-
-            {/* Action buttons */}
-            <div
-              style={{
-                marginTop: 10,
-                display: "flex",
-                gap: 8,
-                flexWrap: "wrap",
-              }}
-            >
-              <button
-                onClick={() => onSave?.(item)}
-                style={{
-                  background: "#5a1c1c",
-                  color: "#fff",
-                  border: "none",
-                  padding: "6px 10px",
-                  borderRadius: 6,
-                  cursor: "pointer",
-                }}
-              >
-                Republish
-              </button>
-
-              <button
-                onClick={() => {
-                  handleBookmark(item);
-                  onBookmark?.(item);
-                }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  background: "#333",
-                  color: "#fff",
-                  padding: "6px 10px",
-                  borderRadius: 6,
-                  border: "none",
-                  cursor: "pointer",
-                }}
-              >
-                <span>⭐</span> Bookmark
-              </button>
-            </div>
-
-            {/* Delete button (top-right) */}
-            <button
-              onClick={() => onDelete?.(item.id)}
-              style={{
-                position: "absolute",
-                top: 8,
-                right: 8,
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-                color: "#888",
-                fontSize: 16,
-              }}
-              title="Remove from feed"
-            >
-              🗑️
-            </button>
-          </li>
-        ))}
-      </ul>
-    </aside>
   );
 }

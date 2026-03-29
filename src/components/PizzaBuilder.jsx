@@ -8,8 +8,13 @@ import PizzaControls from "./PizzaBuilder/PizzaControls";
 import { INGREDIENTS } from "../data/ingredients";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
-export default function PizzaBuilder({ user, publishToFeed, showConfig }) {
-  // UI state
+export default function PizzaBuilder({
+  user,
+  publishToFeed,
+  showConfig,
+  setShowConfig,
+}) {
+  // UI state 
   const [sauceType, setSauceType] = useState("tomate");
   const [baseType, setBaseType] = useState("medium");
   const [baseSize, setBaseSize] = useState(33);
@@ -270,44 +275,41 @@ export default function PizzaBuilder({ user, publishToFeed, showConfig }) {
           mesh.rotation.x = -Math.PI / 2;
           break;
 
-case "pineapple":
+        case "pineapple":
+          const radius = 0.28;
 
-  const radius = 0.28;
+          const shape = new THREE.Shape();
 
-  const shape = new THREE.Shape();
+          const start = -Math.PI / 6;
+          const end = Math.PI / 6;
 
-  const start = -Math.PI / 6;
-  const end = Math.PI / 6;
+          shape.moveTo(0, 0);
+          shape.absarc(0, 0, radius, start, end, false);
+          shape.lineTo(0, 0);
 
-  shape.moveTo(0, 0);
-  shape.absarc(0, 0, radius, start, end, false);
-  shape.lineTo(0, 0);
+          const geom = new THREE.ExtrudeGeometry(shape, {
+            depth: 0.05, // height of the pineapple
+            bevelEnabled: false,
+            curveSegments: 16,
+          });
 
-  const geom = new THREE.ExtrudeGeometry(shape, {
-    depth: 0.05,     // height of the pineapple
-    bevelEnabled: false,
-    curveSegments: 16
-  });
+          geom.rotateX(-Math.PI / 2);
 
-  geom.rotateX(-Math.PI / 2);
+          const loader = new THREE.TextureLoader();
+          const pineappleTexture = loader.load("/textures/pineapple.jpg");
 
-  const loader = new THREE.TextureLoader();
-  const pineappleTexture = loader.load("/textures/pineapple.jpg");
+          const pineappleMat = new THREE.MeshStandardMaterial({
+            map: pineappleTexture,
+            roughness: 0.55,
+            metalness: 0.02,
+          });
 
-  const pineappleMat = new THREE.MeshStandardMaterial({
-    map: pineappleTexture,
-    roughness: 0.55,
-    metalness: 0.02
-  });
+          mesh = new THREE.Mesh(geom, pineappleMat);
 
- mesh = new THREE.Mesh(geom, pineappleMat);
+          const s = 0.7 + Math.random() * 0.5;
+          mesh.scale.set(s, s, s);
 
- 
-
-const s = 0.7 + Math.random() * 0.5;
-mesh.scale.set(s, s, s);
-
-  break;
+          break;
 
         default:
           mesh = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), mat);
@@ -698,7 +700,7 @@ mesh.scale.set(s, s, s);
     };
 
     // attach listeners
-    // renderer.domElement.addEventListener("dragover", handleDragOver);
+    renderer.domElement.addEventListener("dragover", handleDragOver);
     renderer.domElement.addEventListener("drop", handleDrop);
     renderer.domElement.addEventListener("pointerdown", onPointerDown);
     window.addEventListener("pointermove", onPointerMove);
@@ -763,8 +765,8 @@ mesh.scale.set(s, s, s);
       controls.dispose();
       renderer.dispose();
       try {
-        //   renderer.domElement.removeEventListener("dragover", handleDragOver);
-        //   renderer.domElement.removeEventListener("drop", handleDrop);
+        renderer.domElement.removeEventListener("dragover", handleDragOver);
+        renderer.domElement.removeEventListener("drop", handleDrop);
         renderer.domElement.removeEventListener("pointerdown", onPointerDown);
       } catch (e) {}
       window.removeEventListener("pointermove", onPointerMove);
@@ -921,7 +923,7 @@ mesh.scale.set(s, s, s);
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
         renderer.render(scene, camera);
-        const data = canvas.toDataURL("image/png");
+        const data = renderer.domElement.toDataURL("image/jpeg", 0.3);
         return data;
       } else {
         // normal snapshot
@@ -930,7 +932,7 @@ mesh.scale.set(s, s, s);
         camera.aspect = prevWidth / prevHeight;
         camera.updateProjectionMatrix();
         renderer.render(scene, camera);
-        const data = canvas.toDataURL("image/png");
+        const data = renderer.domElement.toDataURL("image/jpeg", 0.3);
         return data;
       }
     } catch (err) {
@@ -1021,19 +1023,16 @@ mesh.scale.set(s, s, s);
     }
 
     const toppings = Array.from(toppingsGroupRef.current?.children || []).map(
-      (c) => {
-        const ing = c.userData?.ing || {};
-        return {
-          id: ing.id || c.uuid,
-          name: ing.name || c.name || "Unknown ingredient",
-          color: ing.color || 0xffffff,
-          pos: { x: c.position.x, y: c.position.y, z: c.position.z },
-        };
-      },
+      (c) => ({
+        id: c.userData?.ing?.id || c.uuid,
+        name: c.userData?.ing?.name || c.name || "Unknown ingredient",
+        color: c.userData?.ing?.color || 0xffffff,
+        pos: { x: c.position.x, y: c.position.y, z: c.position.z },
+      }),
     );
 
-    // capture snapshot (same as publish)
     let image = null;
+
     try {
       image = await captureSnapshot({ scale: 1 });
     } catch (err) {
@@ -1050,11 +1049,18 @@ mesh.scale.set(s, s, s);
       cheeseType,
       sauceType,
       toppings,
-      image: image || null, // ✅ ADD THIS
+      image,
       createdAt: new Date().toISOString(),
     };
 
-    const stored = JSON.parse(localStorage.getItem("userRecipes") || "[]");
+    let stored = [];
+
+    try {
+      stored = JSON.parse(localStorage.getItem("userRecipes")) || [];
+    } catch {
+      stored = [];
+    }
+
     stored.push(recipe);
     localStorage.setItem("userRecipes", JSON.stringify(stored));
 
@@ -1065,38 +1071,51 @@ mesh.scale.set(s, s, s);
 
   // UI render
   return (
-    <div className="config-container">
-      <aside className={`config-modal ${showConfig ? "open" : "closed"}`}>
-        <button onClick={generateRandomPizza} style={{ padding: "8px 12px" }}>
-          Generate Recipe
+    <div>
+    <div className="config-wrapper">
+      <div className="config-container">
+        <aside className={`config-modal ${showConfig ? "open" : "closed"}`}>
+          <button onClick={generateRandomPizza} style={{ padding: "8px 12px" }}>
+            Generate Recipe
+          </button>
+
+          <IngredientPanel
+            addIngredient={addIngredient}
+            removeIngredient={removeIngredient}
+            ingredientCounts={ingredientCounts}
+          />
+          <PizzaControls
+            sauceType={sauceType}
+            setSauceType={setSauceType}
+            baseType={baseType}
+            setBaseType={setBaseType}
+            baseSize={baseSize}
+            setBaseSize={setBaseSize}
+            hasCheese={hasCheese}
+            setHasCheese={setHasCheese}
+            cheeseType={cheeseType}
+            setCheeseType={setCheeseType}
+            downloadSnapshot={downloadSnapshot}
+            handlePublish={handlePublish}
+            handleSaveToProfile={handleSaveToProfile}
+            removeAllToppings={removeAllToppings}
+          />
+        </aside>
+
+      
+      </div>
+      <div className="config-toggle">
+        <button onClick={() => setShowConfig((prev) => !prev)}>
+          {showConfig ? "✖ Close" : "🍕 Builder"}
         </button>
-
-        <IngredientPanel
-          addIngredient={addIngredient}
-          removeIngredient={removeIngredient}
-          ingredientCounts={ingredientCounts}
-        />
-        <PizzaControls
-          sauceType={sauceType}
-          setSauceType={setSauceType}
-          baseType={baseType}
-          setBaseType={setBaseType}
-          baseSize={baseSize}
-          setBaseSize={setBaseSize}
-          hasCheese={hasCheese}
-          setHasCheese={setHasCheese}
-          cheeseType={cheeseType}
-          setCheeseType={setCheeseType}
-          downloadSnapshot={downloadSnapshot}
-          handlePublish={handlePublish}
-          handleSaveToProfile={handleSaveToProfile}
-          removeAllToppings={removeAllToppings}
-        />
-      </aside>
-
-      <main style={{ width: "100%", height: "100%" }}>
-        <div ref={mountRef} className="three-root" />
-      </main>
+      </div>
+      
+      </div>
+      <div>
+        <main style={{ width: "100%", height: "100%" }}>
+          <div ref={mountRef} className="three-root" />
+        </main>
+    </div>
     </div>
   );
 }

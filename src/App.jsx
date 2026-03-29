@@ -5,16 +5,17 @@ import Feed from "./components/Feed";
 import Profile from "./components/Profile"; // 👈 new
 import { loadFeedFromStorage, saveFeedToStorage } from "./utils/storage";
 import "./index.css";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import RecipePage from "./components/RecipePage";
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [showConfig, setShowConfig] = useState(() => {
-  const saved = localStorage.getItem("pizzaBuilderConfigOpen");
-  return saved ? JSON.parse(saved) : true; // default open
-});
+    const saved = localStorage.getItem("pizzaBuilderConfigOpen");
+    return saved ? JSON.parse(saved) : true; // default open
+  });
   const [feed, setFeed] = useState(() => loadFeedFromStorage() || []);
-  const [view, setView] = useState("builder"); // 👈 "builder" | "feed" | "profile"
-  const [bookmarks, setBookmarks] = useState(() => {
+   const [bookmarks, setBookmarks] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem("bookmarks")) || [];
     } catch {
@@ -27,11 +28,12 @@ export default function App() {
     saveFeedToStorage(feed);
   }, [feed]);
 
-useEffect(() => {
-  if (view === "builder") {
-    localStorage.setItem("pizzaBuilderConfigOpen", JSON.stringify(showConfig));
-  }
-}, [showConfig, view]);
+ useEffect(() => {
+  localStorage.setItem(
+    "pizzaBuilderConfigOpen",
+    JSON.stringify(showConfig)
+  );
+}, [showConfig]);
 
   useEffect(() => {
     localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
@@ -49,10 +51,14 @@ useEffect(() => {
     setFeed((prev) => [newPost, ...prev]);
     setView("feed"); // 👈 show feed after publishing
   };
-
+/*
   const deleteFromFeed = (id) => {
     setFeed((prev) => prev.filter((item) => item.id !== id));
   };
+*/
+  const handleLogout = () => {
+  setUser(null);
+};
 
   const toggleBookmark = (id) => {
     setBookmarks((prev) =>
@@ -64,68 +70,79 @@ useEffect(() => {
   const deletePublishedRecipe = (id) => {
     setFeed((prev) => prev.filter((item) => item.id !== id));
   };
-
+/*
   // Delete a bookmarked recipe
   const deleteBookmarkRecipe = (id) => {
     setBookmarks((prev) => prev.filter((b) => b !== id));
   };
-
+*/
   return (
-    <div className="app-root">
-      <Auth user={user} setUser={setUser} />
+    <BrowserRouter>
+      <div className="app-root">
+        <Auth user={user} setUser={setUser} />
 
-      {user ? (
-        <>
-          {/* 🧭 Simple nav bar */}
-          <nav className="mainnav-container">
-            <button onClick={() => setView("builder")}>📰</button>
-            <button
-              onClick={() => {
-                setView("builder");
-                setShowConfig((prev) => !prev);
-              }}
-            >
-              🍕 Builder
-            </button>
-            <button onClick={() => setView("feed")}>📰 Feed</button>
-            <button onClick={() => setView("profile")}>👤 Profile</button>
-          </nav>
+        {user ? (
+          <>
+            <nav className="mainnav-container">
+              <Link to="/">🍕 Builder</Link>
+              <Link to="/feed">📰 Feed</Link>
+              <Link to="/profile">👤 Profile</Link>
+            </nav>
 
-          {/* 🪄 Render the current view */}
-          {view === "builder" && (
-            <PizzaBuilder
-              user={user}
-              publishToFeed={publishToFeed}
-              showConfig={showConfig}
-            />
-          )}
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <PizzaBuilder
+                    user={user}
+                    publishToFeed={publishToFeed}
+                    showConfig={showConfig}
+                    setShowConfig={setShowConfig}
+                  />
+                }
+              />
 
-          {view === "feed" && (
-            <Feed
-              feed={feed}
-              onSave={publishToFeed}
-              onToggleBookmark={toggleBookmark}
-              bookmarks={bookmarks}
-              onDelete={deleteFromFeed}
-            />
-          )}
+              <Route
+                path="/feed"
+                element={
+                  <Feed
+                    feed={feed}
+                    bookmarks={bookmarks}
+                    onBookmark={toggleBookmark}
+                  />
+                }
+              />
 
-          {view === "profile" && (
-            <Profile
-              user={user}
-              feed={feed}
-              bookmarks={bookmarks}
-              onToggleBookmark={toggleBookmark}
-              onDeletePublished={deletePublishedRecipe}
-              onDeleteBookmark={deleteBookmarkRecipe}
-            />
-          )}
-        </>
-      ) : (
-        <div style={{ color: "white", padding: 20 }}>
-          Please log in to start building your pizza 🍕
-        </div>
-      )}
-    </div>
+              <Route
+                path="/profile"
+                element={
+                  <Profile
+                    user={user}
+                    feed={feed}
+                    bookmarks={bookmarks}
+                    onToggleBookmark={toggleBookmark}
+                    onDeletePublished={deletePublishedRecipe}
+                    onLogout={handleLogout}
+                  />
+                }
+              />
+
+              <Route
+                path="/recipe/:id"
+                element={
+                  <RecipePage
+                    feed={feed}
+                    bookmarks={bookmarks}
+                    onToggleBookmark={toggleBookmark}
+                  />
+                }
+              />
+            </Routes>
+          </>
+        ) : (
+          <div style={{ color: "white", padding: 20 }}>Please log in 🍕</div>
+        )}
+      </div>
+    </BrowserRouter>
   );
 }

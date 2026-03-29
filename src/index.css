@@ -51,7 +51,7 @@ html,
   color: white;
   position: absolute;
   right: 0;
-  z-index: 1;
+  z-index: 2;
   display: flex;
   flex-direction: row-reverse;
   gap: 10px;
@@ -60,11 +60,177 @@ html,
 }
 
 .mainnav-container {
-  position: absolute;
-  bottom: 0px;
+  position: sticky;
+  top: 0px;
   width: 100%;
   display: flex;
   justify-content: center;
+  gap: 16px;
+  background: rgba(17, 17, 17, 0);
+  color: rgb(255, 255, 255);
+  padding: 10px 0px;
+  z-index: 2;
+}
+
+
+
+.feed-layout {
+  display: flex; 
+     flex-direction: row;
+  gap: 20px;
+  padding: 20px;
+}
+ 
+.feed-main {
+ display: flex; 
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.feed-search {
+  width: 100%; 
+}
+
+.feed-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+
+.feed-card {
+  position: relative;
+  border-radius: 16px;
+  padding: 12px;
+  background: #181818;
+  border: 1px solid #2a2a2a;
+  display: flex;
+  flex-direction: column;
+}
+.feed-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.feed-tags {
+  border: 1px solid #555;
+    border-radius: 16px;
+    padding: 16px;
+    height: max-content;
+    display: flex;
+    overflow: hidden;
+    flex-direction: column;
+}
+.feed-tags h4 {
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+.tag {
+  border: 1px solid #888;
+  border-radius: 999px;
+  padding: 6px 12px;
+  margin: 4px;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+}
+.tag-list{
+
+  height: auto;
+}
+.feed-tags button{
+  border: 1px solid #888;
+  border-radius: 999px;
+ background-color: #0b0b0b;
+ color: white;
+ padding: 10px;
+}
+
+
+
+.tag.active {
+  background: white;
+  color: black;
+}
+.feed-search{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+.feed-search input {
+  width: 100%;
+  padding: 10px 15px;
+  border-radius: 999px;
+  border: 1px solid #555;
+  background: transparent;
+  color: white;
+}
+
+/* default (desktop) */
+.mobile-only {
+  display: none;
+}
+
+.desktop-only {
+  display: block;
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .feed-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .feed-layout {
+ display: flex;
+    /* grid-template-columns: 1fr 260px; */
+    /* gap: 24px; */
+    /* padding: 20px; */
+    flex-direction: column-reverse;
+}
+  .feed-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+    .mobile-only {
+    display: block;
+  }
+
+  .desktop-only {
+    display: none;
+  }
+}
+
+ 
+/* config panel */
+.config-wrapper{
+ position: absolute;
+bottom: 0px;
+    width: auto;
+  height: 100dvh;
+  display: flex;
+justify-content: flex-end;
+  gap: 16px;
+  background: rgba(17, 17, 17, 0);
+  color: rgb(255, 255, 255);
+  padding: 10px 0px;
+  z-index: 2;
+    left: 10px;
+    flex-direction: column;
+}
+
+.config-toggle{
+  position: relative;
+  bottom: 0px;
+  width: 100%;
+  display: flex;
+justify-content: flex-start;
   gap: 16px;
   background: rgba(17, 17, 17, 0);
   color: rgb(255, 255, 255);
@@ -73,29 +239,6 @@ html,
 }
 
 
-
-
-/* Feed panel */
-.feed-panel {
-  position: fixed;
-  right: 0;
-  top: 56px;
-  width: 280px;
-  padding: 12px;
-  background: #0d0d0d;
-  border-left: 1px solid #222;
-  height: calc(100% - 56px);
-  overflow: auto;
-}
-
-.feed-item {
-  margin-bottom: 10px;
-  padding: 8px;
-  border-radius: 8px;
-  background: #141414;
-  border: 1px solid #222;
-}
-
 /* left panel class used in some code samples */
 .left-panel {
   width: 230px;
@@ -103,8 +246,7 @@ html,
   background: #111;
   color: #fff;
 }
-.config-container{
-  height: 100vh;
+.config-container{ 
     display: flex;
     overflow: hidden;
     align-items: center;
@@ -112,9 +254,7 @@ html,
 
 .config-modal {
   width: 300px;
-  height: 400px;
-  position: absolute;
-    left: 10px;
+  height: calc(100vh - 200px);
       overflow-y: scroll;
   overflow-x: hidden;
    overflow-y: scroll;
@@ -142,4 +282,57 @@ html,
   display: block;
   width: 100% !important;
   height: 100% !important;
+}
+
+
+
+/* profile settings */
+
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.profile-info {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.avatar {
+  width: 64px;
+  height: 64px;
+  background: #ccc;
+  border-radius: 16px;
+}
+
+.profile-stats {
+  display: flex;
+  gap: 12px;
+  color: #aaa;
+  font-size: 14px;
+}
+
+.profile-actions button {
+  margin-left: 10px;
+}
+
+.profile-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.profile-tabs button.active {
+  background: white;
+  color: black;
+  border-radius: 999px;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
 }
