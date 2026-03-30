@@ -19,28 +19,20 @@ export default function Auth({ user, setUser }) {
     <div  className="auth-container"  >
       {user ? (
         <>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <img
-              src={user.photoURL || "https://via.placeholder.com/40"}
-              alt="avatar"
-              style={{ width: 40, height: 40, borderRadius: "50%" }}
-            />
-           {/* <span>Hi, {user.displayName} 👋</span> */} 
-          </div>
-          <button
-           onClick={() => logout()}
-            style={{
-              marginTop: 10,
-              padding: "6px 12px",
-              background: "#333",
-              color: "#fff",
-              border: "none",
-              borderRadius: 4,
-              cursor: "pointer",
-            }}
-          >
-            Logout
-          </button>
+         {/*
+    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <img
+        src={user.photoURL || "https://via.placeholder.com/40"}
+        alt="avatar"
+        style={{ width: 40, height: 40, borderRadius: "50%" }}
+      />
+      <span>Hi, {user.displayName} 👋</span>
+    </div>
+
+    <button onClick={() => logout()}>
+      Logout
+    </button>
+    */}
         </>
       ) : (
         <button

@@ -4,8 +4,7 @@ export default function PizzaControls({
   baseType,
   setBaseType,
   baseSize,
-  setBaseSize,
-  hasCheese,
+  setBaseSize, 
   setHasCheese,
   cheeseType,
   setCheeseType,
@@ -49,41 +48,23 @@ export default function PizzaControls({
         <button onClick={handleSaveToProfile}>Save</button>
         <button onClick={removeAllToppings}>Clear</button>
       </div>
+ 
 
-      {/* Cheese Toggle */}
-      <div style={{marginTop:16}}>Cheese</div>
+       {/* Cheese Types */}
+<div style={{marginTop:10}}>
+  <div>Cheese Type</div>
 
-      <button
-        onClick={()=>setHasCheese(!hasCheese)}
-        style={{
-          marginTop:6,
-          padding:"6px 10px",
-          background: hasCheese ? "#3c7a3c" : "#333",
-          color:"#fff",
-          border:"none",
-          borderRadius:4,
-          cursor:"pointer"
-        }}
-      >
-        {hasCheese ? "Cheese ON" : "No Cheese"}
-      </button>
-
-      {/* Cheese Types (only if cheese is enabled) */}
-      {hasCheese && (
-        <div style={{marginTop:10}}>
-          <div>Cheese Type</div>
-
-          <select
-            value={cheeseType}
-            onChange={(e)=>setCheeseType(e.target.value)}
-          >
-            <option value="mozzarella">Mozzarella</option>
-            <option value="cheddar">Cheddar</option>
-            <option value="parmesan">Parmesan</option>
-            <option value="gorgonzola">Gorgonzola</option>
-          </select>
-        </div>
-      )}
+  <select
+    value={cheeseType}
+    onChange={(e)=>setCheeseType(e.target.value)}
+  >
+    <option value="none">Sem Queijo</option>
+    <option value="mozzarella">Mozzarella</option>
+    <option value="cheddar">Cheddar</option>
+    <option value="parmesan">Parmesan</option>
+    <option value="gorgonzola">Gorgonzola</option>
+  </select>
+</div>
 
     </div>
   );
