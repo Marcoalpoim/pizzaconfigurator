@@ -213,7 +213,7 @@ html,
  position: absolute;
 bottom: 0px;
     width: auto;
-  height: 100dvh;
+  height: auto;
   display: flex;
 justify-content: flex-end;
   gap: 16px;
@@ -237,6 +237,22 @@ justify-content: flex-start;
   padding: 10px 0px;
   z-index: 1;
 }
+
+
+.config-btn {
+position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    gap: 5px;
+}
+.config-btn button {
+background-color: transparent;
+border: 1px solid #333;
+border-radius: 30px;
+}
+
 
 
 /* left panel class used in some code samples */
