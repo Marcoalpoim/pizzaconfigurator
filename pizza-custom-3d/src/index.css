@@ -183,7 +183,8 @@ html,
 .config-wrapper{
  position: absolute;
 bottom: 0px;
-    width: 100%;
+  width: auto;
+      left: 15px;
   height: auto;
   display: flex;
 justify-content: flex-end;
@@ -197,7 +198,7 @@ justify-content: flex-end;
     align-items: center;
 }
 .settings-wrapper{ 
-    width: 90%;
+    width: auto;
   height: auto;
   display: flex;
 justify-content: flex-end;
@@ -259,11 +260,18 @@ padding: 5px;
   border: 1px solid #333;
   border-radius: 10px;
       padding: 5px;
+      cursor: pointer;
+}
+
+.btn-box:hover{
+  background-color: #d8d8d8;
+  color: white;
 }
 .config-btn .btn-box button {
 background-color: transparent;
 border: 1px solid #33333300;
 border-radius: 30px;
+cursor: pointer;
 }
 .config-btn .btn-box button p {
 margin: 0;
@@ -299,7 +307,9 @@ height: 20px;
 }
 
 .config-modal {  
-  background: #d1ab728a;
+  background-color: #d1ab728a;
+  -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
   color: white;
   border: 2px solid #ffffff;
   border-radius: 15px;
@@ -322,6 +332,10 @@ height: 20px;
    overflow-y: scroll;
   padding: 16px; 
   color: white;  
+}
+
+.config-content::-webkit-scrollbar {
+  
 }
 
 
@@ -415,6 +429,16 @@ height: 20px;
 
 /* Mobile */
 @media (max-width: 768px) {
+  .settings-wrapper{ 
+    width: 90%; 
+}
+
+  .config-wrapper{
+ position: absolute;
+bottom: 0px;
+    width: 100%; 
+        left: 0px;
+}
   .config-content { 
   height: calc(60vh - 200px);
   width: auto; 

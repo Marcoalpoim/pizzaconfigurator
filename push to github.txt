@@ -1,4 +1,5 @@
 
+
 cd ~/Desktop/PG-2025-webfrontend/webfrontend-Projeto/pizza-custom-3d
 git add -A
 git commit -m "Fix: project files"
@@ -55,3 +56,37 @@ HOW TO RUN IT?
             or (depending on setup):
 
             npm start
+
+
+ 9. 🧪 Build for Production
+            npm run build
+
+            Preview build:
+
+            npm run preview
+
+10. 🧠 Notes for Developers
+            Built with:
+            React + Three.js
+            Main logic:
+            PizzaBuilder.jsx → 3D scene
+            PizzaControls.jsx → UI controls
+
+
+            Toppings use:
+            normalized positions (important for resizing base)
+
+
+11. 🚀 Optional Improvements
+
+
+Add more ingredients (edit ingredients.js)
+Add new pizza shapes (edit createBase)
+Improve UI controls (icons, sliders, etc.)
+12. 🧼 Reset Everything
+
+If things break badly:
+
+rm -rf node_modules
+npm install
+npm run dev
