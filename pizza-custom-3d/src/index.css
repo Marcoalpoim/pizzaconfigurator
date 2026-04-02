@@ -238,8 +238,14 @@ justify-content: flex-start;
   z-index: 1;
 }
 
+.btn-container{
 
-.config-btn {
+position: sticky;
+    bottom: 0;
+
+}
+
+.btn-container {
 position: absolute;
     bottom: 0;
     left: 0;
@@ -247,13 +253,55 @@ position: absolute;
     background-color: white;
     gap: 5px;
 }
-.config-btn button {
-background-color: transparent;
-border: 1px solid #333;
-border-radius: 30px;
+.settings-btn {
+position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    gap: 5px;
 }
 
+.config-btn {
+display: flex;
+gap: 5px;
+padding: 5px;
+}
 
+.btn-box{
+  display: flex;
+  align-items: center;
+  gap: 0px;
+  flex-direction: column;
+  justify-content: center;
+  border: 1px solid #333;
+  border-radius: 10px;
+      padding: 5px;
+}
+.config-btn .btn-box button {
+background-color: transparent;
+border: 1px solid #33333300;
+border-radius: 30px;
+}
+.config-btn .btn-box button p {
+margin: 0;
+font-size: 12px;
+}
+ 
+.config-btn button img {
+width: auto;
+height: 20px;
+}
+ .send-btn{
+  width: 100%;
+}
+  .send-btn button{
+ display: flex;
+    justify-content: space-between;
+    gap: 5px;
+        align-items: center;
+}
+ 
 
 /* left panel class used in some code samples */
 .left-panel {
@@ -268,25 +316,33 @@ border-radius: 30px;
     align-items: center;
 }
 
-.config-modal {
-  width: 300px;
-  height: calc(100vh - 200px);
-      overflow-y: scroll;
-  overflow-x: hidden;
-   overflow-y: scroll;
-  padding: 16px;
-  background: #d1ab72;
+.config-modal {  
+  background: #d1ab728a;
   color: white;
   border: 2px solid #ffffff;
   border-radius: 15px;
     z-index: 1;
   transform: translateX(0);
   transition: transform 0.35s ease;
+  overflow: hidden;
 }
 
 .config-modal.closed {
   transform: translateX(-100%);
 }
+
+.config-content {
+  width: 300px;
+  height: calc(90vh - 200px);
+  margin-bottom: 60px;
+      overflow-y: scroll;
+  overflow-x: hidden;
+   overflow-y: scroll;
+  padding: 16px; 
+  color: white;  
+}
+
+
 
 .three-root {
   position: absolute;

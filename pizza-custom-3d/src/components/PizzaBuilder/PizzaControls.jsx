@@ -8,14 +8,11 @@ export default function PizzaControls({
   pizzaShape,
    setPizzaShape, 
   cheeseType,
-  setCheeseType,
-  downloadSnapshot,
-  handlePublish,
-  handleSaveToProfile,
-  removeAllToppings,
+  setCheeseType, 
 }) {
   return (
     <div style={{ marginTop: 6 }}>
+   
       {/* Sauce */}
       <div>Sauce Type</div>
       <select value={sauceType} onChange={(e) => setSauceType(e.target.value)}>
@@ -73,14 +70,8 @@ export default function PizzaControls({
           <option value="gorgonzola">Gorgonzola</option>
         </select>
       </div>
-
-      {/* Buttons */}
-      <div className="config-btn" >
-        <button onClick={() => downloadSnapshot(true)}>Snapshot</button>
-        <button onClick={handlePublish}>Publish</button>
-        <button onClick={handleSaveToProfile}>Save</button>
-        <button onClick={removeAllToppings}>Clear</button>
-      </div>
+ 
+    
     </div>
   );
 }

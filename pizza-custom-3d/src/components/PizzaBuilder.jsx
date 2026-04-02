@@ -6,7 +6,9 @@ import { mergeVertices } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import IngredientPanel from "./PizzaBuilder/IngredientsPanel";
 import PizzaControls from "./PizzaBuilder/PizzaControls";
+import PizzaControlsBtns from "./PizzaBuilder/PizzaControlsBtns";
 import { INGREDIENTS } from "../data/ingredients";
+import AiJuri from "./PizzaBuilder/AiJuri";
 
 export default function PizzaBuilder({
   user,
@@ -37,13 +39,12 @@ export default function PizzaBuilder({
   const toppingsGroupRef = useRef(null);
   const modelsRef = useRef({});
 
-
   // Refs so scene closures always read current values
   const snapToRingsRef = useRef(snapToRings);
   const pizzaShapeRef = useRef(pizzaShape);
   const baseTypeRef = useRef(baseType);
   const baseSizeRef = useRef(baseSize);
-    const showConfigRef = useRef(showConfig);
+  const showConfigRef = useRef(showConfig);
 
   useEffect(() => {
     snapToRingsRef.current = snapToRings;
@@ -57,7 +58,9 @@ export default function PizzaBuilder({
   useEffect(() => {
     baseSizeRef.current = baseSize;
   }, [baseSize]);
-useEffect(() => { showConfigRef.current = showConfig; }, [showConfig]);
+  useEffect(() => {
+    showConfigRef.current = showConfig;
+  }, [showConfig]);
   // ---------- Helpers ----------
 
   const getBaseDims = (type, size) => {
@@ -206,10 +209,9 @@ useEffect(() => { showConfigRef.current = showConfig; }, [showConfig]);
       s.lineTo(-r, r);
       s.closePath();
     } else if (shape === "triangle") {
-      
-      s.moveTo(0, -r);  
-      s.lineTo(r * 0.866, r * 0.5);  
-      s.lineTo(-r * 0.866, r * 0.5);  
+      s.moveTo(0, -r);
+      s.lineTo(r * 0.866, r * 0.5);
+      s.lineTo(-r * 0.866, r * 0.5);
       s.closePath();
     } else if (shape === "diamond") {
       s.moveTo(0, -r);
@@ -236,12 +238,12 @@ useEffect(() => { showConfigRef.current = showConfig; }, [showConfig]);
         if (i === 0) s.moveTo(Math.cos(a) * rr, Math.sin(a) * rr);
         else s.lineTo(Math.cos(a) * rr, Math.sin(a) * rr);
       }
-       const firstA = -Math.PI / 2;
+      const firstA = -Math.PI / 2;
       s.lineTo(Math.cos(firstA) * outerR, Math.sin(firstA) * outerR);
       s.closePath();
-    } else if (shape === "heart") { 
+    } else if (shape === "heart") {
       const sc = r * 0.55;
-      s.moveTo(0, -r * 0.9);  
+      s.moveTo(0, -r * 0.9);
       s.bezierCurveTo(-sc * 2, -sc * 0.5, -sc * 2, sc * 1.2, 0, sc * 0.8);
       s.bezierCurveTo(sc * 2, sc * 1.2, sc * 2, -sc * 0.5, 0, -r * 0.9);
       s.closePath();
@@ -345,50 +347,61 @@ useEffect(() => { showConfigRef.current = showConfig; }, [showConfig]);
       return pointInTriangle(x, z, v1, v2, v3);
     }
     if (shape === "star") {
-  const outerR = r, innerR = r * 0.55;
-  const points = 5;
-  // Check all 10 triangles that make up the full star (each spike + each inner kite)
-  for (let i = 0; i < points; i++) {
-    const aOuter1 = (i / points) * Math.PI * 2 - Math.PI / 2;
-    const aInnerL = ((i + 0.5) / points) * Math.PI * 2 - Math.PI / 2;
-    const aOuter2 = ((i + 1) / points) * Math.PI * 2 - Math.PI / 2;
-    const aInnerR = ((i - 0.5 + points) / points) * Math.PI * 2 - Math.PI / 2;
+      const outerR = r,
+        innerR = r * 0.55;
+      const points = 5;
+      // Check all 10 triangles that make up the full star (each spike + each inner kite)
+      for (let i = 0; i < points; i++) {
+        const aOuter1 = (i / points) * Math.PI * 2 - Math.PI / 2;
+        const aInnerL = ((i + 0.5) / points) * Math.PI * 2 - Math.PI / 2;
+        const aOuter2 = ((i + 1) / points) * Math.PI * 2 - Math.PI / 2;
+        const aInnerR =
+          ((i - 0.5 + points) / points) * Math.PI * 2 - Math.PI / 2;
 
-    const tip    = { x: Math.cos(aOuter1) * outerR, z: Math.sin(aOuter1) * outerR };
-    const innerL = { x: Math.cos(aInnerL) * innerR, z: Math.sin(aInnerL) * innerR };
-    const innerR_ = { x: Math.cos(aInnerR) * innerR, z: Math.sin(aInnerR) * innerR };
-    const center = { x: 0, z: 0 };
+        const tip = {
+          x: Math.cos(aOuter1) * outerR,
+          z: Math.sin(aOuter1) * outerR,
+        };
+        const innerL = {
+          x: Math.cos(aInnerL) * innerR,
+          z: Math.sin(aInnerL) * innerR,
+        };
+        const innerR_ = {
+          x: Math.cos(aInnerR) * innerR,
+          z: Math.sin(aInnerR) * innerR,
+        };
+        const center = { x: 0, z: 0 };
 
-    // Spike triangle: tip → left inner → right inner
-    if (pointInTriangle(x, z, tip, innerL, innerR_)) return true;
-    // Inner kite: center → tip's left inner → tip → tip's right inner
-    if (pointInTriangle(x, z, center, innerL, tip)) return true;
-    if (pointInTriangle(x, z, center, tip, innerR_)) return true;
-  }
-  return false;
-}
-   if (shape === "heart") {
-  // Heart in makeShape2D: tip at 2D(0, -r*0.9) → world z = +r*0.9
-  // Lobes at 2D(±sc, +sc) → world x = ±sc, z = -sc
-  // sc = r * 0.55
-const sc = r * 0.3;
-  const lobeR = sc * 1.8;
+        // Spike triangle: tip → left inner → right inner
+        if (pointInTriangle(x, z, tip, innerL, innerR_)) return true;
+        // Inner kite: center → tip's left inner → tip → tip's right inner
+        if (pointInTriangle(x, z, center, innerL, tip)) return true;
+        if (pointInTriangle(x, z, center, tip, innerR_)) return true;
+      }
+      return false;
+    }
+    if (shape === "heart") {
+      // Heart in makeShape2D: tip at 2D(0, -r*0.9) → world z = +r*0.9
+      // Lobes at 2D(±sc, +sc) → world x = ±sc, z = -sc
+      // sc = r * 0.55
+      const sc = r * 0.3;
+      const lobeR = sc * 1.8;
 
-  // Two circles for the left and right lobes
-  // Lobe centres: world x = ±sc*1.1, z = -sc*0.35
-  const lz = -sc * -0.40;
-  const lx = sc * -0.5;
-  if ((x - lx) ** 2 + (z - lz) ** 2 <= lobeR * lobeR) return true;
-  if ((x + lx) ** 2 + (z - lz) ** 2 <= lobeR * lobeR) return true;
+      // Two circles for the left and right lobes
+      // Lobe centres: world x = ±sc*1.1, z = -sc*0.35
+      const lz = -sc * -0.4;
+      const lx = sc * -0.5;
+      if ((x - lx) ** 2 + (z - lz) ** 2 <= lobeR * lobeR) return true;
+      if ((x + lx) ** 2 + (z - lz) ** 2 <= lobeR * lobeR) return true;
 
-  // Triangle for the lower body down to the tip
-  const tv1 = { x: -sc * 1.5, z: -sc * 0.1 };
-  const tv2 = { x:  sc * 1.5, z: -sc * 0.1 };
-  const tv3 = { x:  0,        z:  r * 0.85  };
-  if (pointInTriangle(x, z, tv1, tv2, tv3)) return true;
+      // Triangle for the lower body down to the tip
+      const tv1 = { x: -sc * 1.5, z: -sc * 0.1 };
+      const tv2 = { x: sc * 1.5, z: -sc * 0.1 };
+      const tv3 = { x: 0, z: r * 0.85 };
+      if (pointInTriangle(x, z, tv1, tv2, tv3)) return true;
 
-  return false;
-}
+      return false;
+    }
     return x * x + z * z <= r * r;
   }
 
@@ -916,26 +929,28 @@ const sc = r * 0.3;
     const startPos = new THREE.Vector3(0, 8, 18);
     const endPos = new THREE.Vector3(0.5, 3.6, 5);
     const easeInOut = (t) => t * t * (3 - 2 * t);
-    
-  // In the animate() zoom intro, shift the lookAt target too
-const isMobile = window.innerWidth < 768;
-const endTarget = isMobile
-  ? new THREE.Vector3(0, showConfigRef.current ? -0.8 : 0, 0)
-  : new THREE.Vector3(showConfigRef.current ? -1.2 : 0, 0, 0);
-  
-const animate = () => {
-  requestAnimationFrame(animate);
-  if (zoomProgress < 1) {
-    zoomProgress += 0.005;
-    camera.position.copy(startPos.clone().lerp(endPos, easeInOut(zoomProgress)));
-    camera.lookAt(endTarget);  // look slightly left if panel open
-    controls.enabled = false;
-  } else {
-    controls.enabled = true;
-  }
-  controls.update();
-  renderer.render(scene, camera);
-};
+
+    // In the animate() zoom intro, shift the lookAt target too
+    const isMobile = window.innerWidth < 768;
+    const endTarget = isMobile
+      ? new THREE.Vector3(0, showConfigRef.current ? -0.8 : 0, 0)
+      : new THREE.Vector3(showConfigRef.current ? -1.2 : 0, 0, 0);
+
+    const animate = () => {
+      requestAnimationFrame(animate);
+      if (zoomProgress < 1) {
+        zoomProgress += 0.005;
+        camera.position.copy(
+          startPos.clone().lerp(endPos, easeInOut(zoomProgress)),
+        );
+        camera.lookAt(endTarget); // look slightly left if panel open
+        controls.enabled = false;
+      } else {
+        controls.enabled = true;
+      }
+      controls.update();
+      renderer.render(scene, camera);
+    };
     animate();
 
     return () => {
@@ -973,22 +988,22 @@ const animate = () => {
     });
   }, [ingredientCounts, baseType, baseSize, pizzaShape]);
 
-useEffect(() => {
-  const controls = controlsRef.current;
-  if (!controls) return;
-  const isMobile = window.innerWidth < 768;
-  if (isMobile) {
-    // On mobile the panel slides up, so shift the camera target down
-    // so the pizza stays visible above the panel
-    const targetY = showConfig ? -0.8 : 0;
-    controls.target.set(0, targetY, 0);
-  } else {
-    // On desktop the panel slides in from the left, shift target left
-    const targetX = showConfig ? -1.2 : 0;
-    controls.target.set(targetX, 0, 0);
-  }
-  controls.update();
-}, [showConfig]);
+  useEffect(() => {
+    const controls = controlsRef.current;
+    if (!controls) return;
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) {
+      // On mobile the panel slides up, so shift the camera target down
+      // so the pizza stays visible above the panel
+      const targetY = showConfig ? -0.8 : 0;
+      controls.target.set(0, targetY, 0);
+    } else {
+      // On desktop the panel slides in from the left, shift target left
+      const targetX = showConfig ? -1.2 : 0;
+      controls.target.set(targetX, 0, 0);
+    }
+    controls.update();
+  }, [showConfig]);
   // ---------- Rebuild base/sauce ----------
   useEffect(() => {
     const scene = sceneRef.current;
@@ -1159,35 +1174,53 @@ useEffect(() => {
   return (
     <div>
       <div className="config-wrapper">
-        <div className="config-container">
+        <div>
           <aside className={`config-modal ${showConfig ? "open" : "closed"}`}>
-            <button
-              onClick={generateRandomPizza}
-              style={{ padding: "8px 12px" }}
-            >
-              Generate Recipe
-            </button>
-            <IngredientPanel
-              addIngredient={addIngredient}
-              removeIngredient={removeIngredient}
-              ingredientCounts={ingredientCounts}
-            />
-            <PizzaControls
-              sauceType={sauceType}
-              setSauceType={setSauceType}
-              baseType={baseType}
-              setBaseType={setBaseType}
-              baseSize={baseSize}
-              setBaseSize={setBaseSize}
-              pizzaShape={pizzaShape}
-              setPizzaShape={setPizzaShape}
-              cheeseType={cheeseType}
-              setCheeseType={setCheeseType}
-              downloadSnapshot={downloadSnapshot}
-              handlePublish={handlePublish}
-              handleSaveToProfile={handleSaveToProfile}
-              removeAllToppings={removeAllToppings}
-            />
+            <div className="config-content">
+              <button
+                onClick={generateRandomPizza}
+                style={{ padding: "8px 12px" }}
+              >
+                Generate Recipe
+              </button>
+              <IngredientPanel
+                addIngredient={addIngredient}
+                removeIngredient={removeIngredient}
+                ingredientCounts={ingredientCounts}
+              />
+              <AiJuri
+                pizzaShape={pizzaShape}
+                baseType={baseType}
+                baseSize={baseSize}
+                sauceType={sauceType}
+                cheeseType={cheeseType}
+                ingredientCounts={ingredientCounts}
+                sceneRef={sceneRef}
+                baseRef={baseRef}
+                cheeseGroupRef={cheeseGroupRef}
+                toppingsGroupRef={toppingsGroupRef}
+              />
+              <PizzaControls
+                sauceType={sauceType}
+                setSauceType={setSauceType}
+                baseType={baseType}
+                setBaseType={setBaseType}
+                baseSize={baseSize}
+                setBaseSize={setBaseSize}
+                pizzaShape={pizzaShape}
+                setPizzaShape={setPizzaShape}
+                cheeseType={cheeseType}
+                setCheeseType={setCheeseType}
+              />
+            </div>
+            <div className="btn-container">
+              <PizzaControlsBtns
+                downloadSnapshot={downloadSnapshot}
+                handlePublish={handlePublish}
+                handleSaveToProfile={handleSaveToProfile}
+                removeAllToppings={removeAllToppings}
+              />
+            </div>
           </aside>
         </div>
         <div className="config-toggle">
