@@ -87,6 +87,7 @@ export default function App() {
               <Link to="/">🍕 Builder</Link>
               <Link to="/feed">📰 Feed</Link>
               <Link to="/profile">👤 Profile</Link>
+              <Link to="/info">i Info</Link>
             </nav>
 
             <Routes>
@@ -137,10 +138,11 @@ export default function App() {
                   />
                 }
               />
+ 
             </Routes>
           </>
         ) : (
-          <div style={{ color: "white", padding: 20 }}>Please log in 🍕</div>
+          <div style={{ color: "white", padding: 20 }}>Log in 🍕</div>
         )}
       </div>
     </BrowserRouter>
