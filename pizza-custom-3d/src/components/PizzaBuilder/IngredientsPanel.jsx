@@ -9,15 +9,7 @@ export default function IngredientPanel({
     <>
       <h2 style={{ marginBottom: 12 }}>Ingredients</h2>
 
-      <div
-        style={{
-          display: "grid",
-          gap: 8,
-          height: 220,
-          overflowY: "auto",
-          marginBottom: 14,
-        }}
-      >
+      <div className="ingredient-container">
         {INGREDIENTS.map((ing) => (
           <div
             key={ing.id}

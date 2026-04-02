@@ -178,41 +178,26 @@ html,
   display: block;
 }
 
-/* Tablet */
-@media (max-width: 1024px) {
-  .feed-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
 
-/* Mobile */
-@media (max-width: 768px) {
-  .feed-layout {
- display: flex;
-    /* grid-template-columns: 1fr 260px; */
-    /* gap: 24px; */
-    /* padding: 20px; */
-    flex-direction: column-reverse;
-}
-  .feed-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-    .mobile-only {
-    display: block;
-  }
-
-  .desktop-only {
-    display: none;
-  }
-}
-
- 
 /* config panel */
 .config-wrapper{
  position: absolute;
 bottom: 0px;
-    width: auto;
+    width: 100%;
+  height: auto;
+  display: flex;
+justify-content: flex-end;
+  gap: 5px;
+  background: rgba(17, 17, 17, 0);
+  color: rgb(255, 255, 255);
+  padding: 10px 0px;
+  z-index: 2; 
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+}
+.settings-wrapper{ 
+    width: 90%;
   height: auto;
   display: flex;
 justify-content: flex-end;
@@ -220,21 +205,18 @@ justify-content: flex-end;
   background: rgba(17, 17, 17, 0);
   color: rgb(255, 255, 255);
   padding: 10px 0px;
-  z-index: 2;
-    left: 10px;
+  z-index: 2; 
     flex-direction: column;
 }
 
 .config-toggle{
   position: relative;
   bottom: 0px;
-  width: 100%;
+  width: 90%;
   display: flex;
-justify-content: flex-start;
-  gap: 16px;
+justify-content: flex-start; 
   background: rgba(17, 17, 17, 0);
-  color: rgb(255, 255, 255);
-  padding: 10px 0px;
+  color: rgb(255, 255, 255); 
   z-index: 1;
 }
 
@@ -408,3 +390,54 @@ height: 20px;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
 }
+
+
+.ingredient-container {
+    display: grid;
+    gap: 8px;
+    height: 140px;
+    overflow-y: auto;
+    margin-bottom: 14px;
+   
+}
+
+
+
+
+
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .feed-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .config-content { 
+  height: calc(60vh - 200px);
+  width: auto; 
+}
+
+  .feed-layout {
+ display: flex;
+    /* grid-template-columns: 1fr 260px; */
+    /* gap: 24px; */
+    /* padding: 20px; */
+    flex-direction: column-reverse;
+}
+  .feed-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+    .mobile-only {
+    display: block;
+  }
+
+  .desktop-only {
+    display: none;
+  }
+}
+
+ 

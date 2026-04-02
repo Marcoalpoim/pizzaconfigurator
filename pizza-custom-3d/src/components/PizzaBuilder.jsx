@@ -995,7 +995,7 @@ export default function PizzaBuilder({
     if (isMobile) {
       // On mobile the panel slides up, so shift the camera target down
       // so the pizza stays visible above the panel
-      const targetY = showConfig ? -0.8 : 0;
+      const targetY = showConfig ? -2 : 0;
       controls.target.set(0, targetY, 0);
     } else {
       // On desktop the panel slides in from the left, shift target left
@@ -1174,7 +1174,7 @@ export default function PizzaBuilder({
   return (
     <div>
       <div className="config-wrapper">
-        <div>
+        <div className="settings-wrapper">
           <aside className={`config-modal ${showConfig ? "open" : "closed"}`}>
             <div className="config-content">
               <button
