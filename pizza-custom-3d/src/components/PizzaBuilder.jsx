@@ -1188,18 +1188,11 @@ export default function PizzaBuilder({
                 removeIngredient={removeIngredient}
                 ingredientCounts={ingredientCounts}
               />
-              <AiJuri
-                pizzaShape={pizzaShape}
-                baseType={baseType}
-                baseSize={baseSize}
-                sauceType={sauceType}
-                cheeseType={cheeseType}
-                ingredientCounts={ingredientCounts}
-                sceneRef={sceneRef}
-                baseRef={baseRef}
-                cheeseGroupRef={cheeseGroupRef}
-                toppingsGroupRef={toppingsGroupRef}
-              />
+            <AiJuri
+  baseRef={baseRef}
+  cheeseGroupRef={cheeseGroupRef}
+  toppingsGroupRef={toppingsGroupRef}
+/>
               <PizzaControls
                 sauceType={sauceType}
                 setSauceType={setSauceType}

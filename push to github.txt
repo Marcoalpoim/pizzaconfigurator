@@ -11,7 +11,7 @@ git push -u origin main --force
 
 ...
 
-
+pizza calories counter, pizza receipt, cursed pizza detector, ingredient roulette, pizza shrink
 HOW TO RUN IT? 
 
 🍕 Pizza Configurator — Setup Guide
