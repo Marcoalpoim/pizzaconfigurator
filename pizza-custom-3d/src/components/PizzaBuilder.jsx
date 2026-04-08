@@ -8,7 +8,9 @@ import IngredientPanel from "./PizzaBuilder/IngredientsPanel";
 import PizzaControls from "./PizzaBuilder/PizzaControls";
 import PizzaControlsBtns from "./PizzaBuilder/PizzaControlsBtns";
 import { INGREDIENTS } from "../data/ingredients";
-import AiJuri from "./PizzaBuilder/AiJuri";
+import Bake from "./PizzaBuilder/Bake";
+import CalorieCounter from "./PizzaBuilder/CalorieCounter";
+import PizzaReceipt from "./PizzaBuilder/PizzaReceipt";
 
 export default function PizzaBuilder({
   user,
@@ -1188,11 +1190,18 @@ export default function PizzaBuilder({
                 removeIngredient={removeIngredient}
                 ingredientCounts={ingredientCounts}
               />
-            <AiJuri
-  baseRef={baseRef}
-  cheeseGroupRef={cheeseGroupRef}
-  toppingsGroupRef={toppingsGroupRef}
-/>
+              <Bake
+                baseRef={baseRef}
+                cheeseGroupRef={cheeseGroupRef}
+                toppingsGroupRef={toppingsGroupRef}
+              />
+              <CalorieCounter
+                ingredientCounts={ingredientCounts}
+                baseType={baseType}
+                baseSize={baseSize}
+                sauceType={sauceType}
+                cheeseType={cheeseType}
+              /> 
               <PizzaControls
                 sauceType={sauceType}
                 setSauceType={setSauceType}
@@ -1207,12 +1216,17 @@ export default function PizzaBuilder({
               />
             </div>
             <div className="btn-container">
-              <PizzaControlsBtns
-                downloadSnapshot={downloadSnapshot}
-                handlePublish={handlePublish}
-                handleSaveToProfile={handleSaveToProfile}
-                removeAllToppings={removeAllToppings}
-              />
+            <PizzaControlsBtns
+  downloadSnapshot={downloadSnapshot}
+  handlePublish={handlePublish}
+  handleSaveToProfile={handleSaveToProfile}
+  removeAllToppings={removeAllToppings}
+  baseType={baseType}
+  baseSize={baseSize}
+  sauceType={sauceType}
+  cheeseType={cheeseType}
+  ingredientCounts={ingredientCounts}
+/>
             </div>
           </aside>
         </div>
