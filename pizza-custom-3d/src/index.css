@@ -205,18 +205,29 @@ html,
   display: block;
 }
 
-
-.caloriescounter{
-  z-index: 2;
-    position: fixed;
-    width: 100%;
-    background-color: black;
+ 
+.caloriescounter-wrapper{ 
+    padding: 12px;
+  
+ 
 }
+
+.caloriescounter{ 
+    padding: 12px;
+    margin-top: 4px;
+    position: absolute;
+       bottom: 50px;
+    width: -webkit-fill-available; 
+    left: 0;
+  background-color: #ffffff; 
+}
+
+
 
 .caloriesbar{
     border-bottom: 0px solid rgb(238, 238, 238);
     padding: 0px;
-    margin-top: 4px;
+    margin-bottom: 5px;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -229,7 +240,7 @@ html,
     background: rgb(238, 238, 238);
     border-radius: 3px;
     overflow: hidden;
-    margin-bottom: 6px;
+    margin-bottom: 0px;
 }
  
 
@@ -405,8 +416,8 @@ html,
 }
 .config-content {
   width: 300px;
-  height: calc(90vh - 200px);
-  margin-bottom: 60px;
+  height: calc(75vh - 200px);
+  margin-bottom: 135px;
   overflow-y: scroll;
   overflow-x: hidden;
   overflow-y: scroll;
@@ -508,7 +519,7 @@ html,
 .ingredient-container {
   display: grid;
   gap: 8px;
-  height: 140px;
+  height: 250px;
   overflow-y: auto;
   margin-bottom: 14px;
 

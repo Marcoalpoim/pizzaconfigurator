@@ -1173,43 +1173,35 @@ export default function PizzaBuilder({
   };
 
   return (
-    <div>
-      <div className="caloriescounter">
-        <CalorieCounter
-                ingredientCounts={ingredientCounts}
-                baseType={baseType}
-                baseSize={baseSize}
-                sauceType={sauceType}
-                cheeseType={cheeseType}
-              />
-      </div>
+    <div> 
       <div className="config-wrapper">
         <div className="settings-wrapper">
           <aside className={`config-modal ${showConfig ? "open" : "closed"}`}>
-
             <div className="config-modal-header">
-              <h2>Pizza a Gosto</h2>
+            
+             
+              <div>
+                 <Bake
+                baseRef={baseRef}
+                cheeseGroupRef={cheeseGroupRef}
+                toppingsGroupRef={toppingsGroupRef}
+              />
+              </div>
             </div>
 
-
             <div className="config-content">
-              <button
+                 <button
                 onClick={generateRandomPizza}
                 style={{ padding: "8px 12px" }}
               >
-                Generate Recipe
+                Gerar Receita Aleatória
               </button>
               <IngredientPanel
                 addIngredient={addIngredient}
                 removeIngredient={removeIngredient}
                 ingredientCounts={ingredientCounts}
               />
-              <Bake
-                baseRef={baseRef}
-                cheeseGroupRef={cheeseGroupRef}
-                toppingsGroupRef={toppingsGroupRef}
-              />
-              
+             
               <PizzaControls
                 sauceType={sauceType}
                 setSauceType={setSauceType}
@@ -1221,7 +1213,16 @@ export default function PizzaBuilder({
                 setPizzaShape={setPizzaShape}
                 cheeseType={cheeseType}
                 setCheeseType={setCheeseType}
-              />
+              /> 
+              <div className="caloriescounter-wrapper">
+              <CalorieCounter
+                ingredientCounts={ingredientCounts}
+                baseType={baseType}
+                baseSize={baseSize}
+                sauceType={sauceType}
+                cheeseType={cheeseType}
+              /> 
+              </div>
             </div>
             <div className="btn-container">
               <PizzaControlsBtns

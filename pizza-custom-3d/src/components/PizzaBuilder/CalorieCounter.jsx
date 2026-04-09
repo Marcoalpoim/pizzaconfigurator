@@ -90,16 +90,17 @@ export default function CalorieCounter({
   const pct = Math.min((total / 1400) * 100, 100);
 
   return (
-    <div style={{
-      borderBottom: "1px solid #eee",
-      padding: "12px",
-      marginTop: 4,
-    }}>
+    <div className="caloriescounter" >
+       {/* Reaction label */}
+      <div style={{ fontSize: 12, color: reaction.color, fontWeight: 500, marginBottom: 0, transition: "color 0.4s", textAlign: "right" }}>
+        {reaction.label}
+      </div>
       <div className="caloriesbar">
+        
       {/* Header row */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 0 }}>
         <div> 
-          <div style={{ fontSize: 26, fontWeight: 700, lineHeight: 1, color: reaction.color, transition: "color 0.4s" }}>
+          <div style={{ fontSize: 24, fontWeight: 700, lineHeight: 1, color: reaction.color, transition: "color 0.4s" }}>
             {total.toLocaleString()}
             <span style={{ fontSize: 13, fontWeight: 400, color: "#aaa", marginLeft: 4 }}>kcal</span>
           </div>
@@ -119,10 +120,7 @@ export default function CalorieCounter({
         }} />
       </div>
       </div>
-      {/* Reaction label */}
-      <div style={{ fontSize: 12, color: reaction.color, fontWeight: 500, marginBottom: 10, transition: "color 0.4s", textAlign: "right" }}>
-        {reaction.label}
-      </div>
+     
 
       {/* Breakdown */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "3px 12px" }}>
