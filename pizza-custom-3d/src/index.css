@@ -65,31 +65,51 @@ html,
   width: 100%;
   display: flex;
   justify-content: center;
-  gap: 16px;
-  background: rgba(17, 17, 17, 0);
-  color: rgb(255, 255, 255);
+  gap: 5px;
+  background-color: #404040c2;
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
+  border-bottom: 1px solid white;
+  border-top: 0px solid white;
   padding: 10px 0px;
   z-index: 2;
 }
 
+.mainnav-container img {
+  width: 30px;
+  height: auto;
+  border-radius: 15px;
+  padding: 5px 10px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.mainnav-container img:hover {
+  width: 30px;
+  height: auto;
+  background-color: #656565;
+  border-radius: 15px;
+  padding: 5px 10px;
+  border: 0.5px solid rgba(255, 255, 255, 0.459);
+}
 
 
 .feed-layout {
-  display: flex; 
-     flex-direction: row;
+  display: flex;
+  flex-direction: row;
   gap: 20px;
   padding: 20px;
 }
- 
+
 .feed-main {
- display: flex; 
+  display: flex;
   flex-direction: column;
   gap: 20px;
   width: 100%;
 }
 
 .feed-search {
-  width: 100%; 
+  width: 100%;
 }
 
 .feed-grid {
@@ -108,6 +128,7 @@ html,
   display: flex;
   flex-direction: column;
 }
+
 .feed-card img {
   width: 100%;
   height: 180px;
@@ -117,17 +138,19 @@ html,
 
 .feed-tags {
   border: 1px solid #555;
-    border-radius: 16px;
-    padding: 16px;
-    height: max-content;
-    display: flex;
-    overflow: hidden;
-    flex-direction: column;
+  border-radius: 16px;
+  padding: 16px;
+  height: max-content;
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
 }
+
 .feed-tags h4 {
   margin-top: 0;
   margin-bottom: 20px;
 }
+
 .tag {
   border: 1px solid #888;
   border-radius: 999px;
@@ -137,16 +160,18 @@ html,
   color: white;
   cursor: pointer;
 }
-.tag-list{
+
+.tag-list {
 
   height: auto;
 }
-.feed-tags button{
+
+.feed-tags button {
   border: 1px solid #888;
   border-radius: 999px;
- background-color: #0b0b0b;
- color: white;
- padding: 10px;
+  background-color: #0b0b0b;
+  color: white;
+  padding: 10px;
 }
 
 
@@ -155,11 +180,13 @@ html,
   background: white;
   color: black;
 }
-.feed-search{
-    width: 100%;
-    display: flex;
-    justify-content: center;
+
+.feed-search {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
+
 .feed-search input {
   width: 100%;
   padding: 10px 15px;
@@ -179,119 +206,159 @@ html,
 }
 
 
+.caloriescounter{
+  z-index: 2;
+    position: fixed;
+    width: 100%;
+    background-color: black;
+}
+
+.caloriesbar{
+    border-bottom: 0px solid rgb(238, 238, 238);
+    padding: 0px;
+    margin-top: 4px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.progress-bar {
+    height: 6px;
+    width: 100%;
+    background: rgb(238, 238, 238);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+ 
+
+
 /* config panel */
-.config-wrapper{
- position: absolute;
-bottom: 0px;
+.config-wrapper {
+  position: absolute;
+  bottom: 0px;
   width: auto;
-      left: 15px;
+  left: 15px;
   height: auto;
   display: flex;
-justify-content: flex-end;
+  justify-content: flex-end;
   gap: 5px;
   background: rgba(17, 17, 17, 0);
   color: rgb(255, 255, 255);
-  padding: 10px 0px;
-  z-index: 2; 
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: center;
+  padding: 0px;
+  z-index: 2;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
 }
-.settings-wrapper{ 
-    width: auto;
+
+
+.settings-wrapper {
+  width: auto;
   height: auto;
   display: flex;
-justify-content: flex-end;
+  justify-content: flex-end;
   gap: 16px;
   background: rgba(17, 17, 17, 0);
   color: rgb(255, 255, 255);
   padding: 10px 0px;
-  z-index: 2; 
-    flex-direction: column;
+  z-index: 2;
+  flex-direction: column;
 }
 
-.config-toggle{
+.config-toggle {
   position: relative;
   bottom: 0px;
   width: 90%;
   display: flex;
-justify-content: flex-start; 
+  justify-content: flex-start;
   background: rgba(17, 17, 17, 0);
-  color: rgb(255, 255, 255); 
+  color: rgb(255, 255, 255);
   z-index: 1;
 }
 
-.btn-container{
+.btn-container {
 
-position: sticky;
-    bottom: 0;
+  position: sticky;
+  bottom: 0;
 
 }
 
 .btn-container {
-position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: white;
-    gap: 5px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  gap: 5px;
 }
+
 .settings-btn {
-position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: white;
-    gap: 5px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  gap: 5px;
 }
 
 .config-btn {
-display: flex;
-gap: 5px;
-padding: 5px;
+  display: flex;
+  gap: 5px;
+  padding: 5px;
 }
 
-.btn-box{
+.btn-box {
   display: flex;
   align-items: center;
   gap: 0px;
   flex-direction: column;
   justify-content: center;
   border: 1px solid #333;
-  border-radius: 10px;
-      padding: 5px;
-      cursor: pointer;
+  border-radius: 30px;
+  padding: 5px;
+  cursor: pointer;
 }
 
-.btn-box:hover{
+.btn-box:hover {
   background-color: #d8d8d8;
   color: white;
 }
+
 .config-btn .btn-box button {
-background-color: transparent;
-border: 1px solid #33333300;
-border-radius: 30px;
-cursor: pointer;
+  display: flex;
+  background-color: transparent;
+  border: 1px solid #33333300;
+  border-radius: 30px;
+  padding: 5px;
+  cursor: pointer;
+  gap: 10px;
 }
+
 .config-btn .btn-box button p {
-margin: 0;
-font-size: 12px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 16px;
 }
- 
+
 .config-btn button img {
-width: auto;
-height: 20px;
+  width: auto;
+  height: 20px;
 }
- .send-btn{
+
+
+.send-btn {
   width: 100%;
 }
-  .send-btn button{
- display: flex;
-    justify-content: space-between;
-    gap: 5px;
-        align-items: center;
+
+.send-btn button {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+  align-items: center;
 }
- 
+
 
 /* left panel class used in some code samples */
 .left-panel {
@@ -300,45 +367,77 @@ height: 20px;
   background: #111;
   color: #fff;
 }
-.config-container{ 
-    display: flex;
-    overflow: hidden;
-    align-items: center;
+
+.config-container {
+  display: flex;
+  overflow: hidden;
+  align-items: center;
 }
 
-.config-modal {  
-  background-color: #d1ab728a;
-  -webkit-backdrop-filter: blur(5px);
-    backdrop-filter: blur(5px);
+.config-modal {
+  background-color: #404040c2;
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
   color: white;
   border: 2px solid #ffffff;
   border-radius: 15px;
-    z-index: 1;
+  z-index: 1;
   transform: translateX(0);
   transition: transform 0.35s ease;
   overflow: hidden;
 }
 
 .config-modal.closed {
-  transform: translateX(-100%);
+  transform: translateX(-120%);
+  position: absolute;
 }
-
+.config-modal-header { 
+  display: flex;
+  background-color: #ffffff;
+  color: black;
+    margin: 0;
+    padding: 5px;
+}
+.config-modal-header h2 {  
+      margin: 0 auto;
+      font-size: 14px;
+      line-height: 16px;
+}
 .config-content {
   width: 300px;
   height: calc(90vh - 200px);
   margin-bottom: 60px;
-      overflow-y: scroll;
+  overflow-y: scroll;
   overflow-x: hidden;
-   overflow-y: scroll;
-  padding: 16px; 
-  color: white;  
+  overflow-y: scroll;
+  padding: 16px;
+  color: white;
 }
 
+/* Base scrollbar settings (Firefox + modern spec) */
+.config-content {
+  scrollbar-width: thin;                /* Firefox */
+  scrollbar-color: #888 transparent;    /* thumb | track */
+}
+
+/* WebKit browsers (Chrome, Edge, Safari) */
 .config-content::-webkit-scrollbar {
-  
+  width: 8px;
 }
 
+.config-content::-webkit-scrollbar-track {
+  background: transparent;
+}
 
+.config-content::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.config-content::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
 
 .three-root {
   position: absolute;
@@ -407,12 +506,12 @@ height: 20px;
 
 
 .ingredient-container {
-    display: grid;
-    gap: 8px;
-    height: 140px;
-    overflow-y: auto;
-    margin-bottom: 14px;
-   
+  display: grid;
+  gap: 8px;
+  height: 140px;
+  overflow-y: auto;
+  margin-bottom: 14px;
+
 }
 
 
@@ -429,33 +528,56 @@ height: 20px;
 
 /* Mobile */
 @media (max-width: 768px) {
-  .settings-wrapper{ 
-    width: 90%; 
+  .config-modal {  
+    border-radius: 30px; 
 }
+  .mainnav-container {
+        position: fixed;
+        bottom: -1px !important;
+    top: auto;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
 
-  .config-wrapper{
- position: absolute;
-bottom: 0px;
-    width: 100%; 
-        left: 0px;
-}
-  .config-content { 
-  height: calc(60vh - 200px);
-  width: auto; 
-}
+    border-top: 1px solid white;
+    border-bottom: 0px solid white;
+    padding: 10px 0px;
+    z-index: 2;
+  }
+
+
+  .settings-wrapper {
+    width: 95%;
+  }
+
+  .config-wrapper {
+    position: absolute;
+    bottom: 70px;
+    width: 100%;
+    left: 0px;
+    flex-direction: column-reverse;
+  }
+
+  .config-content {
+    height: calc(60vh - 200px);
+    width: auto;
+  }
 
   .feed-layout {
- display: flex;
+    display: flex;
     /* grid-template-columns: 1fr 260px; */
     /* gap: 24px; */
     /* padding: 20px; */
     flex-direction: column-reverse;
-}
+  }
+
   .feed-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
   }
-    .mobile-only {
+
+  .mobile-only {
     display: block;
   }
 
@@ -463,5 +585,3 @@ bottom: 0px;
     display: none;
   }
 }
-
- 

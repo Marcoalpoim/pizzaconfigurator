@@ -43,13 +43,13 @@ const CHEESE_CALORIES = {
 // ── Reaction tiers ────────────────────────────────────────────────────────────
 
 const REACTIONS = [
-  { max: 300,  emoji: "🥗", label: "Basically a salad",     color: "#1d9e75" },
-  { max: 500,  emoji: "😌", label: "Respectable",           color: "#4aab6d" },
-  { max: 700,  emoji: "🍕", label: "Classic pizza energy",  color: "#ba7517" },
-  { max: 900,  emoji: "😬", label: "Nutritionist left the chat", color: "#d4621a" },
-  { max: 1100, emoji: "🚨", label: "Illegal in 12 countries", color: "#e24b4a" },
-  { max: 1400, emoji: "💀", label: "You've exceeded Italian law", color: "#c0392b" },
-  { max: Infinity, emoji: "🌋", label: "This pizza is a war crime", color: "#8e1a1a" },
+  { max: 300,  label: "Basicamente uma salada",     color: "#1d9e75" },
+  { max: 500,  label: "Respeitável",                color: "#4aab6d" },
+  { max: 700,   label: "Energia clássica de pizza",  color: "#ba7517" },
+  { max: 900,   label: "O nutricionista saiu do chat", color: "#d4621a" },
+  { max: 1100, label: "Ilegal em 12 países",        color: "#e24b4a" },
+  { max: 1400, label: "Excedeste a lei italiana",   color: "#c0392b" },
+  { max: Infinity, label: "Esta pizza é um crime de guerra", color: "#8e1a1a" },
 ];
 
 function getReaction(cal) {
@@ -91,47 +91,46 @@ export default function CalorieCounter({
 
   return (
     <div style={{
-      borderTop: "1px solid #eee",
+      borderBottom: "1px solid #eee",
       padding: "12px",
       marginTop: 4,
     }}>
+      <div className="caloriesbar">
       {/* Header row */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-        <div>
-          <div style={{ fontSize: 11, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-            Est. calories
-          </div>
+        <div> 
           <div style={{ fontSize: 26, fontWeight: 700, lineHeight: 1, color: reaction.color, transition: "color 0.4s" }}>
             {total.toLocaleString()}
             <span style={{ fontSize: 13, fontWeight: 400, color: "#aaa", marginLeft: 4 }}>kcal</span>
           </div>
         </div>
-        <div style={{ fontSize: 28, lineHeight: 1, marginTop: 2 }}>{reaction.emoji}</div>
+         {/* <div style={{ fontSize: 28, lineHeight: 1, marginTop: 2 }}>{reaction.emoji}</div> */}
       </div>
 
       {/* Progress bar */}
-      <div style={{ height: 6, background: "#eee", borderRadius: 3, overflow: "hidden", marginBottom: 6 }}>
+      <div className="progress-bar">
         <div style={{
           height: "100%",
           width: `${pct}%`,
           background: reaction.color,
           borderRadius: 3,
           transition: "width 0.3s ease, background 0.4s ease",
+          marginBottom: "0px"
         }} />
       </div>
-
+      </div>
       {/* Reaction label */}
-      <div style={{ fontSize: 12, color: reaction.color, fontWeight: 500, marginBottom: 10, transition: "color 0.4s" }}>
+      <div style={{ fontSize: 12, color: reaction.color, fontWeight: 500, marginBottom: 10, transition: "color 0.4s", textAlign: "right" }}>
         {reaction.label}
       </div>
 
       {/* Breakdown */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "3px 12px" }}>
         {[
-          ["🍞 Base",    breakdown.baseC],
-          ["🥣 Sauce",   breakdown.sauceC],
-          ["🧀 Cheese",  breakdown.cheeseC],
-          ["🍖 Toppings", breakdown.toppingsC],
+          ["Base",    breakdown.baseC],
+          ["Molho",   breakdown.sauceC],
+          ["Queijo",  breakdown.cheeseC],
+          ["Toppings", breakdown.toppingsC],
         ].map(([label, cal]) => (
           <div key={label} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#999" }}>
             <span>{label}</span>

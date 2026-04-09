@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { ReceiptContent } from "./Pizzareceipt";
 
+
 const TOPPING_PRICES = {
   pepperoni: 1.8,
   mushroom: 1.2,
@@ -112,7 +113,7 @@ async function downloadReceipt({
     link.click();
   } catch (e) {
     console.error("Receipt download failed:", e);
-    alert("Make sure html2canvas is installed: npm install html2canvas");
+    //alert("Make sure html2canvas is installed: npm install html2canvas");
   } finally {
     root.unmount();
     document.body.removeChild(container);
@@ -147,8 +148,8 @@ export default function PizzaControlsBtns({
               })
             }
           >
-            <img src="/icons/camera.svg" alt="receipt" />
-            <p>Receita</p>
+            <img src="/icons/camera.svg" alt="receipt" /> 
+                 {/* <p>Receita</p>*/}
           </button>
         </div>
 
@@ -163,8 +164,8 @@ export default function PizzaControlsBtns({
         {/* 💾 Save */}
         <div className="btn-box">
           <button onClick={handleSaveToProfile}>
-            <img src="/icons/save.svg" alt="save" />
-            <p>Guardar</p>
+            <img src="/icons/save.svg" alt="save" /> 
+              {/* <p>Guardar</p>*/}
           </button>
         </div>
 
@@ -172,14 +173,14 @@ export default function PizzaControlsBtns({
         <div className="btn-box">
           <button onClick={removeAllToppings}>
             <img src="/icons/delete.svg" alt="clear" />
-            <p>Apagar</p>
+           {/* <p>Apagar</p>*/}
           </button>
         </div>
 
         {/* 📤 Publish */}
         <div className="btn-box send-btn">
           <button onClick={handlePublish}>
-            <p>Publicar</p>
+          <p>Publicar</p> 
             <img src="/icons/send.svg" alt="publish" />
           </button>
         </div>

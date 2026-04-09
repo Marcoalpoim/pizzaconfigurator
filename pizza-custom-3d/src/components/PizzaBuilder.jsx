@@ -10,7 +10,6 @@ import PizzaControlsBtns from "./PizzaBuilder/PizzaControlsBtns";
 import { INGREDIENTS } from "../data/ingredients";
 import Bake from "./PizzaBuilder/Bake";
 import CalorieCounter from "./PizzaBuilder/CalorieCounter";
-import PizzaReceipt from "./PizzaBuilder/PizzaReceipt";
 
 export default function PizzaBuilder({
   user,
@@ -1175,9 +1174,24 @@ export default function PizzaBuilder({
 
   return (
     <div>
+      <div className="caloriescounter">
+        <CalorieCounter
+                ingredientCounts={ingredientCounts}
+                baseType={baseType}
+                baseSize={baseSize}
+                sauceType={sauceType}
+                cheeseType={cheeseType}
+              />
+      </div>
       <div className="config-wrapper">
         <div className="settings-wrapper">
           <aside className={`config-modal ${showConfig ? "open" : "closed"}`}>
+
+            <div className="config-modal-header">
+              <h2>Pizza a Gosto</h2>
+            </div>
+
+
             <div className="config-content">
               <button
                 onClick={generateRandomPizza}
@@ -1195,13 +1209,7 @@ export default function PizzaBuilder({
                 cheeseGroupRef={cheeseGroupRef}
                 toppingsGroupRef={toppingsGroupRef}
               />
-              <CalorieCounter
-                ingredientCounts={ingredientCounts}
-                baseType={baseType}
-                baseSize={baseSize}
-                sauceType={sauceType}
-                cheeseType={cheeseType}
-              /> 
+              
               <PizzaControls
                 sauceType={sauceType}
                 setSauceType={setSauceType}
@@ -1216,17 +1224,17 @@ export default function PizzaBuilder({
               />
             </div>
             <div className="btn-container">
-            <PizzaControlsBtns
-  downloadSnapshot={downloadSnapshot}
-  handlePublish={handlePublish}
-  handleSaveToProfile={handleSaveToProfile}
-  removeAllToppings={removeAllToppings}
-  baseType={baseType}
-  baseSize={baseSize}
-  sauceType={sauceType}
-  cheeseType={cheeseType}
-  ingredientCounts={ingredientCounts}
-/>
+              <PizzaControlsBtns
+                downloadSnapshot={downloadSnapshot}
+                handlePublish={handlePublish}
+                handleSaveToProfile={handleSaveToProfile}
+                removeAllToppings={removeAllToppings}
+                baseType={baseType}
+                baseSize={baseSize}
+                sauceType={sauceType}
+                cheeseType={cheeseType}
+                ingredientCounts={ingredientCounts}
+              />
             </div>
           </aside>
         </div>

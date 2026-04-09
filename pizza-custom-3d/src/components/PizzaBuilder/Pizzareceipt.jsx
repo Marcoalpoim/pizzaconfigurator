@@ -366,7 +366,7 @@ export default function PizzaReceipt({
       link.click();
     } catch (e) {
       console.error("Download failed:", e);
-      alert("Install html2canvas: npm install html2canvas");
+      //alert("Install html2canvas: npm install html2canvas");
     }
   }
 
