@@ -205,63 +205,86 @@ html,
   display: block;
 }
 
- 
-.caloriescounter-wrapper{ 
-    padding: 12px;
-  
- 
+
+
+.caloriescounter {
+  padding: 5px;
+  margin-top: 4px;
+  position: absolute;
+  bottom: 50px;
+  width: -webkit-fill-available;
+  left: 0;
+  background-color: #ffffff;
 }
 
-.caloriescounter{ 
-    padding: 12px;
-    margin-top: 4px;
-    position: absolute;
-       bottom: 50px;
-    width: -webkit-fill-available; 
-    left: 0;
-  background-color: #ffffff; 
+.caloriescounter-reaction {
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 5px;
+  transition: color 0.4s;
+  text-align: right;
 }
 
 
 
-.caloriesbar{
-    border-bottom: 0px solid rgb(238, 238, 238);
-    padding: 0px;
-    margin-bottom: 5px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 10px;
+.caloriesbar {
+  border-bottom: 0px solid rgb(238, 238, 238);
+  padding: 0px;
+  margin-bottom: 5px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
 }
 
 .progress-bar {
-    height: 6px;
-    width: 100%;
-    background: rgb(238, 238, 238);
-    border-radius: 3px;
-    overflow: hidden;
-    margin-bottom: 0px;
+  height: 100%;
+  width: 100%;
+  background: rgba(238, 238, 238, 0);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 0px;
 }
- 
-
 
 /* config panel */
 .config-wrapper {
   position: absolute;
-  bottom: 0px;
+  bottom:15px;
   width: auto;
   left: 15px;
-  height: auto;
+  height: 100%;
   display: flex;
-  justify-content: flex-end;
   gap: 5px;
   background: rgba(17, 17, 17, 0);
   color: rgb(255, 255, 255);
   padding: 0px;
   z-index: 2;
   flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
+ justify-content: flex-end;
+align-items: flex-start;
+ transition: all 0.2s ease;
+}
+.config-toggle {
+
+    display: flex;
+    justify-content: flex-start;
+    width: 90%;
+}
+
+.config-toggle {
+  width: auto;
+  display: flex;
+  justify-content: flex-start;
+  color: rgb(255, 255, 255);
+  z-index: 1;
+  padding: 10px;
+border-radius: 30px;
+    background-color: #404040c2;
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
+  border: 2px solid #ffffff;
+  transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 
@@ -278,17 +301,7 @@ html,
   flex-direction: column;
 }
 
-.config-toggle {
-  position: relative;
-  bottom: 0px;
-  width: 90%;
-  display: flex;
-  justify-content: flex-start;
-  background: rgba(17, 17, 17, 0);
-  color: rgb(255, 255, 255);
-  z-index: 1;
-}
-
+ 
 .btn-container {
 
   position: sticky;
@@ -359,6 +372,8 @@ html,
 }
 
 
+
+
 .send-btn {
   width: 100%;
 }
@@ -391,7 +406,7 @@ html,
   backdrop-filter: blur(15px);
   color: white;
   border: 2px solid #ffffff;
-  border-radius: 15px;
+  border-radius: 25px;
   z-index: 1;
   transform: translateX(0);
   transition: transform 0.35s ease;
@@ -399,25 +414,53 @@ html,
 }
 
 .config-modal.closed {
-  transform: translateX(-120%);
-  position: absolute;
+  transform: translateX(-120%); 
 }
-.config-modal-header { 
+
+.config-modal-header {
   display: flex;
   background-color: #ffffff;
   color: black;
-    margin: 0;
-    padding: 5px;
+  margin: 0;
+  padding: 5px;
 }
-.config-modal-header h2 {  
-      margin: 0 auto;
-      font-size: 14px;
-      line-height: 16px;
+
+.config-modal-header h2 {
+  margin: 0 auto;
+  font-size: 14px;
+  line-height: 16px;
 }
+
+
+.bake-wrapper {
+  width: 100%;
+}
+
+.bake-container {
+  width: 100%;
+  padding: 0;
+}
+
+.bake-container button {
+  width: 100%;
+  padding: 0;
+  border-radius: 30px;
+  border: 1px solid #333;
+  background-color: transparent;
+}
+
+
+.fornoProgress {
+  margin-top: 8px;
+
+}
+
+
+
 .config-content {
   width: 300px;
   height: calc(75vh - 200px);
-  margin-bottom: 135px;
+  margin-bottom: 125px;
   overflow-y: scroll;
   overflow-x: hidden;
   overflow-y: scroll;
@@ -427,13 +470,15 @@ html,
 
 /* Base scrollbar settings (Firefox + modern spec) */
 .config-content {
-  scrollbar-width: thin;                /* Firefox */
-  scrollbar-color: #888 transparent;    /* thumb | track */
+  scrollbar-width: thin;
+  /* Firefox */
+  scrollbar-color: #888 transparent;
+  /* thumb | track */
 }
 
 /* WebKit browsers (Chrome, Edge, Safari) */
 .config-content::-webkit-scrollbar {
-  width: 8px;
+  width: 2px;
 }
 
 .config-content::-webkit-scrollbar-track {
@@ -449,6 +494,80 @@ html,
 .config-content::-webkit-scrollbar-thumb:hover {
   background-color: #555;
 }
+
+
+
+.config-content button.btn-wrapper {
+
+  background-color: transparent;
+  color: white;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  width: 100%;
+  padding: 0;
+}
+
+.config-content button .randompizza-container {
+  border: 2px dashed #ffffff;
+  background-color: transparent;
+  color: white;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 14px;
+  line-height: 16px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.config-content button .randompizza-container:hover {
+  background-color: #8a8a8a81;
+  cursor: pointer;
+}
+
+.config-content button.randompizza-container button {
+
+  color: white;
+  background-color: transparent;
+  border: none;
+  padding: 0px;
+  font-size: 14px;
+  line-height: 16px;
+
+}
+
+
+.pizza-controls {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pizza-controls-item {
+  border: 0.5px solid rgb(221, 221, 221);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.pizza-controls-item-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+
+
+
 
 .three-root {
   position: absolute;
@@ -521,12 +640,64 @@ html,
   gap: 8px;
   height: 250px;
   overflow-y: auto;
-  margin-bottom: 14px;
-
+  margin-right: -10px;
+  -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
 }
 
+.ingredient-container-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgb(34, 34, 34);
+  padding: 8px;
+  border-radius: 6px;
+}
 
+.ingredient-container-item button {
+  background: rgba(34, 34, 34, 0);
+  color: white;
+  border: 1px solid #ffffff;
+  padding: 5px 8px;
+  border-radius: 8px;
+  width: 30px;
+  height: auto;
+  display: flex;
+  justify-content: center;
+}
 
+.ingredient-container-item button:hover {
+  background: rgba(156, 156, 156, 0.466);
+  color: white;
+  cursor: pointer;
+}
+
+/* Base scrollbar settings (Firefox + modern spec) */
+.ingredient-container {
+  scrollbar-width: thin;
+  /* Firefox */
+  scrollbar-color: #888 transparent;
+  /* thumb | track */
+}
+
+/* WebKit browsers (Chrome, Edge, Safari) */
+.ingredient-container::-webkit-scrollbar {
+  width: 2px;
+}
+
+.ingredient-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ingredient-container::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.ingredient-container::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
 
 
 
@@ -539,12 +710,17 @@ html,
 
 /* Mobile */
 @media (max-width: 768px) {
-  .config-modal {  
-    border-radius: 30px; 
-}
+  .ingredient-container {
+    margin-right: 0px;
+  }
+
+  .config-modal {
+    border-radius: 30px;
+  }
+
   .mainnav-container {
-        position: fixed;
-        bottom: -1px !important;
+    position: fixed;
+    bottom: -1px !important;
     top: auto;
     width: 100%;
     display: flex;
@@ -557,22 +733,29 @@ html,
     z-index: 2;
   }
 
-
+.config-modal.closed {
+    transform: translateX(-120%);
+    position: absolute;
+}
   .settings-wrapper {
-    width: 95%;
+    width: 90%;
   }
 
   .config-wrapper {
-    position: absolute;
-    bottom: 70px;
-    width: 100%;
-    left: 0px;
-    flex-direction: column-reverse;
+        position: absolute;
+        bottom: 70px;
+        width: 100%;
+        left: 0px;
+        flex-direction: column-reverse;
+       align-items: center;
+        justify-content: flex-start;
+        display: flex;
   }
 
   .config-content {
     height: calc(60vh - 200px);
     width: auto;
+    padding: 10px 15px;
   }
 
   .feed-layout {

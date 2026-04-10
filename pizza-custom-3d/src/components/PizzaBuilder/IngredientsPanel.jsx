@@ -7,21 +7,13 @@ export default function IngredientPanel({
 }) {
   return (
     <>
-      <h2 style={{ marginBottom: 12 }}>Ingredients</h2>
+      <h2 style={{ fontSize: 14, fontWeight: 400, color: "#fff", marginBottom: 10 }}>Ingredientes</h2>
 
-      <div className="ingredient-container">
+      <div className="ingredient-container"> 
         {INGREDIENTS.map((ing) => (
           <div
             key={ing.id}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              background: "#222",
-              padding: "8px",
-              borderRadius: "6px",
-            }}
-          >
+            className="ingredient-container-item">
             <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <img
                 src={ing.image}

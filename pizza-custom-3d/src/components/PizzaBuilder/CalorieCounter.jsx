@@ -90,11 +90,7 @@ export default function CalorieCounter({
   const pct = Math.min((total / 1400) * 100, 100);
 
   return (
-    <div className="caloriescounter" >
-       {/* Reaction label */}
-      <div style={{ fontSize: 12, color: reaction.color, fontWeight: 500, marginBottom: 0, transition: "color 0.4s", textAlign: "right" }}>
-        {reaction.label}
-      </div>
+    <div className="caloriescounter" > 
       <div className="caloriesbar">
         
       {/* Header row */}
@@ -110,8 +106,12 @@ export default function CalorieCounter({
 
       {/* Progress bar */}
       <div className="progress-bar">
+          {/* Reaction label */}
+      <div className="caloriescounter-reaction" style={{  color: reaction.color }}>
+        {reaction.label}
+      </div>
         <div style={{
-          height: "100%",
+          height: "6px",
           width: `${pct}%`,
           background: reaction.color,
           borderRadius: 3,

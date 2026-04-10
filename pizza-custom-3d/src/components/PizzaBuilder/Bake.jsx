@@ -115,24 +115,24 @@ export default function Bake({ baseRef, cheeseGroupRef, toppingsGroupRef }) {
   }
 
   return (
-    <div style={{ borderTop: "1px solid #eee", marginTop: 8 }}>
-      <div style={{ padding: "12px" }}>
-        <div style={{ marginBottom: 8 }}>
+    <div className="bake-wrapper">
+      <div className="bake-container">
+        <div >
           <button
             onClick={bakeProgress === 100 ? resetBake : startBake}
             disabled={isBaking}
             style={{ width: "100%", padding: "10px" }}
           >
             {isBaking
-              ? "Baking..."
+              ? "No Forno ..."
               : bakeProgress === 100
-                ? "❄️ Unbake"
-                : "🔥 Bake it!"}
+                ? "Tirar do Forno"
+                : "Levar ao Forno"}
           </button>
         </div>
 
         {(isBaking || bakeProgress > 0) && (
-          <div>
+          <div className="fornoProgress">
             <div
               style={{
                 height: 6,
@@ -151,30 +151,30 @@ export default function Bake({ baseRef, cheeseGroupRef, toppingsGroupRef }) {
                   transition: "width 0.1s ease",
                 }}
               />
-            </div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                fontSize: 12,
-                color: "#888",
-              }}
-            >
-              <span>Raw</span>
-              <span>
-                {
-                  BAKE_STAGES[
-                    Math.min(
-                      Math.floor(
-                        (bakeProgress / 100) * (BAKE_STAGES.length - 1),
-                      ),
-                      BAKE_STAGES.length - 1,
-                    )
-                  ]
-                }
-              </span>
-              <span>Perfect</span>
-            </div>
+            </div >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  fontSize: 12,
+                  color: "#888",
+                }}
+              >
+                <span>Raw</span>
+                <span>
+                  {
+                    BAKE_STAGES[
+                      Math.min(
+                        Math.floor(
+                          (bakeProgress / 100) * (BAKE_STAGES.length - 1),
+                        ),
+                        BAKE_STAGES.length - 1,
+                      )
+                    ]
+                  }
+                </span>
+                <span>Perfeito!</span>
+              </div>
           </div>
         )}
       </div>
