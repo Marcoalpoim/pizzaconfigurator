@@ -245,7 +245,7 @@ export default function PizzaBuilder({
         ? new THREE.CircleGeometry(innerR, 64)
         : new THREE.ShapeGeometry(makeShape2D(shape, innerR));
     const loader = new THREE.TextureLoader();
-    const tex = loader.load("/textures/dough-texture.jpg");
+    const tex = loader.load("/textures/MarinaraSwirl.webp");
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
     tex.repeat.set(2, 2);
     const key = String(sType || "").toLowerCase();
@@ -412,33 +412,43 @@ export default function PizzaBuilder({
 
   // ── CHEESE ───────────────────────────────────────────────────────────────
 
-  function createCheeseBlob(shape, radius, y, cheeseType) {
-    const geom = new THREE.SphereGeometry(0.18 + Math.random() * 0.05, 12, 8);
-    const loader = new THREE.TextureLoader();
-    const paths = {
-      cheddar: "/textures/cheddar.jpg",
-      parmesan: "/textures/parmesan.jpg",
-      gorgonzola: "/textures/gorgonzola.jpg",
-    };
-    const mat = new THREE.MeshStandardMaterial({
-      map: loader.load(paths[cheeseType] || "/textures/dough-texture.jpg"),
-      normalMap: loader.load("/textures/dough-texture.jpg"),
-      normalScale: new THREE.Vector2(0.4, 0.4),
-      roughness: 0.55,
-      metalness: 0.02,
-    });
-    const mesh = new THREE.Mesh(geom, mat);
-    mesh.scale.set(
-      1.0 + Math.random() * 0.4,
-      0.06 + Math.random() * 0.04,
-      1.0 + Math.random() * 0.4,
-    );
-    const { x, z } = randomPointInShape(shape, radius);
-    mesh.position.set(x, y + Math.random() * 0.01, z);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    return mesh;
-  }
+function createCheeseBlob(shape, radius, y, cheeseType) {
+  const geom = new THREE.SphereGeometry(0.18 + Math.random() * 0.05, 12, 8);
+  const loader = new THREE.TextureLoader();
+  const paths = {
+    cheddar: "/textures/cheddar.png",
+    parmesan: "/textures/parmesan.jpg",
+    gorgonzola: "/textures/gorganzola.jpg",
+  };
+  const texPath = paths[cheeseType] || "/textures/mozzarelacheese.jpeg";
+
+  const mat = new THREE.MeshStandardMaterial({
+    map: loader.load(texPath),
+    // ✅ Removed: normalMap no longer reuses the color texture
+    roughness: 0.75,
+    metalness: 0.0,
+    // Slight emissive warmth so cheese doesn't look dark and muddy
+    emissive: new THREE.Color(0.08, 0.05, 0.0),
+  });
+
+  const mesh = new THREE.Mesh(geom, mat);
+
+  mesh.scale.set(
+    1.0 + Math.random() * 0.4,
+    0.08 + Math.random() * 0.04,  
+    1.0 + Math.random() * 0.4,
+  );
+
+  // ✅ Random rotation so blobs look scattered, not stamped
+  mesh.rotation.y = Math.random() * Math.PI * 2;
+  mesh.rotation.z = (Math.random() - 0.5) * 0.3;
+
+  const { x, z } = randomPointInShape(shape, radius);
+  mesh.position.set(x, y + Math.random() * 0.01, z);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  return mesh;
+}
 
   // ── INGREDIENT MESH ──────────────────────────────────────────────────────
 
