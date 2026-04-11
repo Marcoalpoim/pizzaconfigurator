@@ -264,15 +264,10 @@ html,
 align-items: flex-start;
  transition: all 0.2s ease;
 }
-.config-toggle {
-
-    display: flex;
-    justify-content: flex-start;
-    width: 90%;
-}
+ 
 
 .config-toggle {
-  width: auto;
+ width: auto;
   display: flex;
   justify-content: flex-start;
   color: rgb(255, 255, 255);
@@ -285,6 +280,9 @@ border-radius: 30px;
   border: 2px solid #ffffff;
   transition: all 0.2s ease;
   cursor: pointer;
+}
+.config-toggle-wrapper {
+ width: 90%; 
 }
 
 
@@ -753,7 +751,7 @@ border-radius: 30px;
   }
 
   .config-content {
-    height: calc(60vh - 200px);
+    height: calc(50vh - 200px);
     width: auto;
     padding: 10px 15px;
   }

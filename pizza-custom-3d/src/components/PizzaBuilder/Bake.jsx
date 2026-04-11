@@ -44,8 +44,8 @@ export default function Bake({ baseRef, cheeseGroupRef, toppingsGroupRef }) {
 
       // Darken the base dough colour as it bakes
       if (baseRef.current) {
-        const rawColor = new THREE.Color(0xe8a85a);
-        const bakedColor = new THREE.Color(0x8b4513);
+        const rawColor = new THREE.Color(0xffd19f);
+        const bakedColor = new THREE.Color(0xd39340);
         const current = rawColor.clone().lerp(bakedColor, t);
         baseRef.current.traverse((child) => {
           if (child.isMesh && child.material) {

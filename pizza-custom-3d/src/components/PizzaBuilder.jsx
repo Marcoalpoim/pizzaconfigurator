@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+//import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { setupScene, createAnimateLoop } from "../components/PizzaScene";
 import IngredientPanel from "./PizzaBuilder/IngredientsPanel";
 import PizzaControls from "./PizzaBuilder/PizzaControls";
@@ -9,6 +9,7 @@ import PizzaControlsBtns from "./PizzaBuilder/PizzaControlsBtns";
 import { INGREDIENTS } from "../data/ingredients";
 import Bake from "./PizzaBuilder/Bake";
 import CalorieCounter from "./PizzaBuilder/CalorieCounter";
+import { createMeshForIngredient } from "../data/ingredientMeshFactory";
 
 export default function PizzaBuilder({
   user,
@@ -37,7 +38,7 @@ export default function PizzaBuilder({
   const sauceRef = useRef(null);
   const cheeseGroupRef = useRef(null);
   const toppingsGroupRef = useRef(null);
-  const modelsRef = useRef({});
+  //const modelsRef = useRef({});
 
   const snapToRingsRef = useRef(snapToRings);
   const pizzaShapeRef = useRef(pizzaShape);
@@ -71,11 +72,11 @@ export default function PizzaBuilder({
 
   function makeDoughMat() {
     const loader = new THREE.TextureLoader();
-    const tex = loader.load("/textures/dough-texture.jpg");
+    const tex = loader.load("/textures/dough.jpg");
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
     tex.repeat.set(4, 2);
     tex.anisotropy = 8;
-    const nrm = loader.load("/textures/dough-texture.jpg");
+    const nrm = loader.load("/textures/dough.jpg");
     nrm.wrapS = nrm.wrapT = THREE.RepeatWrapping;
     nrm.repeat.set(4, 2);
     return new THREE.MeshStandardMaterial({
@@ -84,7 +85,7 @@ export default function PizzaBuilder({
       normalScale: new THREE.Vector2(0.25, 0.25),
       roughness: 0.88,
       metalness: 0,
-      color: new THREE.Color(0xe8a85a),
+      color: new THREE.Color(0xffd19f),
       side: THREE.DoubleSide,
     });
   }
@@ -147,7 +148,7 @@ export default function PizzaBuilder({
   function createBase(type, size, shape) {
     const { height, radius } = getBaseDims(type, size);
     const innerRadius = radius * 0.8;
-    const crustWidth = radius * 0.18;
+  const crustWidth = 0.08;
     const mat = makeDoughMat();
 
     let discGeom;
@@ -215,7 +216,7 @@ export default function PizzaBuilder({
       );
     }
 
-    const tubeRadius = crustWidth * 0.1 + height * 0.8;
+  const tubeRadius = crustWidth + height * 0.8;
     const tubeGeom = new THREE.TubeGeometry(
       curve3D,
       isSharp ? 400 : 200,
@@ -245,11 +246,11 @@ export default function PizzaBuilder({
         ? new THREE.CircleGeometry(innerR, 64)
         : new THREE.ShapeGeometry(makeShape2D(shape, innerR));
     const loader = new THREE.TextureLoader();
-    const tex = loader.load("/textures/MarinaraSwirl.webp");
+    const tex = loader.load("/textures/sauce.jpg");
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
     tex.repeat.set(2, 2);
     const key = String(sType || "").toLowerCase();
-    let color = 0xc23b22;
+    let color = 0xaf1917;
     if (key.includes("carbon")) color = 0xf5deb3;
     else if (key.includes("pesto")) color = 0x4f7942;
     else if (key.includes("barb")) color = 0x5c1b00;
@@ -258,7 +259,7 @@ export default function PizzaBuilder({
       new THREE.MeshStandardMaterial({
         map: tex,
         color,
-        roughness: 0.6,
+        roughness: 0.8,
         metalness: 0.1,
         side: THREE.DoubleSide,
       }),
@@ -412,6 +413,8 @@ export default function PizzaBuilder({
 
   // ── CHEESE ───────────────────────────────────────────────────────────────
 
+
+  
 function createCheeseBlob(shape, radius, y, cheeseType) {
   const geom = new THREE.SphereGeometry(0.18 + Math.random() * 0.05, 12, 8);
   const loader = new THREE.TextureLoader();
@@ -450,95 +453,7 @@ function createCheeseBlob(shape, radius, y, cheeseType) {
   return mesh;
 }
 
-  // ── INGREDIENT MESH ──────────────────────────────────────────────────────
-
-  function createMeshForIngredient(ing) {
-    let mesh;
-    if (ing.id === "pepperoni" && modelsRef.current.pepperoni) {
-      mesh = modelsRef.current.pepperoni.clone();
-      mesh.scale.set(0.08, 0.08, 0.08);
-    } else if (
-      (ing.id === "mushroom" || ing.id === "cogumelos") &&
-      modelsRef.current.mushroom
-    ) {
-      mesh = modelsRef.current.mushroom.clone();
-    } else if (ing.id === "olive" && modelsRef.current.olive) {
-      mesh = modelsRef.current.olive.clone();
-    } else {
-      const mat = new THREE.MeshStandardMaterial({
-        color: ing.color,
-        roughness: 0.75,
-      });
-      switch (ing.kind) {
-        case "cylinder":
-          mesh = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.18, 0.18, 0.01, 16),
-            mat,
-          );
-          break;
-        case "mushroom":
-        case "cogumelos":
-          mesh = new THREE.Mesh(
-            new THREE.SphereGeometry(
-              0.18,
-              12,
-              8,
-              0,
-              Math.PI * 2,
-              0,
-              Math.PI / 2,
-            ),
-            mat,
-          );
-          break;
-        case "torus":
-          mesh = new THREE.Mesh(
-            new THREE.TorusGeometry(0.09, 0.035, 6, 12),
-            mat,
-          );
-          mesh.rotation.x = Math.PI / 2;
-          break;
-        case "leaf":
-          mesh = new THREE.Mesh(new THREE.CircleGeometry(0.14, 8), mat);
-          mesh.rotation.x = -Math.PI / 2;
-          break;
-        case "pineapple": {
-          const sh = new THREE.Shape();
-          sh.moveTo(0, 0);
-          sh.absarc(0, 0, 0.28, -Math.PI / 6, Math.PI / 6, false);
-          sh.lineTo(0, 0);
-          const geom = new THREE.ExtrudeGeometry(sh, {
-            depth: 0.05,
-            bevelEnabled: false,
-            curveSegments: 16,
-          });
-          geom.rotateX(-Math.PI / 2);
-          const pTex = new THREE.TextureLoader().load(
-            "/textures/pineapple.jpg",
-          );
-          mesh = new THREE.Mesh(
-            geom,
-            new THREE.MeshStandardMaterial({
-              map: pTex,
-              roughness: 0.55,
-              metalness: 0.02,
-            }),
-          );
-          const sc = 0.7 + Math.random() * 0.5;
-          mesh.scale.set(sc, sc, sc);
-          break;
-        }
-        default:
-          mesh = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), mat);
-      }
-    }
-    mesh.rotation.y = Math.random() * Math.PI * 2;
-    mesh.userData.baseScale = mesh.scale.clone();
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    return mesh;
-  }
-
+ 
   function addIngredientAtWorldPos(ing, worldPos) {
     const fullIng = INGREDIENTS.find((i) => i.id === ing.id) || ing;
     const mesh = createMeshForIngredient(fullIng);
@@ -664,47 +579,7 @@ function createCheeseBlob(shape, radius, y, cheeseType) {
       }
     };
 
-    const handleDragOver = (e) => e.preventDefault();
-    const handleDrop = (e) => {
-      e.preventDefault();
-      try {
-        const rawJson = e.dataTransfer.getData("application/json");
-        const rawText = e.dataTransfer.getData("text/plain");
-        let ing = safeParse(rawJson) || safeParse(rawText);
-        if (!ing && rawText) ing = { id: rawText.trim() };
-        if (!ing) return;
-        const fullIng = INGREDIENTS.find((i) => i.id === ing.id) || ing;
-        const rect = renderer.domElement.getBoundingClientRect();
-        const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-        const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-        raycaster.setFromCamera({ x, y }, cameraRef.current);
-        const hits = raycaster.intersectObjects(
-          [sauceRef.current, baseRef.current].filter(Boolean),
-          true,
-        );
-        const toppingY = getToppingSurfaceY();
-        if (hits.length > 0) {
-          const hp = hits[0].point;
-          addIngredientAtWorldPos(
-            fullIng,
-            new THREE.Vector3(hp.x, toppingY, hp.z),
-          );
-        } else {
-          const planePoint = new THREE.Vector3();
-          if (raycaster.ray.intersectPlane(plane, planePoint))
-            addIngredientAtWorldPos(
-              fullIng,
-              new THREE.Vector3(planePoint.x, toppingY, planePoint.z),
-            );
-        }
-        setIngredientCounts((prev) => ({
-          ...prev,
-          [fullIng.id]: (prev[fullIng.id] || 0) + 1,
-        }));
-      } catch (err) {
-        console.warn("drop parse error", err);
-      }
-    };
+    
 
     const onPointerDown = (e) => {
       if (e.button !== 0) return;
@@ -759,12 +634,7 @@ function createCheeseBlob(shape, radius, y, cheeseType) {
       }
     };
 
-    renderer.domElement.addEventListener("dragover", handleDragOver);
-    renderer.domElement.addEventListener("drop", handleDrop);
-    renderer.domElement.addEventListener("pointerdown", onPointerDown);
-    window.addEventListener("pointermove", onPointerMove);
-    window.addEventListener("pointerup", onPointerUp);
-    window.addEventListener("keydown", onKeyDown);
+ 
 
     const resizeObserver = new ResizeObserver(() => {
       const w = container.clientWidth,
@@ -780,14 +650,7 @@ function createCheeseBlob(shape, radius, y, cheeseType) {
       resizeObserver.disconnect();
       controls.dispose();
       renderer.dispose();
-      try {
-        renderer.domElement.removeEventListener("dragover", handleDragOver);
-        renderer.domElement.removeEventListener("drop", handleDrop);
-        renderer.domElement.removeEventListener("pointerdown", onPointerDown);
-      } catch {}
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerup", onPointerUp);
-      window.removeEventListener("keydown", onKeyDown);
+ 
       if (renderer.domElement && container.contains(renderer.domElement))
         container.removeChild(renderer.domElement);
     };
@@ -871,18 +734,19 @@ function createCheeseBlob(shape, radius, y, cheeseType) {
       );
   }, [cheeseType, baseType, baseSize, pizzaShape]);
 
+  /*
   useEffect(() => {
     const loader = new GLTFLoader();
-    const load = (path, key, scale = 0.25) =>
+    const load = (path, key, scale = 1.05) =>
       loader.load(path, (gltf) => {
         gltf.scene.scale.set(scale, scale, scale);
         modelsRef.current[key] = gltf.scene;
       });
     load("/models/pepperoni.glb", "pepperoni");
-    load("/models/mushroom.glb", "mushroom");
+    load("/models/baby_bella_mushroom.glb", "mushroom");
     load("/models/olive.glb", "olive");
   }, []);
-
+*/
   // ── SNAPSHOT / PUBLISH ────────────────────────────────────────────────────
 
   async function captureSnapshot({ scale = 1 } = {}) {
