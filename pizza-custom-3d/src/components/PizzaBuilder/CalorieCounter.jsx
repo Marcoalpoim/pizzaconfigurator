@@ -123,7 +123,7 @@ export default function CalorieCounter({
      
 
       {/* Breakdown */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "3px 12px" }}>
+      <div className="caloriebreakdown" >
         {[
           ["Base",    breakdown.baseC],
           ["Molho",   breakdown.sauceC],

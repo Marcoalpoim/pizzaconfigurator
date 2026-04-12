@@ -205,10 +205,8 @@ html,
   display: block;
 }
 
-
-
 .caloriescounter {
-  padding: 5px;
+  padding: 5px 10px;
   margin-top: 4px;
   position: absolute;
   bottom: 50px;
@@ -235,6 +233,12 @@ html,
   flex-direction: row;
   align-items: center;
   gap: 10px;
+}
+
+.caloriebreakdown{
+  display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px 12px;
 }
 
 .progress-bar {
@@ -272,7 +276,7 @@ align-items: flex-start;
   justify-content: flex-start;
   color: rgb(255, 255, 255);
   z-index: 1;
-  padding: 10px;
+  padding: 8px;
 border-radius: 30px;
     background-color: #404040c2;
   -webkit-backdrop-filter: blur(15px);
@@ -294,7 +298,7 @@ border-radius: 30px;
   gap: 16px;
   background: rgba(17, 17, 17, 0);
   color: rgb(255, 255, 255);
-  padding: 10px 0px;
+  padding-bottom: 10px;
   z-index: 2;
   flex-direction: column;
 }
@@ -339,7 +343,7 @@ border-radius: 30px;
   justify-content: center;
   border: 1px solid #333;
   border-radius: 30px;
-  padding: 5px;
+  padding: 10px;
   cursor: pointer;
 }
 
@@ -353,7 +357,7 @@ border-radius: 30px;
   background-color: transparent;
   border: 1px solid #33333300;
   border-radius: 30px;
-  padding: 5px;
+  padding: 0px;
   cursor: pointer;
   gap: 10px;
 }
@@ -715,7 +719,7 @@ border-radius: 30px;
   }
 
   .config-modal {
-    border-radius: 30px;
+    border-radius: 25px;
   }
 
   .mainnav-container {
@@ -738,13 +742,18 @@ border-radius: 30px;
     position: absolute;
 }
   .settings-wrapper {
-    width: 90%;
+    width: 95%;
   }
-
+.config-toggle-wrapper {
+    width: 95%;
+            display: flex;
+        flex-direction: row;
+}
   .config-wrapper {
         position: absolute;
         bottom: 70px;
         width: 100%;
+        height: auto;
         left: 0px;
         flex-direction: column-reverse;
        align-items: center;
@@ -756,7 +765,14 @@ border-radius: 30px;
     height: calc(50vh - 200px);
     width: auto;
     padding: 10px 15px;
+        margin-bottom: 90px;
   }
+.caloriebreakdown{
+  display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px 12px;
+    display: none;
+}
 
   .feed-layout {
     display: flex;

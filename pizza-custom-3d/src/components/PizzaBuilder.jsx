@@ -280,16 +280,18 @@ export default function PizzaBuilder({
       d3 = sign(px, pz, v3, v1);
     return !((d1 < 0 || d2 < 0 || d3 < 0) && (d1 > 0 || d2 > 0 || d3 > 0));
   }
-function pointInPolygon(px, pz, points2D) {
-  let inside = false;
-  for (let i = 0, j = points2D.length - 1; i < points2D.length; j = i++) {
-    const xi = points2D[i].x, zi = points2D[i].y;
-    const xj = points2D[j].x, zj = points2D[j].y;
-    if ((zi > pz) !== (zj > pz) && px < ((xj - xi) * (pz - zi)) / (zj - zi) + xi)
-      inside = !inside;
+  function pointInPolygon(px, pz, points2D) {
+    let inside = false;
+    for (let i = 0, j = points2D.length - 1; i < points2D.length; j = i++) {
+      const xi = points2D[i].x,
+        zi = points2D[i].y;
+      const xj = points2D[j].x,
+        zj = points2D[j].y;
+      if (zi > pz !== zj > pz && px < ((xj - xi) * (pz - zi)) / (zj - zi) + xi)
+        inside = !inside;
+    }
+    return inside;
   }
-  return inside;
-}
   function isInsideShape(shape, x, z, r) {
     if (!shape || shape === "circle") return x * x + z * z <= r * r;
     if (shape === "square") return Math.abs(x) <= r && Math.abs(z) <= r;
@@ -308,11 +310,11 @@ function pointInPolygon(px, pz, points2D) {
         { x: -r * 0.866, z: -r * 0.5 },
       );
     if (shape === "star") {
-  const starShape = makeShape2D("star", r);
-  const pts = starShape.getPoints(64);
-  // makeShape2D is in XY but placement is in XZ, so pass x and -z
-  return pointInPolygon(x, -z, pts);
-}
+      const starShape = makeShape2D("star", r);
+      const pts = starShape.getPoints(64);
+      // makeShape2D is in XY but placement is in XZ, so pass x and -z
+      return pointInPolygon(x, -z, pts);
+    }
     if (shape === "heart") {
       const sc = r * 0.3,
         lobeR = sc * 1.8,
@@ -331,33 +333,60 @@ function pointInPolygon(px, pz, points2D) {
     return x * x + z * z <= r * r;
   }
 
-  function randomPointInShape(shape, radius) {
-    const bounds = {
-      oval: { rx: radius * 0.78 * 1.3, rz: radius * 0.78 * 0.7 },
-      heart: { rx: radius * 0.65, rz: radius * 0.85 },
-    };
-    for (let attempt = 0; attempt < 120; attempt++) {
-      let x, z;
-      if (shape === "oval") {
-        x = (Math.random() * 2 - 1) * bounds.oval.rx;
-        z = (Math.random() * 2 - 1) * bounds.oval.rz;
-      } else if (shape === "heart") {
-        x = (Math.random() * 2 - 1) * bounds.heart.rx;
-        z = (Math.random() * 2 - 1) * bounds.heart.rz;
-      } else if (shape === "star") {
-        const r = radius * 0.72;
-        x = (Math.random() * 2 - 1) * r;
-        z = (Math.random() * 2 - 1) * r;
-      } else {
-        const r = radius * 0.78;
-        x = (Math.random() * 2 - 1) * r;
-        z = (Math.random() * 2 - 1) * r;
-      }
-      if (isInsideShape(shape, x, z, radius * 0.78)) return { x, z };
+const placedPositionsRef = useRef([]);
+
+function randomPointInShape(shape, radius) {
+  const r = radius * 0.78;
+  const MIN_DIST = 0.38; // minimum distance between toppings
+  const MAX_ATTEMPTS = 40;
+
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    let x, z;
+
+    if (shape === "oval") {
+      const angle = Math.random() * Math.PI * 2;
+      const dist = Math.sqrt(Math.random());
+      x = Math.cos(angle) * dist * r * 1.3;
+      z = Math.sin(angle) * dist * r * 0.7;
+    } else if (shape === "heart") {
+      x = (Math.random() * 2 - 1) * r * 0.65;
+      z = (Math.random() * 2 - 1) * r * 0.85;
+    } else if (shape === "star") {
+      const angle = Math.random() * Math.PI * 2;
+      const dist = Math.sqrt(Math.random()) * r * 0.72;
+      x = Math.cos(angle) * dist;
+      z = Math.sin(angle) * dist;
+    } else {
+      // circle, square, triangle, diamond — use polar for even fill
+      const angle = Math.random() * Math.PI * 2;
+      const dist = Math.sqrt(Math.random()) * r; // sqrt for uniform density
+      x = Math.cos(angle) * dist;
+      z = Math.sin(angle) * dist;
     }
-    return { x: 0, z: 0 };
+
+    if (!isInsideShape(shape, x, z, r)) continue;
+
+    // Check spacing against already placed toppings
+    const tooClose = placedPositionsRef.current.some(
+      (p) => Math.sqrt((p.x - x) ** 2 + (p.z - z) ** 2) < MIN_DIST
+    );
+
+    if (!tooClose) {
+      placedPositionsRef.current.push({ x, z });
+      return { x, z };
+    }
   }
 
+  // Fallback: just place it inside shape ignoring spacing
+  for (let attempt = 0; attempt < 60; attempt++) {
+    const angle = Math.random() * Math.PI * 2;
+    const dist = Math.sqrt(Math.random()) * r;
+    const x = Math.cos(angle) * dist;
+    const z = Math.sin(angle) * dist;
+    if (isInsideShape(shape, x, z, r)) return { x, z };
+  }
+  return { x: 0, z: 0 };
+}
   function getBaseSurfaceY() {
     return baseRef.current?.userData?.surfaceY ?? 0;
   }
@@ -565,68 +594,62 @@ function pointInPolygon(px, pz, points2D) {
     const pointerState = { dragging: false, offset: new THREE.Vector3() };
     let selected = null;
 
-    const safeParse = (raw) => {
-      try {
-        return JSON.parse(raw);
-      } catch {
-        return null;
-      }
-    };
+ 
 
-    const onPointerDown = (e) => {
-      if (e.button !== 0) return;
-      const rect = renderer.domElement.getBoundingClientRect();
-      pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-      pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-      raycaster.setFromCamera(pointer, cameraRef.current);
-      const intersects = raycaster.intersectObjects(
-        toppingsGroupRef.current.children,
-        true,
-      );
-      if (intersects.length > 0) {
-        selected = intersects[0].object;
-        selected.userData.originalScale = selected.scale.clone();
-        selected.scale.multiplyScalar(1.15);
-        pointerState.dragging = true;
-        pointerState.offset.copy(selected.position).sub(intersects[0].point);
-      } else if (selected) {
-        if (selected.userData.originalScale)
-          selected.scale.copy(selected.userData.originalScale);
-        selected = null;
-      }
-    };
-    const onPointerMove = (e) => {
-      if (!pointerState.dragging || !selected) return;
-      const rect = renderer.domElement.getBoundingClientRect();
-      pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-      pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-      raycaster.setFromCamera(pointer, cameraRef.current);
-      if (raycaster.ray.intersectPlane(plane, dropPoint)) {
-        const target = dropPoint.clone().add(pointerState.offset);
-        const constrained =
-          pizzaShapeRef.current === "circle"
-            ? snapToRingsIfNeeded(target)
-            : constrainToShape(target);
-        selected.position.set(
-          constrained.x,
-          getToppingSurfaceY(),
-          constrained.z,
-        );
-      }
-    };
-    const onPointerUp = () => {
-      pointerState.dragging = false;
-      if (selected?.userData.originalScale)
-        selected.scale.copy(selected.userData.originalScale);
-    };
-    const onKeyDown = (e) => {
-      if ((e.key === "Delete" || e.key === "Backspace") && selected) {
-        if (selected.parent) selected.parent.remove(selected);
-        selected = null;
-      }
-    };
+const onTouchStart = (e) => {
+  if (e.touches.length !== 1) return;
+  const touch = e.touches[0];
+  const rect = renderer.domElement.getBoundingClientRect();
+  pointer.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+  pointer.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
+  raycaster.setFromCamera(pointer, cameraRef.current);
+  const intersects = raycaster.intersectObjects(
+    toppingsGroupRef.current.children, true
+  );
+  if (intersects.length > 0) {
+    selected = intersects[0].object;
+    selected.userData.originalScale = selected.scale.clone();
+    selected.scale.multiplyScalar(1.15);
+    pointerState.dragging = true;
+    pointerState.offset.copy(selected.position).sub(intersects[0].point);
+    controls.enabled = false; // stop orbit from taking over
+    e.preventDefault();
+    e.stopPropagation();
+  }
+};
 
-    const resizeObserver = new ResizeObserver(() => {
+const onTouchMove = (e) => {
+  if (!pointerState.dragging || !selected || e.touches.length !== 1) return;
+  e.preventDefault();
+  e.stopPropagation();
+  const touch = e.touches[0];
+  const rect = renderer.domElement.getBoundingClientRect();
+  pointer.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+  pointer.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
+  raycaster.setFromCamera(pointer, cameraRef.current);
+  if (raycaster.ray.intersectPlane(plane, dropPoint)) {
+    const target = dropPoint.clone().add(pointerState.offset);
+    const constrained = pizzaShapeRef.current === "circle"
+      ? snapToRingsIfNeeded(target)
+      : constrainToShape(target);
+    selected.position.set(constrained.x, getToppingSurfaceY(), constrained.z);
+  }
+};
+
+const onTouchEnd = () => {
+  pointerState.dragging = false;
+  controls.enabled = true; // re-enable orbit
+  if (selected?.userData.originalScale)
+    selected.scale.copy(selected.userData.originalScale);
+};
+
+// ── register all listeners ───────────────────────────────────────────────
+const canvas = renderer.domElement; 
+canvas.addEventListener("touchstart", onTouchStart, { passive: false });
+canvas.addEventListener("touchmove", onTouchMove, { passive: false });
+canvas.addEventListener("touchend", onTouchEnd); 
+
+const resizeObserver = new ResizeObserver(() => {
       const w = container.clientWidth,
         h = container.clientHeight;
       renderer.setSize(w, h);
@@ -635,37 +658,38 @@ function pointInPolygon(px, pz, points2D) {
     });
     resizeObserver.observe(container);
 
-    return () => {
-      cancelAnimate();
-      resizeObserver.disconnect();
-      controls.dispose();
-      renderer.dispose();
+  return () => {
+  cancelAnimate();
+  resizeObserver.disconnect();
+  controls.dispose();
+  renderer.dispose(); 
+  canvas.removeEventListener("touchstart", onTouchStart);
+  canvas.removeEventListener("touchmove", onTouchMove);
+  canvas.removeEventListener("touchend", onTouchEnd); 
 
-      if (renderer.domElement && container.contains(renderer.domElement))
-        container.removeChild(renderer.domElement);
-    };
+  if (renderer.domElement && container.contains(renderer.domElement))
+    container.removeChild(renderer.domElement);
+};
   }, []);
 
   // ── REACTIVE EFFECTS ──────────────────────────────────────────────────────
 
-  useEffect(() => {
-    const group = toppingsGroupRef.current;
-    if (!group) return;
-    group.clear();
-    const { radius } = getBaseDims(baseType, baseSize);
-    Object.entries(ingredientCounts).forEach(([id, count]) => {
-      if (!count) return;
-      const ing = INGREDIENTS.find((i) => i.id === id);
-      if (!ing) return;
-      for (let i = 0; i < count; i++) {
-        const { x, z } = randomPointInShape(pizzaShape, radius);
-        addIngredientAtWorldPos(
-          ing,
-          new THREE.Vector3(x, getToppingSurfaceY(), z),
-        );
-      }
-    });
-  }, [ingredientCounts, baseType, baseSize, pizzaShape]);
+useEffect(() => {
+  const group = toppingsGroupRef.current;
+  if (!group) return;
+  group.clear();
+  placedPositionsRef.current = []; // ← reset spacing tracker
+  const { radius } = getBaseDims(baseType, baseSize);
+  Object.entries(ingredientCounts).forEach(([id, count]) => {
+    if (!count) return;
+    const ing = INGREDIENTS.find((i) => i.id === id);
+    if (!ing) return;
+    for (let i = 0; i < count; i++) {
+      const { x, z } = randomPointInShape(pizzaShape, radius);
+      addIngredientAtWorldPos(ing, new THREE.Vector3(x, getToppingSurfaceY(), z));
+    }
+  });
+}, [ingredientCounts, baseType, baseSize, pizzaShape]);
 
   useEffect(() => {
     const controls = controlsRef.current;
@@ -893,12 +917,10 @@ function pointInPolygon(px, pz, points2D) {
           </aside>
         </div>
         <div className="config-toggle-wrapper">
-          <button
-            className="config-toggle"
-            onClick={() => setShowConfig((prev) => !prev)}
-          >
-            <img src="/icons/config.svg" alt="config" width={30} height={30} />
+          <button className="config-toggle" onClick={() => setShowConfig((prev) => !prev)} >
+            <img src="/icons/config.svg" alt="config" width={20} height={20} />
           </button>
+        
         </div>
       </div>
       <div>

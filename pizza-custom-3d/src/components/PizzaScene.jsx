@@ -106,8 +106,7 @@ export function setupScene(container, refs, options = {}) {
   });
 
   // ── PROPS ────────────────────────────────────────────────────────────────
-
-  // Olive oil bottle — right side, clearly on table
+ 
   const glassMat = new THREE.MeshStandardMaterial({
     color: 0x1a3010,
     roughness: 0.12,
@@ -282,14 +281,17 @@ export function setupScene(container, refs, options = {}) {
   refs.rendererRef.current = renderer;
 
   // ── CAMERA ───────────────────────────────────────────────────────────────
-  const camera = new THREE.PerspectiveCamera(
-    42, // narrower FOV = more compressed/cinematic, less distortion
-    container.clientWidth / container.clientHeight,
-    0.1,
-    1000,
-  );
-  camera.position.set(0, 6, 12);
-  camera.lookAt(0, 0, 0);
+  const isMobileInit = window.innerWidth < 768;
+
+const camera = new THREE.PerspectiveCamera(
+  42,
+  container.clientWidth / container.clientHeight,
+  0.1,
+  1000,
+);
+// Start further back on mobile
+camera.position.set(0, isMobileInit ? 19 : 60, isMobileInit ? 30 : 22);
+camera.lookAt(0, 0, 0);
   refs.cameraRef.current = camera;
   refs.sceneRef.current = scene;
 
@@ -305,15 +307,17 @@ export function createAnimateLoop({
 }) {
   let frameId;
   let zoomProgress = 0;
-
-  const startPos = new THREE.Vector3(0, 9, 18);
-  const endPos = new THREE.Vector3(0.3, 3.8, 6.0);
+ 
   const easeInOut = (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
 
-  const isMobile = window.innerWidth < 768;
-  const endTarget = isMobile
-    ? new THREE.Vector3(0, showConfigRef.current ? -0.8 : 0, 0)
-    : new THREE.Vector3(showConfigRef.current ? -1.2 : 0, 0, 0);
+const isMobile = window.innerWidth < 768;
+const startPos = new THREE.Vector3(4, 9, 18);
+const endPos = isMobile
+  ? new THREE.Vector3(4, 15, 22)   // more zoomed out on mobile
+  : new THREE.Vector3(4, 3.8, 6.0);
+const endTarget = isMobile
+  ? new THREE.Vector3(0, showConfigRef.current ? -0.8 : 0, 0)
+  : new THREE.Vector3(showConfigRef.current ? -1.2 : 0, 0, 0);
 
   function animate() {
     frameId = requestAnimationFrame(animate);
