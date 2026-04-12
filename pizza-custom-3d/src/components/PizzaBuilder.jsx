@@ -148,7 +148,7 @@ export default function PizzaBuilder({
   function createBase(type, size, shape) {
     const { height, radius } = getBaseDims(type, size);
     const innerRadius = radius * 0.8;
-  const crustWidth = 0.08;
+    const crustWidth = 0.08;
     const mat = makeDoughMat();
 
     let discGeom;
@@ -157,7 +157,7 @@ export default function PizzaBuilder({
         innerRadius,
         innerRadius,
         height,
-        128,
+        110,
         1,
         false,
       );
@@ -216,7 +216,7 @@ export default function PizzaBuilder({
       );
     }
 
-  const tubeRadius = crustWidth + height * 0.8;
+    const tubeRadius = crustWidth + height * 0.8;
     const tubeGeom = new THREE.TubeGeometry(
       curve3D,
       isSharp ? 400 : 200,
@@ -280,7 +280,16 @@ export default function PizzaBuilder({
       d3 = sign(px, pz, v3, v1);
     return !((d1 < 0 || d2 < 0 || d3 < 0) && (d1 > 0 || d2 > 0 || d3 > 0));
   }
-
+function pointInPolygon(px, pz, points2D) {
+  let inside = false;
+  for (let i = 0, j = points2D.length - 1; i < points2D.length; j = i++) {
+    const xi = points2D[i].x, zi = points2D[i].y;
+    const xj = points2D[j].x, zj = points2D[j].y;
+    if ((zi > pz) !== (zj > pz) && px < ((xj - xi) * (pz - zi)) / (zj - zi) + xi)
+      inside = !inside;
+  }
+  return inside;
+}
   function isInsideShape(shape, x, z, r) {
     if (!shape || shape === "circle") return x * x + z * z <= r * r;
     if (shape === "square") return Math.abs(x) <= r && Math.abs(z) <= r;
@@ -299,23 +308,11 @@ export default function PizzaBuilder({
         { x: -r * 0.866, z: -r * 0.5 },
       );
     if (shape === "star") {
-      const outerR = r,
-        innerR = r * 0.55,
-        points = 5;
-      for (let i = 0; i < points; i++) {
-        const aO1 = (i / points) * Math.PI * 2 - Math.PI / 2;
-        const aIL = ((i + 0.5) / points) * Math.PI * 2 - Math.PI / 2;
-        const aIR = ((i - 0.5 + points) / points) * Math.PI * 2 - Math.PI / 2;
-        const tip = { x: Math.cos(aO1) * outerR, z: Math.sin(aO1) * outerR };
-        const iL = { x: Math.cos(aIL) * innerR, z: Math.sin(aIL) * innerR };
-        const iR = { x: Math.cos(aIR) * innerR, z: Math.sin(aIR) * innerR };
-        const c = { x: 0, z: 0 };
-        if (pointInTriangle(x, z, tip, iL, iR)) return true;
-        if (pointInTriangle(x, z, c, iL, tip)) return true;
-        if (pointInTriangle(x, z, c, tip, iR)) return true;
-      }
-      return false;
-    }
+  const starShape = makeShape2D("star", r);
+  const pts = starShape.getPoints(64);
+  // makeShape2D is in XY but placement is in XZ, so pass x and -z
+  return pointInPolygon(x, -z, pts);
+}
     if (shape === "heart") {
       const sc = r * 0.3,
         lobeR = sc * 1.8,
@@ -337,7 +334,6 @@ export default function PizzaBuilder({
   function randomPointInShape(shape, radius) {
     const bounds = {
       oval: { rx: radius * 0.78 * 1.3, rz: radius * 0.78 * 0.7 },
-      star: { rx: radius * 0.38, rz: radius * 0.38 },
       heart: { rx: radius * 0.65, rz: radius * 0.85 },
     };
     for (let attempt = 0; attempt < 120; attempt++) {
@@ -345,12 +341,13 @@ export default function PizzaBuilder({
       if (shape === "oval") {
         x = (Math.random() * 2 - 1) * bounds.oval.rx;
         z = (Math.random() * 2 - 1) * bounds.oval.rz;
-      } else if (shape === "star") {
-        x = (Math.random() * 2 - 1) * bounds.star.rx;
-        z = (Math.random() * 2 - 1) * bounds.star.rz;
       } else if (shape === "heart") {
         x = (Math.random() * 2 - 1) * bounds.heart.rx;
         z = (Math.random() * 2 - 1) * bounds.heart.rz;
+      } else if (shape === "star") {
+        const r = radius * 0.72;
+        x = (Math.random() * 2 - 1) * r;
+        z = (Math.random() * 2 - 1) * r;
       } else {
         const r = radius * 0.78;
         x = (Math.random() * 2 - 1) * r;
@@ -413,47 +410,44 @@ export default function PizzaBuilder({
 
   // ── CHEESE ───────────────────────────────────────────────────────────────
 
+  function createCheeseBlob(shape, radius, y, cheeseType) {
+    const geom = new THREE.SphereGeometry(0.18 + Math.random() * 0.05, 12, 8);
+    const loader = new THREE.TextureLoader();
+    const paths = {
+      cheddar: "/textures/cheddar.png",
+      parmesan: "/textures/parmesan.jpg",
+      gorgonzola: "/textures/gorganzola.jpg",
+    };
+    const texPath = paths[cheeseType] || "/textures/mozzarelacheese.jpeg";
 
-  
-function createCheeseBlob(shape, radius, y, cheeseType) {
-  const geom = new THREE.SphereGeometry(0.18 + Math.random() * 0.05, 12, 8);
-  const loader = new THREE.TextureLoader();
-  const paths = {
-    cheddar: "/textures/cheddar.png",
-    parmesan: "/textures/parmesan.jpg",
-    gorgonzola: "/textures/gorganzola.jpg",
-  };
-  const texPath = paths[cheeseType] || "/textures/mozzarelacheese.jpeg";
+    const mat = new THREE.MeshStandardMaterial({
+      map: loader.load(texPath),
+      // ✅ Removed: normalMap no longer reuses the color texture
+      roughness: 0.75,
+      metalness: 0.0,
+      // Slight emissive warmth so cheese doesn't look dark and muddy
+      emissive: new THREE.Color(0.08, 0.05, 0.0),
+    });
 
-  const mat = new THREE.MeshStandardMaterial({
-    map: loader.load(texPath),
-    // ✅ Removed: normalMap no longer reuses the color texture
-    roughness: 0.75,
-    metalness: 0.0,
-    // Slight emissive warmth so cheese doesn't look dark and muddy
-    emissive: new THREE.Color(0.08, 0.05, 0.0),
-  });
+    const mesh = new THREE.Mesh(geom, mat);
 
-  const mesh = new THREE.Mesh(geom, mat);
+    mesh.scale.set(
+      1.0 + Math.random() * 0.4,
+      0.08 + Math.random() * 0.04,
+      1.0 + Math.random() * 0.4,
+    );
 
-  mesh.scale.set(
-    1.0 + Math.random() * 0.4,
-    0.08 + Math.random() * 0.04,  
-    1.0 + Math.random() * 0.4,
-  );
+    // ✅ Random rotation so blobs look scattered, not stamped
+    mesh.rotation.y = Math.random() * Math.PI * 2;
+    mesh.rotation.z = (Math.random() - 0.5) * 0.3;
 
-  // ✅ Random rotation so blobs look scattered, not stamped
-  mesh.rotation.y = Math.random() * Math.PI * 2;
-  mesh.rotation.z = (Math.random() - 0.5) * 0.3;
+    const { x, z } = randomPointInShape(shape, radius);
+    mesh.position.set(x, y + Math.random() * 0.01, z);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    return mesh;
+  }
 
-  const { x, z } = randomPointInShape(shape, radius);
-  mesh.position.set(x, y + Math.random() * 0.01, z);
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
-  return mesh;
-}
-
- 
   function addIngredientAtWorldPos(ing, worldPos) {
     const fullIng = INGREDIENTS.find((i) => i.id === ing.id) || ing;
     const mesh = createMeshForIngredient(fullIng);
@@ -579,8 +573,6 @@ function createCheeseBlob(shape, radius, y, cheeseType) {
       }
     };
 
-    
-
     const onPointerDown = (e) => {
       if (e.button !== 0) return;
       const rect = renderer.domElement.getBoundingClientRect();
@@ -634,8 +626,6 @@ function createCheeseBlob(shape, radius, y, cheeseType) {
       }
     };
 
- 
-
     const resizeObserver = new ResizeObserver(() => {
       const w = container.clientWidth,
         h = container.clientHeight;
@@ -650,7 +640,7 @@ function createCheeseBlob(shape, radius, y, cheeseType) {
       resizeObserver.disconnect();
       controls.dispose();
       renderer.dispose();
- 
+
       if (renderer.domElement && container.contains(renderer.domElement))
         container.removeChild(renderer.domElement);
     };
