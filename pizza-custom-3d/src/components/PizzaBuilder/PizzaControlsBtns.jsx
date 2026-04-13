@@ -148,7 +148,7 @@ export default function PizzaControlsBtns({
               })
             }
           >
-            <img src="/icons/camera.svg" alt="receipt" /> 
+            <img src="/icons/Receipt.svg" alt="receipt" /> 
                  {/* <p>Receita</p>*/}
           </button>
         </div>
@@ -164,7 +164,7 @@ export default function PizzaControlsBtns({
         {/* 💾 Save */}
         <div className="btn-box">
           <button onClick={handleSaveToProfile}>
-            <img src="/icons/save.svg" alt="save" /> 
+            <img src="/icons/Save.svg" alt="save" /> 
               {/* <p>Guardar</p>*/}
           </button>
         </div>
@@ -172,7 +172,7 @@ export default function PizzaControlsBtns({
         {/* 🗑 Clear */}
         <div className="btn-box">
           <button onClick={removeAllToppings}>
-            <img src="/icons/delete.svg" alt="clear" />
+            <img src="/icons/trash.svg" alt="clear" />
            {/* <p>Apagar</p>*/}
           </button>
         </div>
@@ -181,7 +181,7 @@ export default function PizzaControlsBtns({
         <div className="btn-box send-btn">
           <button onClick={handlePublish}>
           <p>Publicar</p> 
-            <img src="/icons/send.svg" alt="publish" />
+            <img src="/icons/Send.svg" alt="publish" />
           </button>
         </div>
       </div>

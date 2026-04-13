@@ -66,7 +66,7 @@ html,
   display: flex;
   justify-content: center;
   gap: 5px;
-  background-color: #404040c2;
+background-color: #00000030;
   -webkit-backdrop-filter: blur(15px);
   backdrop-filter: blur(15px);
   border-bottom: 1px solid white;
@@ -209,7 +209,7 @@ html,
   padding: 5px 10px;
   margin-top: 4px;
   position: absolute;
-  bottom: 50px;
+  bottom: 60px;
   width: -webkit-fill-available;
   left: 0;
   background-color: #ffffff;
@@ -278,11 +278,15 @@ align-items: flex-start;
   z-index: 1;
   padding: 8px;
 border-radius: 30px;
-    background-color: #404040c2;
+    background-color: #40404000;
   -webkit-backdrop-filter: blur(15px);
   backdrop-filter: blur(15px);
   border: 2px solid #ffffff;
   transition: all 0.2s ease;
+  cursor: pointer;
+}
+.config-toggle:hover { 
+    background-color: #ffffff31; 
   cursor: pointer;
 }
 .config-toggle-wrapper {
@@ -341,10 +345,11 @@ border-radius: 30px;
   gap: 0px;
   flex-direction: column;
   justify-content: center;
-  border: 1px solid #333;
+  border: 2px solid #333;
   border-radius: 30px;
   padding: 10px;
   cursor: pointer;
+  width: 60px;
 }
 
 .btn-box:hover {
@@ -366,11 +371,12 @@ border-radius: 30px;
   margin: 0;
   font-size: 14px;
   line-height: 16px;
+  font-weight: 500;
 }
 
 .config-btn button img {
   width: auto;
-  height: 20px;
+  height: 24px;
 }
 
 
@@ -403,20 +409,24 @@ border-radius: 30px;
 }
 
 .config-modal {
-  background-color: #404040c2;
-  -webkit-backdrop-filter: blur(15px);
+  background-color: #00000030;
+  -webkit-backdrop-filter: blur(30px);
   backdrop-filter: blur(15px);
   color: white;
   border: 2px solid #ffffff;
   border-radius: 25px;
   z-index: 1;
   transform: translateX(0);
-  transition: transform 0.35s ease;
+  transition: height 0.35s ease;
   overflow: hidden;
+  height: 100%;
+  
 }
 
 .config-modal.closed {
-  transform: translateX(-120%); 
+  /*transform: translateX(-120%); */
+  height: 0;
+      border: 0px solid #ffffff;
 }
 
 .config-modal-header {
@@ -425,6 +435,7 @@ border-radius: 30px;
   color: black;
   margin: 0;
   padding: 5px;
+  width: 100%;
 }
 
 .config-modal-header h2 {
@@ -432,7 +443,43 @@ border-radius: 30px;
   font-size: 14px;
   line-height: 16px;
 }
+.config-modal.size-large .config-content { 
+  height: calc(75vh - 200px);
+}
 
+.config-modal.size-large .config-content {
+  transition:   height 0.3s ease;
+}
+
+.config-content {
+  transition: width 0.3s ease, height 0.3s ease;
+}
+
+.resize-modal {
+  display: flex;
+  justify-content: flex-end;  
+    background-color: #ffffff;
+  padding: 5px;
+  border-top: 0.5px solid #e0e0e0;
+}
+
+.resize-modal-btn {
+background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 7px;
+    border-radius: 30px;
+    border: 2px solid #000000;
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    width: auto;
+    justify-content: center;
+}
+
+.resize-modal-btn:hover {
+  opacity: 1;
+}
 
 .bake-wrapper {
   width: 100%;
@@ -447,7 +494,7 @@ border-radius: 30px;
   width: 100%;
   padding: 0;
   border-radius: 30px;
-  border: 1px solid #333;
+  border: 2px solid #000000;
   background-color: transparent;
   cursor: pointer;
 }
@@ -463,7 +510,7 @@ border-radius: 30px;
 
 .config-content {
   width: 300px;
-  height: calc(75vh - 200px);
+  height: calc(65vh - 200px);
   margin-bottom: 125px;
   overflow-y: scroll;
   overflow-x: hidden;
@@ -653,7 +700,7 @@ border-radius: 30px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgb(34, 34, 34);
+background: rgb(255 255 255 / 20%);
   padding: 8px;
   border-radius: 6px;
 }
@@ -714,6 +761,11 @@ border-radius: 30px;
 
 /* Mobile */
 @media (max-width: 768px) {
+
+  .config-modal.size-large .config-content { 
+  height: calc(75vh - 200px);
+}
+
   .ingredient-container {
     margin-right: 0px;
   }

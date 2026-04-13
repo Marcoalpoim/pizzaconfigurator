@@ -3,14 +3,14 @@ import React, { useState, useRef } from "react";
 import * as THREE from "three";
 
 const BAKE_STAGES = [
-  "Raw dough",
-  "Preheating...",
-  "Rising...",
-  "Crust forming",
-  "Cheese melting",
-  "Toppings sizzling",
-  "Golden brown",
-  "Perfect!",
+  "Massa crua",
+  "A pré-aquecer...",
+  "A levedar...",
+  "A formar crosta",
+  "Queijo a derreter",
+  "Coberturas a chiar",
+  "Dourado",
+  "Perfeito!",
 ];
 
 export default function Bake({ baseRef, cheeseGroupRef, toppingsGroupRef }) {
@@ -172,8 +172,7 @@ export default function Bake({ baseRef, cheeseGroupRef, toppingsGroupRef }) {
                       )
                     ]
                   }
-                </span>
-                <span>Perfeito!</span>
+                </span> 
               </div>
           </div>
         )}

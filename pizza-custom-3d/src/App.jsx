@@ -59,10 +59,10 @@ export default function App() {
         {user ? (
           <>
             <nav className="mainnav-container">
-              <Link to="/"><img src="/icons/config.svg" alt="configurator" /></Link>
-              <Link to="/feed"><img src="/icons/feed.svg" alt="feed" /></Link>
+              <Link to="/"><img src="/icons/pizza.svg" alt="pizza" /></Link>
+              <Link to="/feed"><img src="/icons/Interface.svg" alt="feed" /></Link>
               <Link to="/profile"><img src="/icons/user.svg" alt="user" /></Link>
-              <Link to="/info"><img src="/icons/info.svg" alt="info" /></Link>
+              <Link to="/info"><img src="/icons/Infocircle.svg" alt="info" /></Link>
             </nav>
 
             <Routes>
