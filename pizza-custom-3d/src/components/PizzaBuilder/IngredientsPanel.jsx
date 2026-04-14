@@ -18,7 +18,7 @@ export default function IngredientPanel({
               <img
                 src={ing.image}
                 alt={ing.name}
-                style={{ width: 24, height: 24 }}
+                style={{ width: 24, height: 24, borderRadius: "5px" }} 
               />
               {ing.name}
             </span>

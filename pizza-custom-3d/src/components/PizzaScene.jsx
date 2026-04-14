@@ -6,7 +6,7 @@ export function setupScene(container, refs, options = {}) {
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x1a0f07);
-  scene.fog = new THREE.FogExp2(0x1a0f07, 0.028);
+scene.fog = new THREE.FogExp2(0x1a0f07, 0.012);
 
   const textureLoader = new THREE.TextureLoader();
 
@@ -86,24 +86,33 @@ export function setupScene(container, refs, options = {}) {
   scene.add(peel);
 
   // ── FLOUR DUST ───────────────────────────────────────────────────────────
-  const flourMat = new THREE.MeshBasicMaterial({
-    color: 0xf0ece0,
-    transparent: true,
-    opacity: 0.1,
-  });
-  [
-    [2.4, 0.01, 1.8],
-    [-3.2, 0.01, 1.0],
-    [4.2, 0.01, -1.2],
-    [-1.6, 0.01, -0.8],
-    [5.5, 0.01, 0.5],
-  ].forEach(([x, y, z]) => {
-    const r = 0.2 + Math.random() * 0.45;
-    const f = new THREE.Mesh(new THREE.CircleGeometry(r, 16), flourMat);
-    f.rotation.x = -Math.PI / 2;
-    f.position.set(x, y, z);
-    scene.add(f);
-  });
+  // ── FLOUR DUST ───────────────────────────────────────────────────────────
+const flourMat = new THREE.MeshBasicMaterial({
+  color: 0xf3efe6,
+  transparent: true,
+  opacity: 0.08,
+  depthWrite: false,
+});
+
+for (let i = 0; i < 10; i++) {
+  const r = 0.15 + Math.random() * 0.5;
+
+  const f = new THREE.Mesh(
+    new THREE.CircleGeometry(r, 18),
+    flourMat,
+  );
+
+  // more natural scattering (not grid-like)
+  const x = (Math.random() - 0.5) * 14;
+  const z = (Math.random() - 0.5) * 10;
+
+  f.rotation.x = -Math.PI / 2;
+  f.rotation.z = Math.random() * Math.PI;
+
+  f.position.set(x, 0.011, z);
+
+  scene.add(f);
+}
 
   // ── PROPS ────────────────────────────────────────────────────────────────
  
@@ -137,37 +146,7 @@ export function setupScene(container, refs, options = {}) {
   bottleCap.position.set(6.5, 1.33, -1.5);
   scene.add(bottleCap);
 
-  // Ceramic bowl — left side
-  const ceramicMat = new THREE.MeshStandardMaterial({
-    color: 0xd8c4a0,
-    roughness: 0.6,
-    metalness: 0.04,
-  });
-  const bowl = new THREE.Mesh(
-    new THREE.SphereGeometry(0.52, 20, 10, 0, Math.PI * 2, 0, Math.PI * 0.55),
-    ceramicMat,
-  );
-  bowl.rotation.x = Math.PI;
-  bowl.position.set(-6.5, 0.36, -1.0);
-  scene.add(bowl);
-
-  // Tomatoes in bowl
-  const tomMat = new THREE.MeshStandardMaterial({
-    color: 0xbb1a0a,
-    roughness: 0.65,
-  });
-  [
-    [-6.3, 0.68, -0.8],
-    [-6.7, 0.72, -1.2],
-    [-6.5, 0.76, -0.95],
-  ].forEach(([x, y, z]) => {
-    const t = new THREE.Mesh(
-      new THREE.SphereGeometry(0.17 + Math.random() * 0.04, 12, 10),
-      tomMat,
-    );
-    t.position.set(x, y, z);
-    scene.add(t);
-  });
+   
 
   // Rolling pin — lying flat on table
   const pinMat = new THREE.MeshStandardMaterial({
@@ -178,8 +157,12 @@ export function setupScene(container, refs, options = {}) {
     new THREE.CylinderGeometry(0.13, 0.13, 3.0, 16),
     pinMat,
   );
-  pinBody.rotation.z = Math.PI / 2;
-  pinBody.position.set(-5.2, 0.13, 2.8);
+pinBody.position.set(-5.2, 0.125, 2.8);
+pinBody.rotation.set(
+  Math.PI / 2,
+  Math.random() * 0.2,
+  Math.random() * 0.1
+);
   scene.add(pinBody);
 
   // Basil leaves near pizza
@@ -228,20 +211,20 @@ export function setupScene(container, refs, options = {}) {
   const rimLight = new THREE.DirectionalLight(0xff8833, 0.4);
   rimLight.position.set(1, 4, -10);
   scene.add(rimLight);
-
-  // PIZZA SPOT — overhead, soft cone, warm white
-  // Wide penumbra = soft falloff, no harsh burn
-  const pizzaSpot = new THREE.SpotLight(0xffeedd, 2.2);
-  pizzaSpot.position.set(0, 7, 1);
-  pizzaSpot.angle = Math.PI / 6;
-  pizzaSpot.penumbra = 0.85; // very soft edge
-  pizzaSpot.decay = 1.2;
-  pizzaSpot.distance = 24;
+ 
+const pizzaSpot = new THREE.SpotLight(0xffe6c0, 1.4);
+pizzaSpot.position.set(-1.5, 6, 3);
+pizzaSpot.angle = Math.PI / 4;
+pizzaSpot.penumbra = 1.0;
+pizzaSpot.decay = 1.4;
+pizzaSpot.distance = 18;
   pizzaSpot.castShadow = true;
   pizzaSpot.shadow.mapSize.set(2048, 2048);
   pizzaSpot.shadow.bias = -0.0003;
   scene.add(pizzaSpot);
 
+
+  
   // TABLE BOUNCE — low, subtle, warm
   const bounceLight = new THREE.PointLight(0xffcc88, 0.4, 10);
   bounceLight.position.set(0, 0.3, 3);
@@ -290,7 +273,7 @@ const camera = new THREE.PerspectiveCamera(
   1000,
 );
 // Start further back on mobile
-camera.position.set(0, isMobileInit ? 19 : 60, isMobileInit ? 30 : 22);
+camera.position.set(6, isMobileInit ? 16 : 10, isMobileInit ? 26 : 12);
 camera.lookAt(0, 0, 0);
   refs.cameraRef.current = camera;
   refs.sceneRef.current = scene;

@@ -19,7 +19,7 @@ export const INGREDIENTS = [
     kind: "mushroom",
     calories: 5,
     category: "veggie",
-     image: "/ingredients/pepperoni.png",
+     image: "./ingredients/ingredientes-cogumelos.png",
   },
   {
     id: "azeitona",
@@ -29,7 +29,7 @@ export const INGREDIENTS = [
     kind: "torus",
     calories: 10,
     category: "veggie",
-     image: "/ingredients/pepperoni.png",
+     image: "./ingredients/ingredientes-azeitonas.png",
   },
   {
     id: "basil",
@@ -39,7 +39,7 @@ export const INGREDIENTS = [
     kind: "leaf",
     calories: 1,
     category: "veggie",
-     image: "/ingredients/pepperoni.png",
+     image: "./ingredients/ingredientes-manjericao-telepizza.png",
   },
   {
     id: "ananas",
@@ -49,7 +49,7 @@ export const INGREDIENTS = [
     kind: "pineapple",
     calories: 12,
     category: "fruit",
-     image: "/ingredients/pepperoni.png",
+     image: "./ingredients/ingredientes-ananas.png",
   },
   {
     id: "cebola",
@@ -59,7 +59,7 @@ export const INGREDIENTS = [
     kind: "torus",
     calories: 4,
     category: "veggie",
-     image: "/ingredients/pepperoni.png",
+     image: "./ingredients/ingredientes-cebola.png",
   },
 
   // ── Meats ─────────────────────────────────────────────────────────────
@@ -71,7 +71,7 @@ export const INGREDIENTS = [
     kind: "chunk",
     calories: 30,
     category: "meat",
-     image: "/ingredients/pepperoni.png",
+     image: "./ingredients/ingredientes-frangomarinado.png",
   },
   {
     id: "carne",
@@ -81,7 +81,7 @@ export const INGREDIENTS = [
     kind: "chunk",
     calories: 40,
     category: "meat",
-     image: "/ingredients/pepperoni.png",
+     image: "./ingredients/Ingredientes-carnedevaca.png",
   },
   {
     id: "pancetta",
@@ -91,7 +91,7 @@ export const INGREDIENTS = [
     kind: "strip",
     calories: 35,
     category: "meat",
-     image: "/ingredients/pepperoni.png",
+     image: "./ingredients/ingredientes-pancetta.png",
   },
   {
     id: "bacon",
@@ -101,7 +101,7 @@ export const INGREDIENTS = [
     kind: "strip",
     calories: 38,
     category: "meat",
-     image: "/ingredients/pepperoni.png",
+     image: "./ingredients/ingredientes-bacon.png",
   },
   {
     id: "chourico",
@@ -111,7 +111,7 @@ export const INGREDIENTS = [
     kind: "cylinder",
     calories: 28,
     category: "meat",
-     image: "/ingredients/pepperoni.png",
+     image: "./ingredients/ingredientes-chourico.png",
   },
   {
     id: "fiambre",
@@ -121,7 +121,7 @@ export const INGREDIENTS = [
     kind: "disc",
     calories: 20,
     category: "meat",
-     image: "/ingredients/pepperoni.png",
+     image: "./ingredients/ingredientes-fiambre.png",
   },
 
   // ── Veggies ───────────────────────────────────────────────────────────
@@ -133,7 +133,7 @@ export const INGREDIENTS = [
     kind: "torus",
     calories: 5,
     category: "veggie",
-     image: "/ingredients/pepperoni.png",
+     image: "./ingredients/ingredientes-pimentoverde.png",
   },
   {
     id: "tomate_cherry",
@@ -143,7 +143,7 @@ export const INGREDIENTS = [
     kind: "sphere",
     calories: 8,
     category: "veggie",
-     image: "/ingredients/pepperoni.png",
+     image: "./ingredients/ingredientes-tomatecherry.png",
   },
   {
     id: "cebola_caramelizada",
@@ -153,7 +153,7 @@ export const INGREDIENTS = [
     kind: "strand",
     calories: 15,
     category: "veggie",
-     image: "/ingredients/pepperoni.png",
+     image: "./ingredients/ingredientes-cebolla-caramelizada-telepizza.png",
   },
 
   // ── Seafood ───────────────────────────────────────────────────────────
@@ -165,7 +165,7 @@ export const INGREDIENTS = [
     kind: "shrimp",
     calories: 22,
     category: "seafood",
-     image: "/ingredients/pepperoni.png",
+     image: "./ingredients/ingredientes-camarao.png",
   },
   {
     id: "atum",
@@ -175,6 +175,6 @@ export const INGREDIENTS = [
     kind: "flake",
     calories: 18,
     category: "seafood",
-     image: "/ingredients/pepperoni.png",
+     image: "./ingredients/ingredientes-atum.png",
   },
 ];

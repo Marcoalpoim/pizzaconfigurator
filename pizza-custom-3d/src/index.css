@@ -598,6 +598,7 @@ background: transparent;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  max-width: 100%;
 }
 
 .pizza-controls-item {

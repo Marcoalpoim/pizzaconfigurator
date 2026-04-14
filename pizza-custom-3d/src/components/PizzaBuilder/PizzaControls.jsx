@@ -146,7 +146,7 @@ export default function PizzaControls({
   cheeseType, setCheeseType,
 }) {
   return (
-    <div className="pizza-controls" style={{ maxWidth: 480 }}>
+    <div className="pizza-controls" >
       <AccordionSelect label="Tipo de Base"    value={baseType}   onChange={setBaseType}   options={BASE_TYPES} />
       <AccordionSelect label="Tamanho da Base" value={baseSize}   onChange={setBaseSize}   options={BASE_SIZES} />
       <AccordionSelect label="Forma da Base"   value={pizzaShape} onChange={setPizzaShape} options={SHAPES} />
