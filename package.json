@@ -1,6 +1,7 @@
 {
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.14"
+    "@tailwindcss/postcss": "^4.1.14",
+    "baseline-browser-mapping": "^2.10.19"
   },
   "dependencies": {
     "firebase": "^12.4.0",

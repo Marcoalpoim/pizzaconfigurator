@@ -70,7 +70,7 @@ export default function PizzaBuilder({
     const radius = size === 28 ? 1.9 : size === 33 ? 2.2 : 2.7;
     return { height, radius };
   };
-
+ 
   function makeDoughMat() {
     const loader = new THREE.TextureLoader();
     const tex = loader.load("/textures/dough.jpg");
@@ -750,7 +750,7 @@ export default function PizzaBuilder({
     group.clear();
     if (cheeseType === "none") return;
     const { radius } = getBaseDims(baseType, baseSize);
-    for (let i = 0; i < 180; i++)
+    for (let i = 0; i < 120; i++)
       group.add(
         createCheeseBlob(pizzaShape, radius * 0.9, getCheeseY(), cheeseType),
       );
