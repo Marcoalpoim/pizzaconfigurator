@@ -164,7 +164,7 @@ export default function PizzaControlsBtns({
         {/* 💾 Save */}
         <div className="btn-box">
           <button onClick={handleSaveToProfile}>
-            <img src="./icons/Save.svg" alt="save" /> 
+            <img src="/icons/Save.svg" alt="save" /> 
               {/* <p>Guardar</p>*/}
           </button>
         </div>
