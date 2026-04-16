@@ -306,7 +306,7 @@ const endTarget = isMobile
     frameId = requestAnimationFrame(animate);
 
     if (zoomProgress < 1) {
-      zoomProgress += 0.0025; // slow, cinematic
+      zoomProgress += 0.0225; // slow, cinematic
       camera.position.copy(
         startPos.clone().lerp(endPos, easeInOut(Math.min(zoomProgress, 1))),
       );
