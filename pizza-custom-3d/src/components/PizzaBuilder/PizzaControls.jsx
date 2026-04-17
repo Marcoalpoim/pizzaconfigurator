@@ -41,7 +41,7 @@ function AccordionSelect({ label, value, onChange, options }) {
             width="14" height="14" viewBox="0 0 16 16" fill="none"
             stroke="currentColor" strokeWidth="1.5"
             style={{
-              color: "#888",
+              color: "#fff",
               transition: "transform 0.25s ease",
               transform: open ? "rotate(180deg)" : "rotate(0deg)",
             }}
@@ -88,7 +88,7 @@ function AccordionSelect({ label, value, onChange, options }) {
               >
                 {opt.label}
                 {isSelected && (
-                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" strokeWidth="2">
                     <path d="M3 8l3.5 3.5L13 5" />
                   </svg>
                 )}
@@ -102,9 +102,9 @@ function AccordionSelect({ label, value, onChange, options }) {
 }
  
 const BASE_TYPES = [
-  { value: "thin", label: "Thin" },
-  { value: "medium", label: "Medium" },
-  { value: "thick", label: "Thick" },
+  { value: "fina", label: "Fina" },
+  { value: "média", label: "Média" },
+  { value: "alta e fofa", label: "Alta e Fofa" },
 ];
  
 const BASE_SIZES = [
@@ -115,13 +115,13 @@ const BASE_SIZES = [
 ];
  
 const SHAPES = [
-  { value: "circle", label: "Circle" },
-  { value: "square", label: "Square" },
-  { value: "triangle", label: "Triangle" },
-  { value: "diamond", label: "Diamante" },
+  { value: "círculo", label: "Círculo" },
+  { value: "quadrado", label: "Quadrado" },
+  { value: "triangulo", label: "Triângulo" },
+  { value: "diamante", label: "Diamante" },
   { value: "oval", label: "Oval" },
-  { value: "star", label: "Star" },
-  { value: "heart", label: "Heart" },
+  { value: "estrela", label: "Estrela" },
+  { value: "coração", label: "Coração" },
 ];
  
 const SAUCES = [

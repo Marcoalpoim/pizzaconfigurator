@@ -21,7 +21,48 @@ html,
 .app-root {
   height: 100%;
 }
+/* === LOADER SCREEN === */
+.loader-screen {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+}
 
+.loader-gif {
+  width: 180px;
+  height: auto;
+}
+
+/* === BRAND LOGO === */
+.brand-logo {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+}
+
+.brand-logo img {
+  height: 65px;
+  width: auto;
+}
+
+/* Desktop: pin logo to top-left */
+@media (min-width: 768px) {
+  .brand-logo {
+    left: 20px;
+    transform: none;
+  }
+  .brand-logo img {
+  height: 45px;
+  width: auto;
+}
+
+}
 /* Auth bar */
 .auth-bar {
   display: flex;
@@ -99,13 +140,15 @@ background-color: #00000030;
   flex-direction: row;
   gap: 20px;
   padding: 20px;
+  justify-content: center;
 }
 
 .feed-main {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 20px; 
   width: 100%;
+    max-width: 800px;
 }
 
 .feed-search {
@@ -114,33 +157,121 @@ background-color: #00000030;
 
 .feed-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 20px;
+  justify-items: center;
 }
 
 
 .feed-card {
   position: relative;
   border-radius: 16px;
-  padding: 12px;
+  padding: 0px;
   background: #181818;
   border: 1px solid #2a2a2a;
   display: flex;
   flex-direction: column;
+width: 100%;
+  min-width: 200px;
+  overflow: hidden;
 }
 
 .feed-card img {
   width: 100%;
-  height: 180px;
+  height: 100%;
+  min-height: 250px;
   object-fit: cover;
   border-radius: 12px;
 }
+.feed-card-info {
+ position: absolute;
+    bottom: 0;
+    left: 0; 
+width: -webkit-fill-available; 
+    background: linear-gradient(180deg, transparent, #111);
+    color: white;
+}
+.feed-card-autor {
+margin-top: 8px;
+    font-weight: 600;
+    padding: 0px 10px;
+}
+.feed-card-pizzainfo {
+    font-size: 13px;
+    color: rgb(170, 170, 170);
+      padding: 0px 10px;
+}
+.feed-card-btns {
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+    right: 10px;
+    gap: 5px;
+}
+
+.feed-card-btns button{
+border: 1px solid #888;
+background-color: #00000030;
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
+display: flex;
+    align-items: center;
+    gap: 2px;
+    cursor: pointer;
+     color: #fff;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    
+}
+.feed-card-btns button > img{
+width: 20px;
+    height: auto;
+    min-height: 0;
+}
+
+
+.feed-card-tags {
+margin: 10px 0px;
+    display: flex; 
+    width: inherit;
+    gap: 6px;
+    overflow-x: scroll; 
+      flex-wrap: nowrap; 
+        padding: 0px 10px;
+}
+
+.tags-list{
+gap: 5px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.feed-card-tags > .tag {
+  flex: 0 0 auto;   
+  white-space: nowrap;  
+}
+
+  
+.feed-card-tags {
+  scrollbar-width: none; 
+}
+ 
+.feed-card-tags::-webkit-scrollbar {
+  width: 0px;
+}
+ 
+
+
 
 .feed-tags {
   border: 1px solid #555;
   border-radius: 16px;
   padding: 16px;
   height: max-content;
+  max-width: 200px;
   display: flex;
   overflow: hidden;
   flex-direction: column;
@@ -155,10 +286,14 @@ background-color: #00000030;
   border: 1px solid #888;
   border-radius: 999px;
   padding: 6px 12px;
-  margin: 4px;
-  background: transparent;
+      width: max-content;
+  margin: 0px;
+    background-color: #40404000;
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
   color: white;
   cursor: pointer;
+  font-size: 12px;
 }
 
 .tag-list {
@@ -174,6 +309,10 @@ background-color: #00000030;
   padding: 10px;
 }
 
+.feed-tags button:hover { 
+  background-color: #ffffff25; 
+  cursor: pointer;
+}
 
 
 .tag.active {
@@ -371,7 +510,7 @@ border-radius: 30px;
   margin: 0;
   font-size: 14px;
   line-height: 16px;
-  font-weight: 500;
+  font-weight: 700;
 }
 
 .config-btn button img {
@@ -817,7 +956,7 @@ background: rgb(255 255 255 / 20%);
   .config-content {
     height: calc(50vh - 200px);
     width: auto;
-    padding: 10px 15px;
+    padding: 20px 15px;
         margin-bottom: 90px;
   }
 .caloriebreakdown{

@@ -192,7 +192,7 @@ pinBody.rotation.set(
   const keyLight = new THREE.DirectionalLight(0xfff2d8, 1.4);
   keyLight.position.set(-4, 8, 5);
   keyLight.castShadow = true;
-  keyLight.shadow.mapSize.set(4096, 4096);
+  keyLight.shadow.mapSize.set(1024, 1024);
   keyLight.shadow.camera.near = 0.5;
   keyLight.shadow.camera.far = 50;
   keyLight.shadow.camera.left = -14;
@@ -218,8 +218,8 @@ pizzaSpot.angle = Math.PI / 4;
 pizzaSpot.penumbra = 1.0;
 pizzaSpot.decay = 1.4;
 pizzaSpot.distance = 18;
-  pizzaSpot.castShadow = true;
-  pizzaSpot.shadow.mapSize.set(2048, 2048);
+ // pizzaSpot.castShadow = true;
+  //pizzaSpot.shadow.mapSize.set(2048, 2048);
   pizzaSpot.shadow.bias = -0.0003;
   scene.add(pizzaSpot);
 
@@ -257,7 +257,7 @@ pizzaSpot.distance = 18;
   renderer.setSize(container.clientWidth, container.clientHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+ renderer.shadowMap.type = THREE.PCFShadowMap 
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.9; // slightly under-exposed = richer, less blown out
   container.appendChild(renderer.domElement);

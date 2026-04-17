@@ -18,9 +18,9 @@ export default function PizzaBuilder({
   setShowConfig,
 }) {
   const [sauceType, setSauceType] = useState("tomate");
-  const [baseType, setBaseType] = useState("medium");
+  const [baseType, setBaseType] = useState("média");
   const [baseSize, setBaseSize] = useState(33);
-  const [pizzaShape, setPizzaShape] = useState("circle");
+  const [pizzaShape, setPizzaShape] = useState("circulo");
   const [snapToRings, setSnapToRings] = useState(true);
   const [cheeseType, setCheeseType] = useState("mozzarella");
   const [ingredientCounts, setIngredientCounts] = useState({});
@@ -66,7 +66,7 @@ export default function PizzaBuilder({
   // ── HELPERS ──────────────────────────────────────────────────────────────
 
   const getBaseDims = (type, size) => {
-    const height = type === "thin" ? 0.04 : type === "medium" ? 0.08 : 0.15;
+    const height = type === "fina" ? 0.04 : type === "média" ? 0.06 : 0.10;
     const radius = size === 28 ? 1.9 : size === 33 ? 2.2 : 2.7;
     return { height, radius };
   };
@@ -93,18 +93,18 @@ export default function PizzaBuilder({
 
   function makeShape2D(shape, r) {
     const s = new THREE.Shape();
-    if (shape === "square") {
+    if (shape === "quadrado") {
       s.moveTo(-r, -r);
       s.lineTo(r, -r);
       s.lineTo(r, r);
       s.lineTo(-r, r);
       s.closePath();
-    } else if (shape === "triangle") {
+    } else if (shape === "triangulo") {
       s.moveTo(0, -r);
       s.lineTo(r * 0.866, r * 0.5);
       s.lineTo(-r * 0.866, r * 0.5);
       s.closePath();
-    } else if (shape === "diamond") {
+    } else if (shape === "diamante") {
       s.moveTo(0, -r);
       s.lineTo(r, 0);
       s.lineTo(0, r);
@@ -119,7 +119,7 @@ export default function PizzaBuilder({
         s.lineTo(Math.cos(a) * rx, Math.sin(a) * ry);
       }
       s.closePath();
-    } else if (shape === "star") {
+    } else if (shape === "estrela") {
       const outerR = r,
         innerR = r * 0.55,
         points = 5;
@@ -134,7 +134,7 @@ export default function PizzaBuilder({
         Math.sin(-Math.PI / 2) * outerR,
       );
       s.closePath();
-    } else if (shape === "heart") {
+    } else if (shape === "coração") {
       const sc = r * 0.55;
       s.moveTo(0, -r * 0.9);
       s.bezierCurveTo(-sc * 2, -sc * 0.5, -sc * 2, sc * 1.2, 0, sc * 0.8);
@@ -153,7 +153,7 @@ export default function PizzaBuilder({
     const mat = makeDoughMat();
 
     let discGeom;
-    if (!shape || shape === "circle") {
+    if (!shape || shape === "circulo") {
       discGeom = new THREE.CylinderGeometry(
         innerRadius,
         innerRadius,
@@ -178,11 +178,11 @@ export default function PizzaBuilder({
     discMesh.receiveShadow = true;
 
     const crustCentreR = innerRadius + crustWidth * 0.3;
-    const sharpShapes = ["square", "triangle", "diamond", "star"];
+    const sharpShapes = ["quadrado", "triangulo", "diamante", "estrela"];
     const isSharp = sharpShapes.includes(shape);
 
     let curve3D;
-    if (!shape || shape === "circle") {
+    if (!shape || shape === "circulo") {
       const pts = [];
       for (let i = 0; i < 128; i++) {
         const a = (i / 128) * Math.PI * 2;
@@ -243,7 +243,7 @@ export default function PizzaBuilder({
     const { radius } = getBaseDims(type, size);
     const innerR = radius * 0.86 * 0.97;
     const geom =
-      !shape || shape === "circle"
+      !shape || shape === "circulo"
         ? new THREE.CircleGeometry(innerR, 64)
         : new THREE.ShapeGeometry(makeShape2D(shape, innerR));
     const loader = new THREE.TextureLoader();
@@ -294,15 +294,15 @@ export default function PizzaBuilder({
     return inside;
   }
   function isInsideShape(shape, x, z, r) {
-    if (!shape || shape === "circle") return x * x + z * z <= r * r;
-    if (shape === "square") return Math.abs(x) <= r && Math.abs(z) <= r;
+    if (!shape || shape === "circulo") return x * x + z * z <= r * r;
+    if (shape === "quadrado") return Math.abs(x) <= r && Math.abs(z) <= r;
     if (shape === "oval") {
       const rx = r * 1.3,
         rz = r * 0.7;
       return (x * x) / (rx * rx) + (z * z) / (rz * rz) <= 1;
     }
-    if (shape === "diamond") return Math.abs(x) / r + Math.abs(z) / r <= 1;
-    if (shape === "triangle")
+    if (shape === "diamante") return Math.abs(x) / r + Math.abs(z) / r <= 1;
+    if (shape === "triangulo")
       return pointInTriangle(
         x,
         z,
@@ -310,13 +310,13 @@ export default function PizzaBuilder({
         { x: r * 0.866, z: -r * 0.5 },
         { x: -r * 0.866, z: -r * 0.5 },
       );
-    if (shape === "star") {
-      const starShape = makeShape2D("star", r);
+    if (shape === "estrela") {
+      const starShape = makeShape2D("estrela", r);
       const pts = starShape.getPoints(64);
       // makeShape2D is in XY but placement is in XZ, so pass x and -z
       return pointInPolygon(x, -z, pts);
     }
-    if (shape === "heart") {
+    if (shape === "coração") {
       const sc = r * 0.3,
         lobeR = sc * 1.8,
         lz = sc * 0.4,
@@ -340,30 +340,40 @@ export default function PizzaBuilder({
     const r = radius * 0.78;
     const MIN_DIST = 0.38; // minimum distance between toppings
     const MAX_ATTEMPTS = 40;
+    const JITTER = 0.18;
 
     for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
       let x, z;
 
-      if (shape === "oval") {
-        const angle = Math.random() * Math.PI * 2;
-        const dist = Math.sqrt(Math.random());
-        x = Math.cos(angle) * dist * r * 1.3;
-        z = Math.sin(angle) * dist * r * 0.7;
-      } else if (shape === "heart") {
-        x = (Math.random() * 2 - 1) * r * 0.65;
-        z = (Math.random() * 2 - 1) * r * 0.85;
-      } else if (shape === "star") {
-        const angle = Math.random() * Math.PI * 2;
-        const dist = Math.sqrt(Math.random()) * r * 0.72;
-        x = Math.cos(angle) * dist;
-        z = Math.sin(angle) * dist;
-      } else {
-        // circle, square, triangle, diamond — use polar for even fill
-        const angle = Math.random() * Math.PI * 2;
-        const dist = Math.sqrt(Math.random()) * r; // sqrt for uniform density
-        x = Math.cos(angle) * dist;
-        z = Math.sin(angle) * dist;
-      }
+    if (shape === "oval") {
+      const angle = Math.random() * Math.PI * 2;
+      const dist = Math.sqrt(Math.random());
+      x = Math.cos(angle) * dist * r * 1.3;
+      z = Math.sin(angle) * dist * r * 0.7;
+    } else if (shape === "coração") {
+      x = (Math.random() * 2 - 1) * r * 0.65;
+      z = (Math.random() * 2 - 1) * r * 0.85;
+    } else if (shape === "estrela") {
+      const angle = Math.random() * Math.PI * 2;
+      const dist = Math.sqrt(Math.random()) * r * 0.72;
+      x = Math.cos(angle) * dist;
+      z = Math.sin(angle) * dist;
+    } else if (shape === "quadrado") { 
+      x = (Math.random() * 2 - 1) * r;
+      z = (Math.random() * 2 - 1) * r;
+    } else if (shape === "diamante") { 
+      x = (Math.random() * 2 - 1) * r;
+      z = (Math.random() * 2 - 1) * r;
+    } else if (shape === "triangulo") { 
+      x = (Math.random() * 2 - 1) * r;
+      z = (Math.random() * 2 - 1) * r;
+    } else { 
+      const angle = Math.random() * Math.PI * 2;
+      const dist = Math.sqrt(Math.random()) * r;
+      x = Math.cos(angle) * dist;
+      z = Math.sin(angle) * dist;
+    }
+
 
       if (!isInsideShape(shape, x, z, r)) continue;
 
@@ -377,9 +387,40 @@ export default function PizzaBuilder({
         return { x, z };
       }
     }
+ // Build a grid of candidate points
+  const candidates = [];
+  const step = 0.38; // grid spacing — tune this to change density
 
+  for (let x = -r; x <= r; x += step) {
+    for (let z = -r; z <= r; z += step) {
+      if (isInsideShape(shape, x, z, r)) {
+        candidates.push({ x, z });
+      }
+    }
+  }
+
+  // Shuffle candidates so picks feel random, not row-by-row
+  for (let i = candidates.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+  }
+
+  // Pick a candidate not already used, with jitter
+  for (const c of candidates) {
+    const jx = c.x + (Math.random() - 0.5) * JITTER * 2;
+    const jz = c.z + (Math.random() - 0.5) * JITTER * 2;
+
+    const alreadyUsed = placedPositionsRef.current.some(
+      (p) => Math.sqrt((p.x - jx) ** 2 + (p.z - jz) ** 2) < step * 0.85
+    );
+
+    if (!alreadyUsed && isInsideShape(shape, jx, jz, r)) {
+      placedPositionsRef.current.push({ x: jx, z: jz });
+      return { x: jx, z: jz };
+    }
+  }
     // Fallback: just place it inside shape ignoring spacing
-    for (let attempt = 0; attempt < 60; attempt++) {
+    for (let i = 0; i < 60; i++) {
       const angle = Math.random() * Math.PI * 2;
       const dist = Math.sqrt(Math.random()) * r;
       const x = Math.cos(angle) * dist;
@@ -388,6 +429,7 @@ export default function PizzaBuilder({
     }
     return { x: 0, z: 0 };
   }
+  
   function getBaseSurfaceY() {
     return baseRef.current?.userData?.surfaceY ?? 0;
   }
@@ -402,7 +444,7 @@ export default function PizzaBuilder({
   }
 
   function snapToRingsIfNeeded(posVec) {
-    if (!snapToRingsRef.current || pizzaShapeRef.current !== "circle")
+    if (!snapToRingsRef.current || pizzaShapeRef.current !== "circulo")
       return posVec;
     const { radius } = getBaseDims(baseTypeRef.current, baseSizeRef.current);
     const dx = posVec.x,
@@ -441,6 +483,7 @@ export default function PizzaBuilder({
   // ── CHEESE ───────────────────────────────────────────────────────────────
 
   function createCheeseBlob(shape, radius, y, cheeseType) {
+    
     const geom = new THREE.SphereGeometry(0.18 + Math.random() * 0.05, 12, 8);
     const loader = new THREE.TextureLoader();
     const paths = {
@@ -466,14 +509,14 @@ export default function PizzaBuilder({
       0.08 + Math.random() * 0.04,
       1.0 + Math.random() * 0.4,
     );
-
+mesh.castShadow = false;
     // ✅ Random rotation so blobs look scattered, not stamped
     mesh.rotation.y = Math.random() * Math.PI * 2;
     mesh.rotation.z = (Math.random() - 0.5) * 0.3;
 
     const { x, z } = randomPointInShape(shape, radius);
     mesh.position.set(x, y + Math.random() * 0.01, z);
-    mesh.castShadow = true;
+    mesh.castShadow = false;
     mesh.receiveShadow = true;
     return mesh;
   }
@@ -483,7 +526,7 @@ export default function PizzaBuilder({
     const mesh = createMeshForIngredient(fullIng);
     mesh.userData.ing = { ...fullIng };
     const pos =
-      pizzaShapeRef.current === "circle"
+      pizzaShapeRef.current === "circulo"
         ? snapToRingsIfNeeded(worldPos)
         : constrainToShape(worldPos);
     mesh.position.set(pos.x, getToppingSurfaceY(), pos.z);
@@ -511,18 +554,18 @@ export default function PizzaBuilder({
 
   function generateRandomPizza() {
     const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
-    setBaseType(rand(["thin", "medium", "thick"]));
+    setBaseType(rand(["fina", "média", "alta e fofa"]));
     setBaseSize(rand([28, 33, 40]));
-    setSauceType(rand(["tomato", "carbonara", "pesto", "barbecue"]));
+    setSauceType(rand(["tomate e oregãos", "carbonara", "pesto", "barbecue"]));
     setPizzaShape(
       rand([
-        "circle",
-        "square",
-        "triangle",
-        "diamond",
+        "círculo",
+        "quadrado",
+        "triangulo",
+        "diamante",
         "oval",
-        "star",
-        "heart",
+        "estrela",
+        "coração",
       ]),
     );
     const MIN_TOPPINGS = 35;
@@ -630,7 +673,7 @@ export default function PizzaBuilder({
       if (raycaster.ray.intersectPlane(plane, dropPoint)) {
         const target = dropPoint.clone().add(pointerState.offset);
         const constrained =
-          pizzaShapeRef.current === "circle"
+          pizzaShapeRef.current === "circulo"
             ? snapToRingsIfNeeded(target)
             : constrainToShape(target);
         selected.position.set(
@@ -683,21 +726,38 @@ export default function PizzaBuilder({
     const group = toppingsGroupRef.current;
     if (!group) return;
     group.clear();
-    placedPositionsRef.current = []; // ← reset spacing tracker
+    placedPositionsRef.current = [];  
+
     const { radius } = getBaseDims(baseType, baseSize);
-    Object.entries(ingredientCounts).forEach(([id, count]) => {
-      if (!count) return;
-      const ing = INGREDIENTS.find((i) => i.id === id);
-      if (!ing) return;
-      for (let i = 0; i < count; i++) {
+
+// Sort ingredients so larger counts are placed first (fill evenly before cramming)
+  const sorted = Object.entries(ingredientCounts)
+    .filter(([, count]) => count > 0)
+    .sort(([, a], [, b]) => b - a);
+
+  // Interleave placements: place one of each ingredient at a time
+  // so no single topping clusters together
+  const queues = sorted.map(([id, count]) => {
+    const ing = INGREDIENTS.find((i) => i.id === id);
+    return { ing, remaining: count };
+  });
+
+  let anyLeft = true;
+  while (anyLeft) {
+    anyLeft = false;
+    for (const q of queues) {
+      if (q.remaining > 0 && q.ing) {
+        anyLeft = true;
+        q.remaining--;
         const { x, z } = randomPointInShape(pizzaShape, radius);
         addIngredientAtWorldPos(
-          ing,
-          new THREE.Vector3(x, getToppingSurfaceY(), z),
+          q.ing,
+          new THREE.Vector3(x, getToppingSurfaceY(), z)
         );
       }
-    });
-  }, [ingredientCounts, baseType, baseSize, pizzaShape]);
+    }
+  }
+}, [ingredientCounts, baseType, baseSize, pizzaShape]);
 
   useEffect(() => {
     const controls = controlsRef.current;
@@ -750,7 +810,7 @@ export default function PizzaBuilder({
     group.clear();
     if (cheeseType === "none") return;
     const { radius } = getBaseDims(baseType, baseSize);
-    for (let i = 0; i < 120; i++)
+    for (let i = 0; i < 100; i++)
       group.add(
         createCheeseBlob(pizzaShape, radius * 0.9, getCheeseY(), cheeseType),
       );

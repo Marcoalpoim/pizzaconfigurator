@@ -558,67 +558,64 @@ geom.computeVertexNormals();
   group.rotation.y = Math.random() * Math.PI * 2;
   return group;
 }
-function makeChourico() {
+
+ 
+function makeChourico(hexColor = "#9b260f") {
   const group = new THREE.Group();
   const sc = 0.85 + Math.random() * 0.25;
   const size = 128;
   const data = new Uint8Array(size * size * 4);
+
+  const base = hexToRgb(hexColor);
+  const edge = { r: Math.round(base.r * 0.52), g: Math.round(base.g * 0.58), b: Math.round(base.b * 0.53) };
+  const fat  = { r: 228, g: 205, b: 175 };
+
   const fatChunks = Array.from({ length: 14 }, () => ({
     x: Math.random() * size,
     y: Math.random() * size,
     r: 5 + Math.random() * 8,
   }));
+
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       const idx = (y * size + x) * 4;
-      const dx = x - size / 2,
-        dy = y - size / 2;
+      const dx = x - size / 2, dy = y - size / 2;
       const d = Math.sqrt(dx * dx + dy * dy) / (size / 2);
-      if (d > 1.0) {
-        data[idx + 3] = 0;
-        continue;
-      }
-      const onFat = fatChunks.some(
-        (c) => Math.sqrt((x - c.x) ** 2 + (y - c.y) ** 2) < c.r,
-      );
-      const v = (Math.random() - 0.5) * 18;
-      if (d > 0.88) {
-        data[idx] = 80 + v;
-        data[idx + 1] = 22 + v;
-        data[idx + 2] = 8 + v;
-      } else if (onFat) {
-        data[idx] = 228 + v;
-        data[idx + 1] = 205 + v;
-        data[idx + 2] = 175 + v;
-      } else {
-        data[idx] = 155 + v;
-        data[idx + 1] = 38 + v;
-        data[idx + 2] = 15 + v;
-      }
-      data[idx + 3] = 255;
+
+     if (d > 1.0) { data[idx + 3] = 0; continue; }
+
+const onFat = fatChunks.some(
+  (c) => Math.sqrt((x - c.x) ** 2 + (y - c.y) ** 2) < c.r
+);
+const v = (Math.random() - 0.5) * 18;
+
+// 👇 removido o "if (d > 0.88)" — agora só fat ou base
+if (onFat) {
+  data[idx]     = fat.r + v;
+  data[idx + 1] = fat.g + v;
+  data[idx + 2] = fat.b + v;
+} else {
+  data[idx]     = base.r + v;
+  data[idx + 1] = base.g + v;
+  data[idx + 2] = base.b + v;
+}
+data[idx + 3] = 255;
     }
   }
+
   const tex = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
   tex.needsUpdate = true;
+
   const disc = new THREE.Mesh(
     new THREE.CylinderGeometry(0.22 * sc, 0.215 * sc, 0.028, 48),
-    new THREE.MeshStandardMaterial({
-      map: tex,
-      roughness: 0.7,
-      transparent: true,
-    }),
+    new THREE.MeshStandardMaterial({ map: tex, roughness: 0.7, transparent: true })
   );
-  const rim = new THREE.Mesh(
-    new THREE.TorusGeometry(0.218 * sc, 0.02, 8, 48),
-    solidMat(0x4a0e04, 0.85),
-  );
-  rim.rotation.x = Math.PI / 2;
-  rim.position.y = 0.008;
+
   group.add(disc);
-  group.add(rim);
   return group;
 }
- 
+
+
 function makeFiambre() {
   const group = new THREE.Group();
   const sc = 0.75 + Math.random() * 0.35;
@@ -922,10 +919,7 @@ function makeCamarao() {
   return group;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ATUM — pale pink flaky chunks
-// ─────────────────────────────────────────────────────────────────────────────
-function makeAtum() {
+ function makeAtum() {
   const group = new THREE.Group();
   const numFlakes = 2 + Math.floor(Math.random() * 3);
   for (let i = 0; i < numFlakes; i++) {
@@ -949,10 +943,7 @@ function makeAtum() {
   return group;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// MAIN FACTORY
-// ─────────────────────────────────────────────────────────────────────────────
-export function createMeshForIngredient(ing) {
+ export function createMeshForIngredient(ing) {
   let group;
   switch (ing.id) {
     case "pepperoni":

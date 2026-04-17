@@ -4,7 +4,7 @@ import React, { useMemo } from "react";
 // ── Calorie data ──────────────────────────────────────────────────────────────
 
 const TOPPING_CALORIES = {
-  pepperoni: 55,  // per slice/piece
+  pepperoni: 55,  
   mushroom:   4,
   olive:      8,
   basil:      1,
@@ -43,8 +43,8 @@ const CHEESE_CALORIES = {
 // ── Reaction tiers ────────────────────────────────────────────────────────────
 
 const REACTIONS = [
-  { max: 300,  label: "Basicamente uma salada",     color: "#1d9e75" },
-  { max: 500,  label: "Respeitável",                color: "#4aab6d" },
+  { max: 300,  label: "Basicamente uma salada",     color: "#005316" },
+  { max: 500,  label: "Respeitável",                color: "#194328" },
   { max: 700,   label: "Energia clássica de pizza",  color: "#ba7517" },
   { max: 900,   label: "O nutricionista saiu do chat", color: "#d4621a" },
   { max: 1100, label: "Ilegal em 12 países",        color: "#e24b4a" },
@@ -130,7 +130,7 @@ export default function CalorieCounter({
           ["Queijo",  breakdown.cheeseC],
           ["Toppings", breakdown.toppingsC],
         ].map(([label, cal]) => (
-          <div key={label} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#999" }}>
+          <div key={label} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#313131" }}>
             <span>{label}</span>
             <span style={{ fontWeight: 500, color: "#666" }}>{cal} kcal</span>
           </div>

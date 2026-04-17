@@ -11,46 +11,121 @@ async function downloadRecipeAsReceipt(recipe) {
   downloads[recipe.id] = (downloads[recipe.id] || 0) + 1;
   localStorage.setItem("downloads", JSON.stringify(downloads));
 
-  // Build the data object PizzaReceipt expects
-  const TOPPING_PRICES  = { pepperoni:1.8, mushroom:1.2, olive:1.0, basil:0.8, ananas:1.5, cebola:0.9 };
-  const BASE_PRICES     = { thin:4.5, medium:5.5, thick:6.5 };
-  const SIZE_PRICES     = { 28:0, 33:1.5, 40:3.0 };
-  const SAUCE_PRICES    = { tomate:1.0, tomato:1.0, carbonara:1.8, pesto:2.0, barbecue:1.5 };
-  const CHEESE_PRICES   = { mozzarella:2.0, cheddar:2.2, parmesan:2.5, gorgonzola:2.8, none:0 };
-  const TOPPING_NAMES   = { pepperoni:"Salame Piccante", mushroom:"Funghi Porcini", olive:"Olive Taggiasche", basil:"Basilico Fresco", ananas:"Ananas (con coraggio)", cebola:"Cipolla Caramellata" };
+  // ── Prices ────────────────────────────────────────────────────────────────
+  const BASE_PRICES = {
+    "fina": 4.5,
+    "média": 5.5,
+    "alta e fofa": 6.5,
+  };
+  const SIZE_PRICES  = { 28: 0, 33: 1.5, 40: 3.0 };
+  const SAUCE_PRICES = {
+    "tomate":           1.0,
+    "tomate e oregãos": 1.0,
+    "carbonara":        1.8,
+    "pesto":            2.0,
+    "barbecue":         1.5,
+  };
+  const CHEESE_PRICES = {
+    mozzarella: 2.0,
+    cheddar:    2.2,
+    parmesan:   2.5,
+    gorgonzola: 2.8,
+    none:       0,
+  };
+  const TOPPING_PRICES = {
+    pepperoni:          1.80,
+    cogumelos:          1.20,
+    azeitona:           1.00,
+    basil:              0.80,
+    ananas:             1.50,
+    cebola:             0.90,
+    frango:             2.00,
+    carne:              2.50,
+    pancetta:           1.80,
+    bacon:              1.80,
+    chourico:           1.70,
+    fiambre:            1.40,
+    pimento:            1.00,
+    tomate_cherry:      1.10,
+    cebola_caramelizada:1.20,
+    camarao:            2.80,
+    atum:               2.20,
+  };
+  const TOPPING_NAMES = {
+    pepperoni:           "Pepperoni",
+    cogumelos:           "Cogumelos",
+    azeitona:            "Azeitona",
+    basil:               "Manjericão",
+    ananas:              "Ananás",
+    cebola:              "Cebola",
+    frango:              "Frango Marinado",
+    carne:               "Carne de Vaca",
+    pancetta:            "Pancetta",
+    bacon:               "Bacon",
+    chourico:            "Chouriço",
+    fiambre:             "Fiambre",
+    pimento:             "Pimento Verde",
+    tomate_cherry:       "Tomate Cherry",
+    cebola_caramelizada: "Cebola Caramelizada",
+    camarao:             "Camarão",
+    atum:                "Atum",
+  };
 
-  // Rebuild ingredientCounts from the toppings array stored on the recipe
+  // ── Rebuild ingredient counts from toppings array ─────────────────────────
   const ingredientCounts = {};
   (recipe.toppings || []).forEach((t) => {
     if (t.id) ingredientCounts[t.id] = (ingredientCounts[t.id] || 0) + 1;
   });
 
-  const basePrice   = BASE_PRICES[recipe.baseType]    ?? 5.5;
-  const sizePrice   = SIZE_PRICES[recipe.baseSize]    ?? 0;
-  const saucePrice  = SAUCE_PRICES[recipe.sauceType]  ?? 1.0;
-  const cheesePrice = CHEESE_PRICES[recipe.cheeseType] ?? 2.0;
+  // ── Prices (normalise keys to lowercase for safety) ───────────────────────
+  const baseKey   = (recipe.baseType  || "").toLowerCase();
+  const sauceKey  = (recipe.sauceType || "").toLowerCase();
+  const cheeseKey = (recipe.cheeseType || "").toLowerCase();
+
+  const basePrice   = BASE_PRICES[baseKey]   ?? 5.5;
+  const sizePrice   = SIZE_PRICES[recipe.baseSize] ?? 0;
+  const saucePrice  = SAUCE_PRICES[sauceKey]  ?? 1.0;
+  const cheesePrice = CHEESE_PRICES[cheeseKey] ?? 2.0;
 
   const toppingLines = Object.entries(ingredientCounts).map(([id, count]) => ({
     id,
-    name: TOPPING_NAMES[id] ?? id,
+    name:  TOPPING_NAMES[id]  ?? id,
     count,
     price: (TOPPING_PRICES[id] ?? 1.0) * count,
   }));
 
   const coperto  = 2.5;
-  const subtotal = basePrice + sizePrice + saucePrice + cheesePrice +
-                   toppingLines.reduce((s, l) => s + l.price, 0) + coperto;
+  const subtotal =
+    basePrice + sizePrice + saucePrice + cheesePrice +
+    toppingLines.reduce((s, l) => s + l.price, 0) + coperto;
   const vat   = subtotal * 0.22;
   const total = subtotal + vat;
 
+  // ── Shape label (display-only on receipt) ─────────────────────────────────
+  const SHAPE_LABELS = {
+    circulo:   "Círculo",
+    quadrado:  "Quadrado",
+    triangulo: "Triângulo",
+    diamante:  "Diamante",
+    oval:      "Oval",
+    estrela:   "Estrela",
+    coração:   "Coração",
+  };
+  const shapeLabel =
+    SHAPE_LABELS[(recipe.pizzaShape || "").toLowerCase()] ??
+    recipe.pizzaShape ??
+    "Círculo";
+
+  // ── Data object for PizzaReceipt ──────────────────────────────────────────
   const data = {
     orderId:   `#${recipe.id.toString().slice(-4)}`,
-    timestamp: new Date(recipe.createdAt || Date.now()).toLocaleString("it-IT", {
+    timestamp: new Date(recipe.createdAt || Date.now()).toLocaleString("pt-PT", {
       day: "2-digit", month: "long", year: "numeric",
       hour: "2-digit", minute: "2-digit",
     }),
     baseType:         recipe.baseType,
     baseSize:         recipe.baseSize,
+    pizzaShape:       shapeLabel,
     sauceType:        recipe.sauceType,
     cheeseType:       recipe.cheeseType,
     ingredientCounts,
@@ -58,7 +133,7 @@ async function downloadRecipeAsReceipt(recipe) {
     toppingLines, subtotal, vat, total,
   };
 
-  // Mount receipt off-screen, capture with html2canvas, then remove
+  // ── Mount off-screen, capture, remove ────────────────────────────────────
   const container = document.createElement("div");
   container.style.cssText = "position:fixed;left:-9999px;top:-9999px;z-index:-1;";
   document.body.appendChild(container);
@@ -66,7 +141,6 @@ async function downloadRecipeAsReceipt(recipe) {
   const root = ReactDOM.createRoot(container);
   root.render(<ReceiptContent data={data} />);
 
-  // Wait one frame for React to paint
   await new Promise((r) => setTimeout(r, 100));
 
   try {
@@ -122,9 +196,12 @@ export default function Feed({ feed = [], onBookmark, bookmarks }) {
   const filteredFeed = useMemo(() => {
     return feed.filter((item) => {
       const text = (
-        (item.author || "") + " " +
-        (item.baseType || "") + " " +
-        (item.sauceType || "") + " " +
+        (item.author || "") +
+        " " +
+        (item.baseType || "") +
+        " " +
+        (item.sauceType || "") +
+        " " +
         (item.toppings?.map((t) => t.name).join(" ") || "")
       ).toLowerCase();
       const matchesSearch = text.includes(search.toLowerCase());
@@ -150,7 +227,9 @@ export default function Feed({ feed = [], onBookmark, bookmarks }) {
             className={`tag ${activeTags.includes(tag) ? "active" : ""}`}
             onClick={() =>
               setActiveTags((prev) =>
-                prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
+                prev.includes(tag)
+                  ? prev.filter((t) => t !== tag)
+                  : [...prev, tag],
               )
             }
           >
@@ -158,7 +237,13 @@ export default function Feed({ feed = [], onBookmark, bookmarks }) {
           </button>
         ))}
       </div>
-      <button style={{ marginTop: 12 }} onClick={() => { setSearch(""); setActiveTags([]); }}>
+      <button
+        style={{ marginTop: 12 }}
+        onClick={() => {
+          setSearch("");
+          setActiveTags([]);
+        }}
+      >
         Reset Filters
       </button>
     </>
@@ -201,51 +286,59 @@ export default function Feed({ feed = [], onBookmark, bookmarks }) {
                   src={item.image || "/placeholder-pizza.png"}
                   alt="Pizza"
                   loading="lazy"
-                  style={{ width: "100%", borderRadius: 12, objectFit: "cover", height: 180, background: "#222" }}
                 />
-
-                <div style={{ marginTop: 8, fontWeight: 600 }}>
-                  {item.author || "Anonymous"}
-                </div>
-
-                <div style={{ fontSize: 13, color: "#aaa" }}>
-                  {item.baseType} — {item.baseSize} cm
-                </div>
-
-                <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 6 }}>
-                  {grouped && Object.entries(grouped).map(([name, info], idx) => (
-                    <span
-                      key={idx}
-                      className="tag"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const tag = name.toLowerCase();
-                        setActiveTags((prev) =>
-                          prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
-                        );
-                      }}
-                      style={{ cursor: "pointer", fontSize: 12, border: "1px solid #777", padding: "4px 8px", borderRadius: 999 }}
-                    >
-                      {name} ×{info.count}
-                    </span>
-                  ))}
-                </div>
-
-                <div style={{ marginTop: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  {/* ⭐ Bookmark */}
-                  <div
-                    onClick={(e) => { e.stopPropagation(); onBookmark(item.id); }}
-                    style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", color: bookmarks.includes(item.id) ? "#ffd700" : "#fff" }}
-                  >
-                    ⭐ <span>{bookmarkCounts[item.id] || 0}</span>
+                <div className="feed-card-info">
+                  <div className="feed-card-autor">
+                    {item.author || "Anonymous"}
                   </div>
 
-                  {/* ⬇️ Download receipt */}
+                  <div className="feed-card-pizzainfo">
+                    {item.baseType} — {item.baseSize} cm
+                  </div>
+
+                  <div className="feed-card-tags">
+                    {grouped &&
+                      Object.entries(grouped).map(([name, info], idx) => (
+                        <span
+                          key={idx}
+                          className="tag"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const tag = name.toLowerCase();
+                            setActiveTags((prev) =>
+                              prev.includes(tag)
+                                ? prev.filter((t) => t !== tag)
+                                : [...prev, tag],
+                            );
+                          }}
+                        >
+                          {name} ×{info.count}
+                        </span>
+                      ))}
+                  </div>
+                </div>
+                <div className="feed-card-btns">
+                  {/* Bookmark */}
                   <button
-                    onClick={(e) => { e.stopPropagation(); downloadRecipeAsReceipt(item); }}
-                    style={{ background: "#222", border: "1px solid #444", color: "#fff", padding: "6px 10px", borderRadius: 6, cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", gap: 6 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onBookmark(item.id);
+                    }}
+                    className={`tag ${bookmarks.includes(item.id) ? "bookmarked" : ""}`}
                   >
-                    🧾 {downloadCounts[item.id] || 0}
+                    <img src="/icons/Bookmark.svg" alt="save" />{" "}
+                    <span>{bookmarkCounts[item.id] || 0}</span>
+                  </button>
+
+                  {/* Download receipt */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      downloadRecipeAsReceipt(item);
+                    }}
+                  >
+                    <img src="/icons/Receipt-white.svg" alt="receita" />{" "}
+                    {downloadCounts[item.id] || 0}
                   </button>
                 </div>
               </div>
