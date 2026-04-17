@@ -6,8 +6,7 @@ import Profile from "./components/Profile";
 import { loadFeedFromStorage, saveFeedToStorage } from "./utils/storage";
 import "./index.css";
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
-import RecipePage from "./components/RecipePage";
-import { SpeedInsights } from '@vercel/speed-insights/react'
+import RecipePage from "./components/RecipePage"; 
 
 export default function App() {
   const [user, setUser] = useState(null);
