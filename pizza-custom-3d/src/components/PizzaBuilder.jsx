@@ -10,6 +10,7 @@ import { INGREDIENTS } from "../data/ingredients";
 import Bake from "./PizzaBuilder/Bake";
 import CalorieCounter from "./PizzaBuilder/CalorieCounter";
 import { createMeshForIngredient } from "../data/ingredientMeshFactory";
+import { useNavigate } from "react-router-dom";
 
 export default function PizzaBuilder({
   user,
@@ -39,6 +40,7 @@ export default function PizzaBuilder({
   const sauceRef = useRef(null);
   const cheeseGroupRef = useRef(null);
   const toppingsGroupRef = useRef(null);
+  const navigate = useNavigate();
   //const modelsRef = useRef({});
 
   const snapToRingsRef = useRef(snapToRings);
@@ -630,74 +632,11 @@ mesh.castShadow = false;
       showConfigRef,
     });
 
-    // Drag & drop
-    const raycaster = new THREE.Raycaster();
-    const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-    const dropPoint = new THREE.Vector3();
-    const pointer = new THREE.Vector2();
-    const pointerState = { dragging: false, offset: new THREE.Vector3() };
-    let selected = null;
-
-    const onTouchStart = (e) => {
-      if (e.touches.length !== 1) return;
-      const touch = e.touches[0];
-      const rect = renderer.domElement.getBoundingClientRect();
-      pointer.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
-      pointer.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
-      raycaster.setFromCamera(pointer, cameraRef.current);
-      const intersects = raycaster.intersectObjects(
-        toppingsGroupRef.current.children,
-        true,
-      );
-      if (intersects.length > 0) {
-        selected = intersects[0].object;
-        selected.userData.originalScale = selected.scale.clone();
-        selected.scale.multiplyScalar(1.15);
-        pointerState.dragging = true;
-        pointerState.offset.copy(selected.position).sub(intersects[0].point);
-        controls.enabled = false; // stop orbit from taking over
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    };
-
-    const onTouchMove = (e) => {
-      if (!pointerState.dragging || !selected || e.touches.length !== 1) return;
-      e.preventDefault();
-      e.stopPropagation();
-      const touch = e.touches[0];
-      const rect = renderer.domElement.getBoundingClientRect();
-      pointer.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
-      pointer.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
-      raycaster.setFromCamera(pointer, cameraRef.current);
-      if (raycaster.ray.intersectPlane(plane, dropPoint)) {
-        const target = dropPoint.clone().add(pointerState.offset);
-        const constrained =
-          pizzaShapeRef.current === "circulo"
-            ? snapToRingsIfNeeded(target)
-            : constrainToShape(target);
-        selected.position.set(
-          constrained.x,
-          getToppingSurfaceY(),
-          constrained.z,
-        );
-      }
-    };
-
-    const onTouchEnd = () => {
-      pointerState.dragging = false;
-      controls.enabled = true; // re-enable orbit
-      if (selected?.userData.originalScale)
-        selected.scale.copy(selected.userData.originalScale);
-    };
-
+  
     // ── register all listeners ───────────────────────────────────────────────
     const canvas = renderer.domElement;
-    canvas.addEventListener("touchstart", onTouchStart, { passive: false });
-    canvas.addEventListener("touchmove", onTouchMove, { passive: false });
-    canvas.addEventListener("touchend", onTouchEnd);
 
-    const resizeObserver = new ResizeObserver(() => {
+ const resizeObserver = new ResizeObserver(() => {
       const w = container.clientWidth,
         h = container.clientHeight;
       renderer.setSize(w, h);
@@ -710,10 +649,7 @@ mesh.castShadow = false;
       cancelAnimate();
       resizeObserver.disconnect();
       controls.dispose();
-      renderer.dispose();
-      canvas.removeEventListener("touchstart", onTouchStart);
-      canvas.removeEventListener("touchmove", onTouchMove);
-      canvas.removeEventListener("touchend", onTouchEnd);
+      renderer.dispose(); 
 
       if (renderer.domElement && container.contains(renderer.domElement))
         container.removeChild(renderer.domElement);
@@ -894,32 +830,53 @@ mesh.castShadow = false;
     createdAt: new Date().toISOString(),
   });
 
-  const handlePublish = async () => {
-    let image = null;
-    try {
-      image = await captureSnapshot({ scale: 1 });
-    } catch {}
-    publishToFeed?.(buildRecipe(image));
-  };
+const handlePublish = async () => {
+  // 1. Close config panel so camera re-centres on the pizza
+  const wasOpen = showConfig;
+  if (wasOpen) setShowConfig(false);
 
-  const handleSaveToProfile = async () => {
-    if (!user) {
-      alert("Faz LogIn primeiro!");
-      return;
-    }
-    let image = null;
-    try {
-      image = await captureSnapshot({ scale: 1 });
-    } catch {}
-    const recipe = { ...buildRecipe(image), userId: user.uid };
-    let stored = [];
-    try {
-      stored = JSON.parse(localStorage.getItem("userRecipes")) || [];
-    } catch {}
-    stored.push(recipe);
-    localStorage.setItem("userRecipes", JSON.stringify(stored));
-    alert("Receita guardada no perfil!");
-  };
+  // 2. Wait for the camera transition to settle (matches your controls.update timing)
+  await new Promise((r) => setTimeout(r, 350));
+
+  // 3. Snapshot
+  let image = null;
+  try {
+    image = await captureSnapshot({ scale: 1 });
+  } catch {}
+
+  // 4. Restore panel state
+  if (wasOpen) setShowConfig(true);
+
+  // 5. Publish and navigate
+  publishToFeed?.(buildRecipe(image));
+  navigate("/feed");
+};
+const handleSaveToProfile = async () => {
+  if (!user) {
+    alert("Faz LogIn primeiro!");
+    return;
+  }
+
+  const wasOpen = showConfig;
+  if (wasOpen) setShowConfig(false);
+  await new Promise((r) => setTimeout(r, 350));
+
+  let image = null;
+  try {
+    image = await captureSnapshot({ scale: 1 });
+  } catch {}
+
+  if (wasOpen) setShowConfig(true);
+
+  const recipe = { ...buildRecipe(image), userId: user.uid };
+  let stored = [];
+  try {
+    stored = JSON.parse(localStorage.getItem("userRecipes")) || [];
+  } catch {}
+  stored.push(recipe);
+  localStorage.setItem("userRecipes", JSON.stringify(stored));
+  alert("Receita guardada no perfil!");
+};
 
   // ── RENDER ────────────────────────────────────────────────────────────────
 
