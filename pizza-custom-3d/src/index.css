@@ -39,11 +39,12 @@ html,
 
 /* === BRAND LOGO === */
 .brand-logo {
-  position: fixed;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
+  position: relative;
+  top: 10px; 
   z-index: 200;
+  display: flex;
+    justify-content: center;
+  
 }
 
 .brand-logo img {
@@ -56,6 +57,7 @@ html,
   .brand-logo {
     left: 20px;
     transform: none;
+    position: fixed; 
   }
   .brand-logo img {
   height: 45px;
@@ -338,7 +340,43 @@ gap: 5px;
 /* default (desktop) */
 .mobile-only {
   display: none;
+  max-width: 100%;
+      padding: 10px 0px;
 }
+
+.mobile-only .tags-list {
+    gap: 5px;
+    display: flex;
+    overflow: scroll;
+    flex-wrap: nowrap;
+    padding: 0 1px;
+     margin-left: 10px;
+}
+
+.mobile-only .tags-list {
+  scrollbar-width: none; 
+}
+ 
+.mobile-only .tags-list::-webkit-scrollbar {
+  width: 0px;
+}
+ 
+
+
+
+.mobile-only h4{
+margin-left: 10px;
+display: none;
+}
+.mobile-only .tags-list button{
+width: auto;
+    min-width: max-content; 
+    margin-left: 0px;
+}
+.mobile-only  button{ 
+   margin-left: 10px;
+}
+
 
 .desktop-only {
   display: block;
@@ -883,7 +921,7 @@ background: rgb(255 255 255 / 20%);
 .ingredient-container::-webkit-scrollbar-thumb {
   background-color: #888;
   border-radius: 10px;
-  transition: background 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 .ingredient-container::-webkit-scrollbar-thumb:hover {
@@ -900,7 +938,15 @@ background: rgb(255 255 255 / 20%);
 }
 
 /* Mobile */
-@media (max-width: 768px) {
+@media (max-width: 768px) {  
+.feed-main { 
+    gap: 10px; 
+    margin-bottom: 100px;
+}
+  .feed-card {
+
+        min-width: auto;
+  }
 
   .config-modal.size-large .config-content { 
   height: calc(75vh - 200px);
@@ -972,6 +1018,10 @@ background: rgb(255 255 255 / 20%);
     /* gap: 24px; */
     /* padding: 20px; */
     flex-direction: column-reverse;
+   align-items: flex-end;
+        width: auto;
+        padding: 10px;
+        margin: 0 auto;
   }
 
   .feed-grid {

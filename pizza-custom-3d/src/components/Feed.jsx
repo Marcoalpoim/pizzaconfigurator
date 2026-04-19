@@ -237,6 +237,7 @@ export default function Feed({ feed = [], onBookmark, bookmarks }) {
           </button>
         ))}
       </div>
+      {/*
       <button
         style={{ marginTop: 12 }}
         onClick={() => {
@@ -245,7 +246,7 @@ export default function Feed({ feed = [], onBookmark, bookmarks }) {
         }}
       >
         Reset Filters
-      </button>
+      </button> */}
     </>
   );
 
