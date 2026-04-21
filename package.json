@@ -5,7 +5,7 @@
   },
   "dependencies": {
     "@vercel/speed-insights": "^2.0.0",
-    "firebase": "^12.4.0",
+    "firebase": "^12.12.1",
     "framer-motion": "^12.38.0",
     "html2canvas": "^1.4.1"
   }

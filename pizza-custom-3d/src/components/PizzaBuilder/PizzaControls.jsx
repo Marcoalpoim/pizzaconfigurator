@@ -104,7 +104,7 @@ function AccordionSelect({ label, value, onChange, options }) {
 const BASE_TYPES = [
   { value: "fina", label: "Fina" },
   { value: "média", label: "Média" },
-  { value: "alta e fofa", label: "Alta e Fofa" },
+  { value: "alta", label: "Alta e Fofa" },
 ];
  
 const BASE_SIZES = [

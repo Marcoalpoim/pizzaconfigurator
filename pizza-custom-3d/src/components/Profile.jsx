@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { logout } from "../firebase";
-import ReactDOM from "react-dom/client";
-import { ReceiptContent } from "./PizzaBuilder/Pizzareceipt";
+import ReactDOM from "react-dom/client"; 
+import { downloadRecipeAsReceipt } from "../utils/downloadRecipeAsReceipt";
 
 // ── Horizontal scroll hook ────────────────────────────────────────────────────
 
@@ -39,104 +39,7 @@ function TagsRow({ grouped }) {
   );
 }
 
-// ── Receipt download (same logic as Feed.jsx) ─────────────────────────────────
-
-async function downloadRecipeAsReceipt(recipe) {
-  const downloads = JSON.parse(localStorage.getItem("downloads") || "{}");
-  downloads[recipe.id] = (downloads[recipe.id] || 0) + 1;
-  localStorage.setItem("downloads", JSON.stringify(downloads));
-
-  const BASE_PRICES = { fina: 4.5, média: 5.5, "alta e fofa": 6.5 };
-  const SIZE_PRICES = { 28: 0, 33: 1.5, 40: 3.0 };
-  const SAUCE_PRICES = {
-    tomate: 1.0, "tomate e oregãos": 1.0, carbonara: 1.8, pesto: 2.0, barbecue: 1.5,
-  };
-  const CHEESE_PRICES = {
-    mozzarella: 2.0, cheddar: 2.2, parmesan: 2.5, gorgonzola: 2.8, none: 0,
-  };
-  const TOPPING_PRICES = {
-    pepperoni: 1.8, cogumelos: 1.2, azeitona: 1.0, basil: 0.8, ananas: 1.5,
-    cebola: 0.9, frango: 2.0, carne: 2.5, pancetta: 1.8, bacon: 1.8,
-    chourico: 1.7, fiambre: 1.4, pimento: 1.0, tomate_cherry: 1.1,
-    cebola_caramelizada: 1.2, camarao: 2.8, atum: 2.2,
-  };
-  const TOPPING_NAMES = {
-    pepperoni: "Pepperoni", cogumelos: "Cogumelos", azeitona: "Azeitona",
-    basil: "Manjericão", ananas: "Ananás", cebola: "Cebola",
-    frango: "Frango Marinado", carne: "Carne de Vaca", pancetta: "Pancetta",
-    bacon: "Bacon", chourico: "Chouriço", fiambre: "Fiambre",
-    pimento: "Pimento Verde", tomate_cherry: "Tomate Cherry",
-    cebola_caramelizada: "Cebola Caramelizada", camarao: "Camarão", atum: "Atum",
-  };
-
-  const ingredientCounts = {};
-  (recipe.toppings || []).forEach((t) => {
-    if (t.id) ingredientCounts[t.id] = (ingredientCounts[t.id] || 0) + 1;
-  });
-
-  const baseKey   = (recipe.baseType  || "").toLowerCase();
-  const sauceKey  = (recipe.sauceType || "").toLowerCase();
-  const cheeseKey = (recipe.cheeseType || "").toLowerCase();
-
-  const basePrice   = BASE_PRICES[baseKey]   ?? 5.5;
-  const sizePrice   = SIZE_PRICES[recipe.baseSize] ?? 0;
-  const saucePrice  = SAUCE_PRICES[sauceKey]  ?? 1.0;
-  const cheesePrice = CHEESE_PRICES[cheeseKey] ?? 2.0;
-
-  const toppingLines = Object.entries(ingredientCounts).map(([id, count]) => ({
-    id, name: TOPPING_NAMES[id] ?? id, count,
-    price: (TOPPING_PRICES[id] ?? 1.0) * count,
-  }));
-
-  const coperto  = 2.5;
-  const subtotal =
-    basePrice + sizePrice + saucePrice + cheesePrice +
-    toppingLines.reduce((s, l) => s + l.price, 0) + coperto;
-  const vat   = subtotal * 0.22;
-  const total = subtotal + vat;
-
-  const SHAPE_LABELS = {
-    circulo: "Círculo", quadrado: "Quadrado", triangulo: "Triângulo",
-    diamante: "Diamante", oval: "Oval", estrela: "Estrela", coração: "Coração",
-  };
-  const shapeLabel =
-    SHAPE_LABELS[(recipe.pizzaShape || "").toLowerCase()] ?? recipe.pizzaShape ?? "Círculo";
-
-  const data = {
-    orderId: `#${recipe.id.toString().slice(-4)}`,
-    timestamp: new Date(recipe.createdAt || Date.now()).toLocaleString("pt-PT", {
-      day: "2-digit", month: "long", year: "numeric",
-      hour: "2-digit", minute: "2-digit",
-    }),
-    baseType: recipe.baseType, baseSize: recipe.baseSize, pizzaShape: shapeLabel,
-    sauceType: recipe.sauceType, cheeseType: recipe.cheeseType,
-    ingredientCounts, basePrice, sizePrice, saucePrice, cheesePrice,
-    toppingLines, subtotal, vat, total,
-  };
-
-  const container = document.createElement("div");
-  container.style.cssText = "position:fixed;left:-9999px;top:-9999px;z-index:-1;";
-  document.body.appendChild(container);
-
-  const root = ReactDOM.createRoot(container);
-  root.render(<ReceiptContent data={data} />);
-  await new Promise((r) => setTimeout(r, 100));
-
-  try {
-    const { default: html2canvas } = await import("html2canvas");
-    const canvas = await html2canvas(container.firstChild, { backgroundColor: "#fffdf5", scale: 2 });
-    const link = document.createElement("a");
-    link.download = `ricevuta-${data.orderId}.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-  } catch (e) {
-    console.error("O Download da Receita falhou:", e);
-    //alert("Make sure html2canvas is installed: npm install html2canvas");
-  } finally {
-    root.unmount();
-    document.body.removeChild(container);
-  }
-}
+ 
 
 // ── Recipe card (mirrors profile-card style) ─────────────────────────────────────
 

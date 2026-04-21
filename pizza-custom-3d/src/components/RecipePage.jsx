@@ -14,7 +14,7 @@ export default function RecipePage({ feed, bookmarks, onToggleBookmark }) {
     return JSON.parse(localStorage.getItem("downloads") || "{}");
   }, []);
 
-  if (!recipe) return <div style={{ color: "white" }}>Recipe not found</div>;
+  if (!recipe) return <div style={{ color: "white" }}>Receita não encontrada!</div>;
 
 
   // group toppings

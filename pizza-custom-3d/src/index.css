@@ -846,7 +846,7 @@ background: transparent;
 
 .profile-stats {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   color: #aaa;
   font-size: 14px;
 }
@@ -910,12 +910,7 @@ display: flex;
 
 }
  
- .profile-stats{
-display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
+ 
  .profile-avatar{
 width: 60px;
     height: 60px;
@@ -1280,7 +1275,7 @@ display: flex;
   .config-content {
     height: calc(50vh - 200px);
     width: auto;
-    padding: 20px 15px;
+    padding: 25px;
         margin-bottom: 90px;
   }
 .caloriebreakdown{

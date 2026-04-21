@@ -1,81 +1,7 @@
 // src/components/PizzaBuilder/PizzaReceipt.jsx
 import React, { useState, useRef, useMemo } from "react";
+import { TOPPING_CALORIES, BASE_CALORIES, SIZE_MULTIPLIER, SAUCE_CALORIES, CHEESE_CALORIES } from "../../data/ingredientData";
 
-// ── Pricing data ──────────────────────────────────────────────────────────────
-
-const TOPPING_PRICES = {
-  pepperoni: 1.8,
-  mushroom:  1.2,
-  olive:     1.0,
-  basil:     0.8,
-  ananas:    1.5,
-  cebola:    0.9,
-};
-
-const BASE_PRICES = {
-  thin:   4.5,
-  medium: 5.5,
-  thick:  6.5,
-};
-
-const SIZE_PRICES = {
-  28: 0,
-  33: 1.5,
-  40: 3.0,
-};
-
-const SAUCE_PRICES = {
-  tomate:    1.0,
-  tomato:    1.0,
-  carbonara: 1.8,
-  pesto:     2.0,
-  barbecue:  1.5,
-};
-
-const CHEESE_PRICES = {
-  mozzarella: 2.0,
-  cheddar:    2.2,
-  parmesan:   2.5,
-  gorgonzola: 2.8,
-  none:       0,
-};
-
-const SAUCE_NAMES = {
-  tomate:    "Salsa di Pomodoro",
-  tomato:    "Salsa di Pomodoro",
-  carbonara: "Crema Carbonara",
-  pesto:     "Pesto alla Genovese",
-  barbecue:  "Salsa Barbecue",
-};
-
-const CHEESE_NAMES = {
-  mozzarella: "Fior di Latte",
-  cheddar:    "Cheddar Stagionato",
-  parmesan:   "Parmigiano Reggiano",
-  gorgonzola: "Gorgonzola DOP",
-  none:       null,
-};
-
-const TOPPING_NAMES = {
-  pepperoni: "Salame Piccante",
-  mushroom:  "Funghi Porcini",
-  olive:     "Olive Taggiasche",
-  basil:     "Basilico Fresco",
-  ananas:    "Ananas (con coraggio)",
-  cebola:    "Cipolla Caramellata",
-};
-
-const BASE_NAMES = {
-  thin:   "Impasto Sottile",
-  medium: "Impasto Classico",
-  thick:  "Impasto Alto",
-};
-
-const SIZE_NAMES = {
-  28: "Piccola (28cm)",
-  33: "Media (33cm)",
-  40: "Grande (40cm)",
-};
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -88,7 +14,7 @@ function formatPrice(n) {
 }
 
 function now() {
-  return new Date().toLocaleString("it-IT", {
+  return new Date().toLocaleString("pt-PT", {
     day: "2-digit", month: "long", year: "numeric",
     hour: "2-digit", minute: "2-digit",
   });
@@ -217,34 +143,33 @@ export function ReceiptContent({ data }) {
 
       {/* Header */}
       <div style={{ paddingTop: 8 }}>
-        <div style={R.restaurantName}>La Pizzeria Digitale</div>
-        <div style={R.subtitle}>Ristorante & Pizzeria — Dal 2025</div>
-        <div style={R.subtitle}>Via dell'Algoritmo, 42 · Milano</div>
+        <div style={R.restaurantName}>PIZZA-INATOR</div>
+        <div style={R.subtitle}>A tua pizzaria digital (2026) </div> 
       </div>
 
       <div style={R.divider} />
 
       {/* Meta */}
       <div style={R.metaRow}>
-        <span>Ordine {orderId}</span>
+        <span>Pedido {orderId}</span>
         <span>{timestamp}</span>
       </div>
       <div style={R.metaRow}>
-        <span>Tavolo 7</span>
-        <span>Coperto: €2.50</span>
+        <span>Mesa 7</span>
+        <span>Entrega: 1.99€</span>
       </div>
 
       <div style={R.divider} />
 
       {/* Base */}
-      <div style={R.sectionLabel}>Impasto</div>
+      <div style={R.sectionLabel}>Base</div>
       <div style={R.lineItem}>
         <span style={R.lineItemName}>{BASE_NAMES[baseType] ?? baseType} · {SIZE_NAMES[baseSize]}</span>
         <span style={R.lineItemPrice}>{formatPrice(basePrice + sizePrice)}</span>
       </div>
 
       {/* Sauce */}
-      <div style={R.sectionLabel}>Salsa</div>
+      <div style={R.sectionLabel}>Molho</div>
       <div style={R.lineItem}>
         <span style={R.lineItemName}>{SAUCE_NAMES[sauceType] ?? sauceType}</span>
         <span style={R.lineItemPrice}>{formatPrice(saucePrice)}</span>
@@ -253,7 +178,7 @@ export function ReceiptContent({ data }) {
       {/* Cheese */}
       {CHEESE_NAMES[cheeseType] && (
         <>
-          <div style={R.sectionLabel}>Formaggio</div>
+          <div style={R.sectionLabel}>Queijo</div>
           <div style={R.lineItem}>
             <span style={R.lineItemName}>{CHEESE_NAMES[cheeseType]}</span>
             <span style={R.lineItemPrice}>{formatPrice(cheesePrice)}</span>
@@ -264,7 +189,7 @@ export function ReceiptContent({ data }) {
       {/* Toppings */}
       {toppingLines.length > 0 && (
         <>
-          <div style={R.sectionLabel}>Ingredienti</div>
+          <div style={R.sectionLabel}>Ingredientes</div>
           {toppingLines.map(({ id, name, count, price }) => (
             <div key={id} style={R.lineItem}>
               <span style={R.lineItemName}>{name}{count > 1 ? ` ×${count}` : ""}</span>
@@ -274,36 +199,29 @@ export function ReceiptContent({ data }) {
         </>
       )}
 
-      {/* Coperto */}
-      <div style={{ ...R.lineItem, marginTop: 6 }}>
-        <span style={R.lineItemName}>Coperto</span>
-        <span style={R.lineItemPrice}>€2.50</span>
-      </div>
 
       <div style={R.divider} />
 
       {/* Totals */}
       <div style={R.vatRow}>
-        <span>Subtotale</span>
+        <span>Subtotal</span>
         <span>{formatPrice(subtotal)}</span>
       </div>
       <div style={R.vatRow}>
-        <span>IVA (22%)</span>
+        <span>IVA (23%)</span>
         <span>{formatPrice(vat)}</span>
       </div>
       <div style={R.totalRow}>
-        <span>TOTALE</span>
+        <span>TOTAL</span>
         <span>{formatPrice(total)}</span>
       </div>
 
       <div style={R.divider} />
 
       {/* Footer */}
-      <div style={R.thankYou}>Grazie per la sua visita!</div>
-      <div style={R.thankYou}>Arrivederci e buon appetito 🍕</div>
-      <div style={R.barcode}>||| || ||| | || ||| || | |||</div>
+      <div style={R.thankYou}>Obrigad@ pela preferência!🍕</div>  
       <div style={{ textAlign: "center", fontSize: 9, color: "#bbb", marginTop: 4 }}>
-        {orderId} · pizzeria-digitale.it
+        {orderId} · PIZZA-INATOR
       </div>
 
       <div style={R.zigzagBottom} />
@@ -361,11 +279,11 @@ export default function PizzaReceipt({
         scale: 2,
       });
       const link = document.createElement("a");
-      link.download = `ricevuta-${data.orderId}.png`;
+      link.download = `receita-${data.orderId}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
     } catch (e) {
-      console.error("Download failed:", e);
+      console.error("O download falhou:", e);
       //alert("Install html2canvas: npm install html2canvas");
     }
   }
@@ -373,7 +291,7 @@ export default function PizzaReceipt({
   function handlePrint() {
     const win = window.open("", "_blank");
     win.document.write(`
-      <html><head><title>Ricevuta ${data.orderId}</title>
+      <html><head><title>Receita ${data.orderId}</title>
       <style>body{margin:0;display:flex;justify-content:center;padding:20px;background:#eee;}
       @media print{body{background:white;}}</style>
       </head><body>${receiptRef.current.outerHTML}

@@ -1,44 +1,6 @@
 // src/components/PizzaBuilder/CalorieCounter.jsx
 import React, { useMemo } from "react";
-
-// ── Calorie data ──────────────────────────────────────────────────────────────
-
-const TOPPING_CALORIES = {
-  pepperoni: 55,  
-  mushroom:   4,
-  olive:      8,
-  basil:      1,
-  ananas:    10,
-  cebola:     7,
-};
-
-const BASE_CALORIES = {
-  thin:   180,
-  medium: 260,
-  thick:  380,
-};
-
-const SIZE_MULTIPLIER = {
-  28: 0.8,
-  33: 1.0,
-  40: 1.35,
-};
-
-const SAUCE_CALORIES = {
-  tomate:    45,
-  tomato:    45,
-  carbonara: 110,
-  pesto:     130,
-  barbecue:  90,
-};
-
-const CHEESE_CALORIES = {
-  mozzarella: 170,
-  cheddar:    200,
-  parmesan:   160,
-  gorgonzola: 190,
-  none:         0,
-};
+import { TOPPING_CALORIES, BASE_CALORIES, SIZE_MULTIPLIER, SAUCE_CALORIES, CHEESE_CALORIES } from "../../data/ingredientData";
 
 // ── Reaction tiers ────────────────────────────────────────────────────────────
 
