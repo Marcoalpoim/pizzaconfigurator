@@ -1,7 +1,12 @@
 // src/components/PizzaBuilder/PizzaReceipt.jsx
 import React, { useState, useRef, useMemo } from "react";
-import { TOPPING_CALORIES, BASE_CALORIES, SIZE_MULTIPLIER, SAUCE_CALORIES, CHEESE_CALORIES } from "../../data/ingredientData";
-
+import {
+  TOPPING_PRICES, TOPPING_NAMES,
+  BASE_PRICES, BASE_NAMES,
+  SIZE_PRICES, SIZE_NAMES,
+  SAUCE_PRICES, SAUCE_NAMES,
+  CHEESE_PRICES, CHEESE_NAMES,
+} from "../../data/ingredientData";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

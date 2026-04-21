@@ -1,6 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import { logout } from "../firebase";
+import ReactDOM from "react-dom/client"; 
 import { downloadRecipeAsReceipt } from "../utils/downloadRecipeAsReceipt";
+
+// ── Horizontal scroll hook ────────────────────────────────────────────────────
 
 function useHorizontalScroll() {
   const ref = useRef(null);
@@ -20,6 +23,8 @@ function useHorizontalScroll() {
   return ref;
 }
 
+// ── Tags row (same as Feed.jsx) ───────────────────────────────────────────────
+
 function TagsRow({ grouped }) {
   const tagsRef = useHorizontalScroll();
   return (
@@ -34,6 +39,10 @@ function TagsRow({ grouped }) {
   );
 }
 
+ 
+
+// ── Recipe card (mirrors profile-card style) ─────────────────────────────────────
+
 function RecipeCard({ r, onAction, actionIcon }) {
   const grouped = r.toppings?.reduce((acc, t) => {
     const key = t.name || "Unknown";
@@ -44,12 +53,21 @@ function RecipeCard({ r, onAction, actionIcon }) {
 
   return (
     <div className="profile-card">
-      <img src={r.image || "/placeholder-pizza.png"} alt="Pizza" loading="lazy" />
+      <img
+        src={r.image || "/placeholder-pizza.png"}
+        alt="Pizza"
+        loading="lazy"
+      />
+
       <div className="profile-card-info">
         <div className="profile-card-autor">{r.author || r.name || "Sem nome"}</div>
-        <div className="profile-card-pizzainfo">{r.baseType} — {r.baseSize} cm</div>
+        <div className="profile-card-pizzainfo">
+          {r.baseType} — {r.baseSize} cm
+        </div>
         <TagsRow grouped={grouped} />
       </div>
+
+    
       <div className="profile-card-btns" style={{ top: 10 }}>
         <button onClick={() => downloadRecipeAsReceipt(r)}>
           <img src="/icons/Receita.svg" alt="receita" />
@@ -64,15 +82,23 @@ function RecipeCard({ r, onAction, actionIcon }) {
   );
 }
 
+// ── Main component ────────────────────────────────────────────────────────────
+
 export default function Profile({
   user,
   feed,
   bookmarks,
   onToggleBookmark,
   onDeletePublished,
+  onDeleteBookmark,
 }) {
   const [localRecipes, setLocalRecipes] = useState([]);
   const [activeTab, setActiveTab] = useState("criadas");
+
+  const totalBookmarks = feed.reduce((acc, recipe) => {
+    if (recipe.userId === user?.uid) return acc + (recipe.bookmarkCount || 0);
+    return acc;
+  }, 0);
 
   useEffect(() => {
     const loadRecipes = () => {
@@ -86,7 +112,7 @@ export default function Profile({
   }, [user]);
 
   const handleLogout = async () => {
-    try { await logout(); } catch (err) { console.error("Erro no Logout:", err); }
+    try { await logout(); } catch (err) { console.error("Erro noLogout:", err); }
   };
 
   const handleShare = () => {
@@ -106,46 +132,51 @@ export default function Profile({
     setLocalRecipes(updated.filter((r) => r.userId === (user?.uid || user?.id)));
   };
 
-  const userRecipes       = feed.filter((p) => p.userId === user?.uid);
+  const userRecipes      = feed.filter((p) => p.userId === user?.uid);
   const bookmarkedRecipes = feed.filter((item) => bookmarks.includes(item.id));
 
   const activeList =
     activeTab === "criadas"    ? localRecipes :
-    activeTab === "publicadas" ? userRecipes  :   // ✅ was "published"
+    activeTab === "published"  ? userRecipes  :
     bookmarkedRecipes;
 
   const getAction = (tab) => {
-    if (tab === "criadas")    return handleDeleteRecipe;
+    if (tab === "criadas")   return handleDeleteRecipe;
     if (tab === "publicadas") return onDeletePublished;
-    if (tab === "guardadas")  return onToggleBookmark;
+    if (tab === "guardadas") return onToggleBookmark;
     return null;
   };
 
   return (
-    <section className="profile-panel">
+    <section
+      className="profile-panel" >
       {/* PROFILE HEADER */}
-      <div className="profile-main">
-        <div className="profile-stats">
-          <img className="profile-avatar" src={user?.photoURL || "/default-avatar.png"} alt="Profile" />
+      <div  className="profile-main" >
+        <div className="profile-stats" >
+          <img  className="profile-avatar"
+            src={user?.photoURL || "/default-avatar.png"}  alt="Profile" />
           <div>
-            <div style={{ fontSize: 18, fontWeight: "bold" }}>{user?.displayName || "User"}</div>
+            <div style={{ fontSize: 18, fontWeight: "bold" }}>
+              {user?.displayName || "User"}
+            </div>
             <div style={{ fontSize: 13, color: "#aaa" }}>
-              {localRecipes.length} Criadas · {userRecipes.length} Publicadas · {bookmarkedRecipes.length} Guardadas
+              {localRecipes.length} Criadas · {userRecipes.length} Publicadas ·{" "}
+              {bookmarkedRecipes.length} Guardadas
             </div>
           </div>
         </div>
-        <div className="profile-btns">
+        <div  className="profile-btns" >
           <button className="profile-handles" onClick={handleShare}><img src="/icons/Share.svg" alt="share" />Partilhar</button>
           <button className="profile-handles" onClick={handleLogout}><img src="/icons/logout.svg" alt="logout" />Logout</button>
         </div>
       </div>
 
       {/* TABS */}
-      <div className="profile-tabs">
+      <div className="profile-tabs"  >
         {[
           { key: "criadas",    label: "Criadas" },
-          { key: "publicadas", label: "Publicadas" },
-          { key: "guardadas",  label: "Guardadas" },
+          { key: "publicadas",  label: "Publicadas" },
+          { key: "guardadas", label: "Guardadas" },
         ].map((tab) => (
           <button
             key={tab.key}
@@ -173,7 +204,7 @@ export default function Profile({
               key={r.id}
               r={r}
               onAction={getAction(activeTab)}
-              actionIcon={<img src="/icons/Trash-white.svg" alt="delete" />}
+              actionIcon= {<img src="/icons/Trash-white.svg" alt="delete" />}
             />
           ))}
         </div>

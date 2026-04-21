@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { ReceiptContent } from "../components/PizzaBuilder/Pizzareceipt";
-import { TOPPING_CALORIES, BASE_CALORIES, SIZE_MULTIPLIER, SAUCE_CALORIES, CHEESE_CALORIES } from "../data/ingredientData";
+import { TOPPING_PRICES, TOPPING_NAMES, BASE_PRICES, SIZE_PRICES, SAUCE_PRICES, CHEESE_PRICES, SHAPE_LABELS } from "../data/ingredientData";
 
 export async function downloadRecipeAsReceipt(recipe) {
   const downloads = JSON.parse(localStorage.getItem("downloads") || "{}");
