@@ -69,11 +69,11 @@ function calcRecipe(recipe) {
 function Pill({ label, value, accent }) {
   return (
     <div style={{
-      background: "#111", border: "1px solid #222",
+      background: "#111", border: "1px solid #555555",
       borderRadius: 12, padding: "12px 14px",
       display: "flex", flexDirection: "column", gap: 5,
     }}>
-      <span style={{ fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "#444" }}>
+      <span style={{ fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "#939393" }}>
         {label}
       </span>
       <span style={{ fontSize: 17, fontWeight: 700, color: accent || "#e5e5e5" }}>
@@ -86,9 +86,9 @@ function Pill({ label, value, accent }) {
 function Section({ title, children }) {
   return (
     <div style={{ marginTop: 28 }}>
-      <div style={{
-        fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase",
-        color: "#444", marginBottom: 10,
+      <div className="section" style={{
+        fontSize: 12, letterSpacing: "0.15em", textTransform: "uppercase",
+        color: "#fff", marginBottom: 10,
       }}>
         {title}
       </div>
@@ -100,7 +100,7 @@ function Section({ title, children }) {
 function Card({ children }) {
   return (
     <div style={{
-      background: "#111", border: "1px solid #222",
+      background: "#111", border: "1px solid #555555",
       borderRadius: 12, padding: "14px 16px",
     }}>
       {children}
@@ -146,7 +146,7 @@ export default function RecipePage({ feed, bookmarks, onToggleBookmark }) {
   }, [recipe]);
 
   if (!recipe) return (
-    <div style={{ color: "#666", padding: 48, textAlign: "center", fontSize: 14 }}>
+    <div style={{ color: "#939393", padding: 48, textAlign: "center", fontSize: 14 }}>
       Receita não encontrada
     </div>
   );
@@ -155,28 +155,21 @@ export default function RecipePage({ feed, bookmarks, onToggleBookmark }) {
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      style={{ minHeight: "100vh", background: "#0a0a0a", color: "white", paddingBottom: 80 }}
-    >
+      transition={{ duration: 0.3 }}  className="pagina-receita-container">
+
       {/* HEADER */}
-      <div style={{
-        position: "sticky", top: 0, zIndex: 10,
-        display: "flex", justifyContent: "space-between", alignItems: "center",
-        padding: "12px 16px",
-        background: "rgba(10,10,10,0.9)", backdropFilter: "blur(14px)",
-        borderBottom: "1px solid #1a1a1a",
-      }}>
+      <div className="pagina-receita-header">
         <button onClick={() => navigate(-1)} style={{
-          background: "#1a1a1a", border: "none", color: "#ccc",
+          background: "#1a1a1a", border: "none", color: "#fff",
           width: 34, height: 34, borderRadius: 9, fontSize: 15,
           cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-        }}>←</button>
-        <span style={{ fontSize: 11, color: "#444", letterSpacing: "0.1em" }}>RECEITA</span>
+        }}><img src="/icons/arrowleft.svg" alt="Arrow left" /></button>
+        <span style={{ fontSize: 12, color: "#fff", letterSpacing: "0.1em" }}>A RECEITA</span>
         <button
           onClick={() => downloadRecipeAsReceipt(recipe)}
           title="Download receita"
           style={{
-            background: "#1a1a1a", border: "none", color: "#ccc",
+            background: "#1a1a1a", border: "none", color: "#fff",
             width: 34, height: 34, borderRadius: 9, fontSize: 15,
             cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
           }}
@@ -184,11 +177,11 @@ export default function RecipePage({ feed, bookmarks, onToggleBookmark }) {
       </div>
 
       {/* HERO */}
-      <div style={{ position: "relative" }}>
+      <div className="pagina-receita-hero" >
         <img
           src={recipe.image || "/placeholder-pizza.png"}
           alt="Pizza"
-          style={{ width: "100%", height: 260, objectFit: "cover", display: "block" }}
+          style={{ width: "100%", height: 300, objectFit: "cover", display: "block" }}
         />
         <div style={{
           position: "absolute", inset: 0,
@@ -207,15 +200,16 @@ export default function RecipePage({ feed, bookmarks, onToggleBookmark }) {
           <button
             onClick={() => onToggleBookmark(recipe.id)}
             style={{
-              background: isBookmarked ? "#ffd700" : "rgba(20,20,20,0.8)",
-              border: "1px solid " + (isBookmarked ? "#ffd700" : "#333"),
-              borderRadius: 9, color: isBookmarked ? "#000" : "#aaa",
+              background: isBookmarked ? "#595959" : "rgb(26, 26, 26)",
+              border: "1px solid " + (isBookmarked ? "#595959" : "rgb(255 255 255 / 0%)"),
+              borderRadius: 9, color: "#fff",
               padding: "7px 13px", cursor: "pointer",
               fontSize: 12, fontWeight: 600, backdropFilter: "blur(8px)",
+              display: "flex", alignItems: "center",
             }}
           >
-            <img src="/icons/Bookmark.svg" alt="save" style={{ width: 14, height: 14, marginRight: 5, verticalAlign: "middle" }} />
-            {isBookmarked ? "Guardado" : "Guardar"}
+            <img src="/icons/Bookmark.svg" alt="save" style={{ width: 20, height: 20, marginRight: 5, verticalAlign: "middle" }} />
+            <p className="feedbookmark">{ isBookmarked ? "Guardado" : "Guardar"}</p>
           </button>
         </div>
       </div>
@@ -237,7 +231,7 @@ export default function RecipePage({ feed, bookmarks, onToggleBookmark }) {
           <Card>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
               <span style={{ fontSize: 13, color: reaction.color, fontWeight: 600 }}>{reaction.label}</span>
-              <span style={{ fontSize: 11, color: "#444" }}>{calc.totalCal} kcal</span>
+              <span style={{ fontSize: 11, color: "#adadad" }}>{calc.totalCal} kcal</span>
             </div>
             <div style={{ background: "#1c1c1c", borderRadius: 4, height: 5, overflow: "hidden", marginBottom: 14 }}>
               <motion.div
@@ -249,8 +243,8 @@ export default function RecipePage({ feed, bookmarks, onToggleBookmark }) {
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "5px 20px" }}>
               {[["Base", calc.baseCal], ["Molho", calc.sauceCal], ["Queijo", calc.cheeseCal], ["Toppings", calc.toppingCal]].map(([l, v]) => (
-                <div key={l} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#444" }}>
-                  <span>{l}</span><span style={{ color: "#666" }}>{v} kcal</span>
+                <div key={l} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#adadad" }}>
+                  <span>{l}</span><span style={{ color: "#939393" }}>{v} kcal</span>
                 </div>
               ))}
             </div>
@@ -303,7 +297,7 @@ export default function RecipePage({ feed, bookmarks, onToggleBookmark }) {
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {Object.entries(groupedToppings).map(([name, info]) => (
               <span key={name} style={{
-                background: "#111", border: "1px solid #222",
+                background: "#111", border: "1px solid #555555",
                 padding: "7px 13px", borderRadius: 999,
                 fontSize: 13, color: "#bbb",
               }}>

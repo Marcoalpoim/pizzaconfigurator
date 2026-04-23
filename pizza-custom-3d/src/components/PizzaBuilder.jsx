@@ -25,7 +25,7 @@ export default function PizzaBuilder({
   const [snapToRings, setSnapToRings] = useState(true);
   const [cheeseType, setCheeseType] = useState("mozzarella");
   const [ingredientCounts, setIngredientCounts] = useState({});
-  const [panelSize, setPanelSize] = useState("default");  
+  const [panelSize, setPanelSize] = useState("default");
 
   const SAUCE_OFFSET = 0.002;
   const CHEESE_OFFSET = 0.012;
@@ -68,11 +68,11 @@ export default function PizzaBuilder({
   // ── HELPERS ──────────────────────────────────────────────────────────────
 
   const getBaseDims = (type, size) => {
-    const height = type === "fina" ? 0.04 : type === "média" ? 0.06 : 0.10;
+    const height = type === "fina" ? 0.04 : type === "média" ? 0.06 : 0.1;
     const radius = size === 28 ? 1.9 : size === 33 ? 2.2 : 2.7;
     return { height, radius };
   };
- 
+
   function makeDoughMat() {
     const loader = new THREE.TextureLoader();
     const tex = loader.load("/textures/dough.jpg");
@@ -347,35 +347,34 @@ export default function PizzaBuilder({
     for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
       let x, z;
 
-    if (shape === "oval") {
-      const angle = Math.random() * Math.PI * 2;
-      const dist = Math.sqrt(Math.random());
-      x = Math.cos(angle) * dist * r * 1.3;
-      z = Math.sin(angle) * dist * r * 0.7;
-    } else if (shape === "coração") {
-      x = (Math.random() * 2 - 1) * r * 0.65;
-      z = (Math.random() * 2 - 1) * r * 0.85;
-    } else if (shape === "estrela") {
-      const angle = Math.random() * Math.PI * 2;
-      const dist = Math.sqrt(Math.random()) * r * 0.72;
-      x = Math.cos(angle) * dist;
-      z = Math.sin(angle) * dist;
-    } else if (shape === "quadrado") { 
-      x = (Math.random() * 2 - 1) * r;
-      z = (Math.random() * 2 - 1) * r;
-    } else if (shape === "diamante") { 
-      x = (Math.random() * 2 - 1) * r;
-      z = (Math.random() * 2 - 1) * r;
-    } else if (shape === "triangulo") { 
-      x = (Math.random() * 2 - 1) * r;
-      z = (Math.random() * 2 - 1) * r;
-    } else { 
-      const angle = Math.random() * Math.PI * 2;
-      const dist = Math.sqrt(Math.random()) * r;
-      x = Math.cos(angle) * dist;
-      z = Math.sin(angle) * dist;
-    }
-
+      if (shape === "oval") {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = Math.sqrt(Math.random());
+        x = Math.cos(angle) * dist * r * 1.3;
+        z = Math.sin(angle) * dist * r * 0.7;
+      } else if (shape === "coração") {
+        x = (Math.random() * 2 - 1) * r * 0.65;
+        z = (Math.random() * 2 - 1) * r * 0.85;
+      } else if (shape === "estrela") {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = Math.sqrt(Math.random()) * r * 0.72;
+        x = Math.cos(angle) * dist;
+        z = Math.sin(angle) * dist;
+      } else if (shape === "quadrado") {
+        x = (Math.random() * 2 - 1) * r;
+        z = (Math.random() * 2 - 1) * r;
+      } else if (shape === "diamante") {
+        x = (Math.random() * 2 - 1) * r;
+        z = (Math.random() * 2 - 1) * r;
+      } else if (shape === "triangulo") {
+        x = (Math.random() * 2 - 1) * r;
+        z = (Math.random() * 2 - 1) * r;
+      } else {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = Math.sqrt(Math.random()) * r;
+        x = Math.cos(angle) * dist;
+        z = Math.sin(angle) * dist;
+      }
 
       if (!isInsideShape(shape, x, z, r)) continue;
 
@@ -389,38 +388,38 @@ export default function PizzaBuilder({
         return { x, z };
       }
     }
- // Build a grid of candidate points
-  const candidates = [];
-  const step = 0.38; // grid spacing — tune this to change density
+    // Build a grid of candidate points
+    const candidates = [];
+    const step = 0.38; // grid spacing — tune this to change density
 
-  for (let x = -r; x <= r; x += step) {
-    for (let z = -r; z <= r; z += step) {
-      if (isInsideShape(shape, x, z, r)) {
-        candidates.push({ x, z });
+    for (let x = -r; x <= r; x += step) {
+      for (let z = -r; z <= r; z += step) {
+        if (isInsideShape(shape, x, z, r)) {
+          candidates.push({ x, z });
+        }
       }
     }
-  }
 
-  // Shuffle candidates so picks feel random, not row-by-row
-  for (let i = candidates.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
-  }
-
-  // Pick a candidate not already used, with jitter
-  for (const c of candidates) {
-    const jx = c.x + (Math.random() - 0.5) * JITTER * 2;
-    const jz = c.z + (Math.random() - 0.5) * JITTER * 2;
-
-    const alreadyUsed = placedPositionsRef.current.some(
-      (p) => Math.sqrt((p.x - jx) ** 2 + (p.z - jz) ** 2) < step * 0.85
-    );
-
-    if (!alreadyUsed && isInsideShape(shape, jx, jz, r)) {
-      placedPositionsRef.current.push({ x: jx, z: jz });
-      return { x: jx, z: jz };
+    // Shuffle candidates so picks feel random, not row-by-row
+    for (let i = candidates.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
     }
-  }
+
+    // Pick a candidate not already used, with jitter
+    for (const c of candidates) {
+      const jx = c.x + (Math.random() - 0.5) * JITTER * 2;
+      const jz = c.z + (Math.random() - 0.5) * JITTER * 2;
+
+      const alreadyUsed = placedPositionsRef.current.some(
+        (p) => Math.sqrt((p.x - jx) ** 2 + (p.z - jz) ** 2) < step * 0.85,
+      );
+
+      if (!alreadyUsed && isInsideShape(shape, jx, jz, r)) {
+        placedPositionsRef.current.push({ x: jx, z: jz });
+        return { x: jx, z: jz };
+      }
+    }
     // Fallback: just place it inside shape ignoring spacing
     for (let i = 0; i < 60; i++) {
       const angle = Math.random() * Math.PI * 2;
@@ -431,7 +430,7 @@ export default function PizzaBuilder({
     }
     return { x: 0, z: 0 };
   }
-  
+
   function getBaseSurfaceY() {
     return baseRef.current?.userData?.surfaceY ?? 0;
   }
@@ -485,7 +484,6 @@ export default function PizzaBuilder({
   // ── CHEESE ───────────────────────────────────────────────────────────────
 
   function createCheeseBlob(shape, radius, y, cheeseType) {
-    
     const geom = new THREE.SphereGeometry(0.18 + Math.random() * 0.05, 12, 8);
     const loader = new THREE.TextureLoader();
     const paths = {
@@ -511,7 +509,7 @@ export default function PizzaBuilder({
       0.08 + Math.random() * 0.04,
       1.0 + Math.random() * 0.4,
     );
-mesh.castShadow = false;
+    mesh.castShadow = false;
     // ✅ Random rotation so blobs look scattered, not stamped
     mesh.rotation.y = Math.random() * Math.PI * 2;
     mesh.rotation.z = (Math.random() - 0.5) * 0.3;
@@ -632,11 +630,10 @@ mesh.castShadow = false;
       showConfigRef,
     });
 
-  
     // ── register all listeners ───────────────────────────────────────────────
     const canvas = renderer.domElement;
 
- const resizeObserver = new ResizeObserver(() => {
+    const resizeObserver = new ResizeObserver(() => {
       const w = container.clientWidth,
         h = container.clientHeight;
       renderer.setSize(w, h);
@@ -649,7 +646,7 @@ mesh.castShadow = false;
       cancelAnimate();
       resizeObserver.disconnect();
       controls.dispose();
-      renderer.dispose(); 
+      renderer.dispose();
 
       if (renderer.domElement && container.contains(renderer.domElement))
         container.removeChild(renderer.domElement);
@@ -662,38 +659,38 @@ mesh.castShadow = false;
     const group = toppingsGroupRef.current;
     if (!group) return;
     group.clear();
-    placedPositionsRef.current = [];  
+    placedPositionsRef.current = [];
 
     const { radius } = getBaseDims(baseType, baseSize);
 
-// Sort ingredients so larger counts are placed first (fill evenly before cramming)
-  const sorted = Object.entries(ingredientCounts)
-    .filter(([, count]) => count > 0)
-    .sort(([, a], [, b]) => b - a);
+    // Sort ingredients so larger counts are placed first (fill evenly before cramming)
+    const sorted = Object.entries(ingredientCounts)
+      .filter(([, count]) => count > 0)
+      .sort(([, a], [, b]) => b - a);
 
-  // Interleave placements: place one of each ingredient at a time
-  // so no single topping clusters together
-  const queues = sorted.map(([id, count]) => {
-    const ing = INGREDIENTS.find((i) => i.id === id);
-    return { ing, remaining: count };
-  });
+    // Interleave placements: place one of each ingredient at a time
+    // so no single topping clusters together
+    const queues = sorted.map(([id, count]) => {
+      const ing = INGREDIENTS.find((i) => i.id === id);
+      return { ing, remaining: count };
+    });
 
-  let anyLeft = true;
-  while (anyLeft) {
-    anyLeft = false;
-    for (const q of queues) {
-      if (q.remaining > 0 && q.ing) {
-        anyLeft = true;
-        q.remaining--;
-        const { x, z } = randomPointInShape(pizzaShape, radius);
-        addIngredientAtWorldPos(
-          q.ing,
-          new THREE.Vector3(x, getToppingSurfaceY(), z)
-        );
+    let anyLeft = true;
+    while (anyLeft) {
+      anyLeft = false;
+      for (const q of queues) {
+        if (q.remaining > 0 && q.ing) {
+          anyLeft = true;
+          q.remaining--;
+          const { x, z } = randomPointInShape(pizzaShape, radius);
+          addIngredientAtWorldPos(
+            q.ing,
+            new THREE.Vector3(x, getToppingSurfaceY(), z),
+          );
+        }
       }
     }
-  }
-}, [ingredientCounts, baseType, baseSize, pizzaShape]);
+  }, [ingredientCounts, baseType, baseSize, pizzaShape]);
 
   useEffect(() => {
     const controls = controlsRef.current;
@@ -830,53 +827,53 @@ mesh.castShadow = false;
     createdAt: new Date().toISOString(),
   });
 
-const handlePublish = async () => {
-  // 1. Close config panel so camera re-centres on the pizza
-  const wasOpen = showConfig;
-  if (wasOpen) setShowConfig(false);
+  const handlePublish = async () => {
+    // 1. Close config panel so camera re-centres on the pizza
+    const wasOpen = showConfig;
+    if (wasOpen) setShowConfig(false);
 
-  // 2. Wait for the camera transition to settle (matches your controls.update timing)
-  await new Promise((r) => setTimeout(r, 350));
+    // 2. Wait for the camera transition to settle (matches your controls.update timing)
+    await new Promise((r) => setTimeout(r, 350));
 
-  // 3. Snapshot
-  let image = null;
-  try {
-    image = await captureSnapshot({ scale: 1 });
-  } catch {}
+    // 3. Snapshot
+    let image = null;
+    try {
+      image = await captureSnapshot({ scale: 1 });
+    } catch {}
 
-  // 4. Restore panel state
-  if (wasOpen) setShowConfig(true);
+    // 4. Restore panel state
+    if (wasOpen) setShowConfig(true);
 
-  // 5. Publish and navigate
-  publishToFeed?.(buildRecipe(image));
-  navigate("/feed");
-};
-const handleSaveToProfile = async () => {
-  if (!user) {
-    alert("Faz LogIn primeiro!");
-    return;
-  }
+    // 5. Publish and navigate
+    publishToFeed?.(buildRecipe(image));
+    navigate("/feed");
+  };
+  const handleSaveToProfile = async () => {
+    if (!user) {
+      alert("Faz LogIn primeiro!");
+      return;
+    }
 
-  const wasOpen = showConfig;
-  if (wasOpen) setShowConfig(false);
-  await new Promise((r) => setTimeout(r, 350));
+    const wasOpen = showConfig;
+    if (wasOpen) setShowConfig(false);
+    await new Promise((r) => setTimeout(r, 350));
 
-  let image = null;
-  try {
-    image = await captureSnapshot({ scale: 1 });
-  } catch {}
+    let image = null;
+    try {
+      image = await captureSnapshot({ scale: 1 });
+    } catch {}
 
-  if (wasOpen) setShowConfig(true);
+    if (wasOpen) setShowConfig(true);
 
-  const recipe = { ...buildRecipe(image), userId: user.uid };
-  let stored = [];
-  try {
-    stored = JSON.parse(localStorage.getItem("userRecipes")) || [];
-  } catch {}
-  stored.push(recipe);
-  localStorage.setItem("userRecipes", JSON.stringify(stored));
-  alert("Receita guardada no perfil!");
-};
+    const recipe = { ...buildRecipe(image), userId: user.uid };
+    let stored = [];
+    try {
+      stored = JSON.parse(localStorage.getItem("userRecipes")) || [];
+    } catch {}
+    stored.push(recipe);
+    localStorage.setItem("userRecipes", JSON.stringify(stored));
+    alert("Receita guardada no perfil!");
+  };
 
   // ── RENDER ────────────────────────────────────────────────────────────────
 
@@ -884,8 +881,10 @@ const handleSaveToProfile = async () => {
     <div>
       <div className="config-wrapper">
         <div className="settings-wrapper">
-       <aside className={`config-modal ${showConfig ? "open" : "closed"} size-${panelSize}`}>
-            <div style={{display: "flex"}}>
+          <aside
+            className={`config-modal ${showConfig ? "open" : "closed"} size-${panelSize}`}
+          >
+            <div style={{ display: "flex" }}>
               <div className="config-modal-header">
                 <Bake
                   baseRef={baseRef}

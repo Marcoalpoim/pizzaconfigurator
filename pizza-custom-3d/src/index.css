@@ -1182,6 +1182,45 @@ background: rgb(255 255 255 / 20%);
 
 
 
+/* -- PIZZA RECIPE PAGE */
+
+.pagina-receita-container{
+min-height: 100vh;
+    background: rgba(10, 10, 10, 0);
+    color: white;
+    padding-bottom: 80px; 
+width: 100%;
+    max-width: 700px;
+        position: relative;
+    left: 50%;
+    transform: translateX(-50%) !important;
+}
+.pagina-receita-header{
+    position: sticky;
+    top: 0px;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0px;
+    background: rgba(10, 10, 10, 0); 
+}
+
+
+
+
+
+ .pagina-receita-hero{
+   position: relative;
+   border-radius: 15px;
+   overflow: hidden;
+  }
+
+p.feedbookmark{
+  margin: 0;
+}
+  
+
 /* Tablet */
 @media (max-width: 1024px) {
   .feed-grid {
@@ -1194,6 +1233,10 @@ background: rgb(255 255 255 / 20%);
 
 /* Mobile */
 @media (max-width: 768px) {  
+  .pagina-receita-header{ 
+    padding: 12px 16px; 
+}
+
   .profile-btns {
 display: flex;
     gap: 10px;
