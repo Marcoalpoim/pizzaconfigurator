@@ -15,8 +15,7 @@ import {
   query,
   deleteDoc,
   doc,
-} from "firebase/firestore";
-import { SpeedInsights } from "@vercel/speed-insights/next"
+} from "firebase/firestore"; 
 
 export default function App() {
   const [user, setUser] = useState(null);
