@@ -16,6 +16,7 @@ import {
   deleteDoc,
   doc,
 } from "firebase/firestore";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -45,11 +46,11 @@ export default function App() {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const recipes = snapshot.docs.map((doc) => ({
         ...doc.data(),
-        id: doc.id,          // Firestore doc ID replaces Date.now() id
+        id: doc.id,         
       }));
       setFeed(recipes);
     });
-    return () => unsubscribe();  // clean up listener on unmount
+    return () => unsubscribe();  
   }, []);
 
   // ── Persist non-critical state to localStorage ──────────────────────────────
