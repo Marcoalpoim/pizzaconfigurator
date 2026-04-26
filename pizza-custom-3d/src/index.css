@@ -891,7 +891,7 @@ display: flex;
 }
 
 .profile-panel{
-      padding: 20px;
+      padding:10px;
     color: white;
     background: rgb(17, 17, 17);
     border-radius: 8px; 
@@ -951,6 +951,7 @@ display: flex;
   justify-items: center;
     max-width: 1020px;
      width: 100%;
+     margin-bottom: 100px;
 }
 
 
@@ -1203,7 +1204,9 @@ width: 100%;
     justify-content: space-between;
     align-items: center;
     padding: 12px 0px;
-    background: rgba(10, 10, 10, 0); 
+       background-color: #40404000;
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
 }
 
 

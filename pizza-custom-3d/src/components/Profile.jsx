@@ -72,7 +72,7 @@ export default function Profile({
   onDeletePublished,
 }) {
   const [localRecipes, setLocalRecipes] = useState([]);
-  const [activeTab, setActiveTab] = useState("criadas");
+  const [activeTab, setActiveTab] = useState("guardadas");
 
   useEffect(() => {
     const loadRecipes = () => {
@@ -110,14 +110,14 @@ export default function Profile({
   const bookmarkedRecipes = feed.filter((item) => bookmarks.includes(item.id));
 
   const activeList =
-    activeTab === "criadas"    ? localRecipes :
+    activeTab === "guardadas"    ? localRecipes :
     activeTab === "publicadas" ? userRecipes  :   // ✅ was "published"
     bookmarkedRecipes;
 
   const getAction = (tab) => {
-    if (tab === "criadas")    return handleDeleteRecipe;
+    if (tab === "guardadas")    return handleDeleteRecipe;
     if (tab === "publicadas") return onDeletePublished;
-    if (tab === "guardadas")  return onToggleBookmark;
+    if (tab === "favoritas")  return onToggleBookmark;
     return null;
   };
 
@@ -130,7 +130,7 @@ export default function Profile({
           <div>
             <div style={{ fontSize: 18, fontWeight: "bold" }}>{user?.displayName || "User"}</div>
             <div style={{ fontSize: 13, color: "#aaa" }}>
-              {localRecipes.length} Criadas · {userRecipes.length} Publicadas · {bookmarkedRecipes.length} Guardadas
+              {localRecipes.length} Guardadas · {userRecipes.length} Publicadas · {bookmarkedRecipes.length} Favoritas
             </div>
           </div>
         </div>
@@ -143,9 +143,9 @@ export default function Profile({
       {/* TABS */}
       <div className="profile-tabs">
         {[
-          { key: "criadas",    label: "Criadas" },
+          { key: "guardadas",    label: "Guardadas" },
           { key: "publicadas", label: "Publicadas" },
-          { key: "guardadas",  label: "Guardadas" },
+          { key: "favoritas",  label: "Favoritas" },
         ].map((tab) => (
           <button
             key={tab.key}
