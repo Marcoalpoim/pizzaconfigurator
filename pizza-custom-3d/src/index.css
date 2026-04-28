@@ -738,7 +738,7 @@ html,
 
 /* WebKit browsers (Chrome, Edge, Safari) */
 .config-content::-webkit-scrollbar {
-  width: 2px;
+  width: 1px;
 }
 
 .config-content::-webkit-scrollbar-track {
@@ -821,6 +821,9 @@ html,
   border: 0.5px solid rgb(221, 221, 221);
   border-radius: 8px;
   overflow: hidden;
+      position: relative;
+    z-index: 5;
+    margin-bottom: 1px;
 }
 
 .pizza-controls-item-content {
