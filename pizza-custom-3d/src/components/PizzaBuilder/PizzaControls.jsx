@@ -1,39 +1,49 @@
 import { useState, useRef, useEffect } from "react";
- 
-function AccordionSelect({ label, value, onChange, options }) {
+
+function AccordionSelect({ label, value, onChange, options, scrollContainerRef }) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
   const bodyRef = useRef(null);
   const [height, setHeight] = useState(0);
- 
+
   const selectedLabel = options.find((o) => o.value === value)?.label ?? value;
- 
+
   useEffect(() => {
     function handleClickOutside(e) {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
+        // ✅ FIX 1: Only close if the click was inside the scroll container
+        // (i.e. another accordion or its content) — ignore clicks outside it entirely
+        const scrollEl = scrollContainerRef?.current;
+        if (scrollEl && !scrollEl.contains(e.target)) return;
         setOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
- 
+
   useEffect(() => {
     if (bodyRef.current) {
       setHeight(open ? bodyRef.current.scrollHeight : 0);
     }
+
+    // ✅ FIX 2: Scroll within the config-content container, not the page
     if (open && containerRef.current) {
       setTimeout(() => {
-        containerRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        const scrollEl = scrollContainerRef?.current;
+        if (scrollEl && containerRef.current) {
+          const containerTop = containerRef.current.offsetTop;
+          scrollEl.scrollTo({ top: containerTop - 12, behavior: "smooth" });
+        } else {
+          containerRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
       }, 50);
     }
   }, [open]);
- 
+
   return (
-    <div
-      ref={containerRef} className="pizza-controls-item" >
-      <div
-        onClick={() => setOpen((o) => !o)} className="pizza-controls-item-content"  >
+    <div ref={containerRef} className="pizza-controls-item">
+      <div onClick={() => setOpen((o) => !o)} className="pizza-controls-item-content">
         <span style={{ fontSize: 13, fontWeight: 400, color: "#fff" }}>{label}</span>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ fontSize: 14, fontWeight: 500 }}>{selectedLabel}</span>
@@ -50,7 +60,7 @@ function AccordionSelect({ label, value, onChange, options }) {
           </svg>
         </div>
       </div>
- 
+
       <div
         ref={bodyRef}
         style={{
@@ -75,11 +85,10 @@ function AccordionSelect({ label, value, onChange, options }) {
                   textAlign: "left",
                   padding: "9px 10px",
                   fontSize: 14,
-                  border: "none",
                   borderRadius: 6,
                   cursor: "pointer",
                   color: "#fff",
-                  background: isSelected ? "transparent" : "transparent",
+                  background: "transparent",
                   border: isSelected ? "2px dashed #ddd" : "1px dashed transparent",
                   fontWeight: isSelected ? 500 : 400,
                   fontFamily: "inherit",
@@ -88,7 +97,7 @@ function AccordionSelect({ label, value, onChange, options }) {
               >
                 {opt.label}
                 {isSelected && (
-                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" strokeWidth="2">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" strokeWidth="2" stroke="currentColor">
                     <path d="M3 8l3.5 3.5L13 5" />
                   </svg>
                 )}
@@ -100,7 +109,7 @@ function AccordionSelect({ label, value, onChange, options }) {
     </div>
   );
 }
- 
+
 const BASE_TYPES = [
   { value: "fina", label: "Fina" },
   { value: "média", label: "Média" },
@@ -144,14 +153,15 @@ export default function PizzaControls({
   baseSize, setBaseSize,
   pizzaShape, setPizzaShape,
   cheeseType, setCheeseType,
+  scrollContainerRef, // ✅ pass this in from PizzaBuilder
 }) {
   return (
-    <div className="pizza-controls" >
-      <AccordionSelect label="Tipo de Base"    value={baseType}   onChange={setBaseType}   options={BASE_TYPES} />
-      <AccordionSelect label="Tamanho da Base" value={baseSize}   onChange={setBaseSize}   options={BASE_SIZES} />
-      <AccordionSelect label="Forma da Base"   value={pizzaShape} onChange={setPizzaShape} options={SHAPES} />
-      <AccordionSelect label="Tipo de Molho"   value={sauceType}  onChange={setSauceType}  options={SAUCES} />
-      <AccordionSelect label="Tipo de Queijo"  value={cheeseType} onChange={setCheeseType} options={CHEESES} />
+    <div className="pizza-controls">
+      <AccordionSelect label="Tipo de Base"    value={baseType}   onChange={setBaseType}   options={BASE_TYPES} scrollContainerRef={scrollContainerRef} />
+      <AccordionSelect label="Tamanho da Base" value={baseSize}   onChange={setBaseSize}   options={BASE_SIZES} scrollContainerRef={scrollContainerRef} />
+      <AccordionSelect label="Forma da Base"   value={pizzaShape} onChange={setPizzaShape} options={SHAPES}     scrollContainerRef={scrollContainerRef} />
+      <AccordionSelect label="Tipo de Molho"   value={sauceType}  onChange={setSauceType}  options={SAUCES}     scrollContainerRef={scrollContainerRef} />
+      <AccordionSelect label="Tipo de Queijo"  value={cheeseType} onChange={setCheeseType} options={CHEESES}    scrollContainerRef={scrollContainerRef} />
     </div>
   );
 }

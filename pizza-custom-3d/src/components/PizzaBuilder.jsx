@@ -48,6 +48,7 @@ export default function PizzaBuilder({
   const baseTypeRef = useRef(baseType);
   const baseSizeRef = useRef(baseSize);
   const showConfigRef = useRef(showConfig);
+  const configContentRef = useRef(null);
 
   useEffect(() => {
     snapToRingsRef.current = snapToRings;
@@ -917,7 +918,7 @@ export default function PizzaBuilder({
                 </button>
               </div>
             </div>
-            <div className="config-content">
+       <div className="config-content" ref={configContentRef}>
               <button onClick={generateRandomPizza} className="btn-wrapper">
                 <div className="randompizza-container">
                   <img src="/icons/shuffle.svg" alt="save" />
@@ -929,6 +930,7 @@ export default function PizzaBuilder({
                 removeIngredient={removeIngredient}
                 ingredientCounts={ingredientCounts}
               />
+
               <PizzaControls
                 sauceType={sauceType}
                 setSauceType={setSauceType}
@@ -940,6 +942,7 @@ export default function PizzaBuilder({
                 setPizzaShape={setPizzaShape}
                 cheeseType={cheeseType}
                 setCheeseType={setCheeseType}
+                   scrollContainerRef={configContentRef}
               />
               <div className="caloriescounter-wrapper">
                 <CalorieCounter
