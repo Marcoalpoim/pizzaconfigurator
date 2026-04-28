@@ -884,7 +884,7 @@ export default function PizzaBuilder({
           <aside
             className={`config-modal ${showConfig ? "open" : "closed"} size-${panelSize}`}
           >
-            <div style={{ display: "flex" }}>
+            <div style={{ display: "flex", padding: "5px", gap: 5, alignItems: "center", backgroundColor: "white" }}>
               <div className="config-modal-header">
                 <Bake
                   baseRef={baseRef}
