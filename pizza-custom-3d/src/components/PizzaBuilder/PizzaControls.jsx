@@ -10,36 +10,32 @@ function AccordionSelect({ label, value, onChange, options, scrollContainerRef }
 
   useEffect(() => {
     function handleClickOutside(e) {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
-        // ✅ FIX 1: Only close if the click was inside the scroll container
-        // (i.e. another accordion or its content) — ignore clicks outside it entirely
-        const scrollEl = scrollContainerRef?.current;
-        if (scrollEl && !scrollEl.contains(e.target)) return;
-        setOpen(false);
-      }
+      if (!containerRef.current || containerRef.current.contains(e.target)) return;
+
+   
+      const scrollEl = scrollContainerRef?.current;
+      if (!scrollEl || !scrollEl.contains(e.target)) return;
+
+      setOpen(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    if (bodyRef.current) {
-      setHeight(open ? bodyRef.current.scrollHeight : 0);
-    }
+useEffect(() => {
+  if (bodyRef.current) {
+    setHeight(open ? bodyRef.current.scrollHeight : 0);
+  }
 
-    // ✅ FIX 2: Scroll within the config-content container, not the page
-    if (open && containerRef.current) {
-      setTimeout(() => {
-        const scrollEl = scrollContainerRef?.current;
-        if (scrollEl && containerRef.current) {
-          const containerTop = containerRef.current.offsetTop;
-          scrollEl.scrollTo({ top: containerTop - 12, behavior: "smooth" });
-        } else {
-          containerRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-        }
-      }, 50);
-    }
-  }, [open]);
+  if (open && containerRef.current && scrollContainerRef?.current) {
+ setTimeout(() => {
+  const scrollEl = scrollContainerRef.current;
+  const itemTop = containerRef.current.offsetTop;
+  const isMobile = window.innerWidth < 768;
+  scrollEl.scrollTop = itemTop - (isMobile ? 100 : 80);
+}, 300);
+  }
+}, [open]);
 
   return (
     <div ref={containerRef} className="pizza-controls-item">
@@ -64,7 +60,7 @@ function AccordionSelect({ label, value, onChange, options, scrollContainerRef }
       <div
         ref={bodyRef}
         style={{
-          height: height,
+          height,
           overflow: "hidden",
           transition: "height 0.28s cubic-bezier(0.4, 0, 0.2, 1)",
           borderTop: height > 0 ? "0.5px solid #ddd" : "none",
@@ -97,7 +93,8 @@ function AccordionSelect({ label, value, onChange, options, scrollContainerRef }
               >
                 {opt.label}
                 {isSelected && (
-                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" strokeWidth="2" stroke="currentColor">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none"
+                    stroke="currentColor" strokeWidth="2">
                     <path d="M3 8l3.5 3.5L13 5" />
                   </svg>
                 )}
@@ -109,7 +106,6 @@ function AccordionSelect({ label, value, onChange, options, scrollContainerRef }
     </div>
   );
 }
-
 const BASE_TYPES = [
   { value: "fina", label: "Fina" },
   { value: "média", label: "Média" },
