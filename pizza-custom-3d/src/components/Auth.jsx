@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { auth, signInWithGoogle } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
-const DEV_MODE = import.meta.env.DEV; 
+//const DEV_MODE = import.meta.env.DEV; 
+const DEV_MODE = true;
 
 const FAKE_USER = {
   displayName: "Dev Chef",
