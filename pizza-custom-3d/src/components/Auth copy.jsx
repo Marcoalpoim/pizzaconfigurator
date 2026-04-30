@@ -2,24 +2,10 @@ import React, { useEffect, useState } from "react";
 import { auth, signInWithGoogle } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
-const DEV_MODE = import.meta.env.DEV; 
-
-const FAKE_USER = {
-  displayName: "Dev Chef",
-  name: "Dev Chef",
-  uid: "dev-user-123",
-  email: "dev@pizzainator.test",
-};
-
 export default function Auth({ user, setUser }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (DEV_MODE) {
-      setUser(FAKE_USER);
-      setLoading(false);
-      return;
-    }
     const unsub = onAuthStateChanged(auth, (u) => {
       setUser(u);
       setLoading(false);
