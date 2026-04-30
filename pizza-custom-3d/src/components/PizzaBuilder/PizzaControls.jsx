@@ -28,12 +28,24 @@ useEffect(() => {
   }
 
   if (open && containerRef.current && scrollContainerRef?.current) {
- setTimeout(() => {
-  const scrollEl = scrollContainerRef.current;
-  const itemTop = containerRef.current.offsetTop;
-  const isMobile = window.innerWidth < 768;
-  scrollEl.scrollTop = itemTop - (isMobile ? 100 : 80);
-}, 300);
+    const body = bodyRef.current;
+
+    const handleTransitionEnd = () => {
+      const scrollEl = scrollContainerRef.current;
+      const isMobile = window.innerWidth < 768;
+
+      scrollEl.scrollTo({
+        top: containerRef.current.offsetTop - (isMobile ? 100 : 80),
+        behavior: 'smooth',
+      });
+
+      body.removeEventListener('transitionend', handleTransitionEnd);
+    };
+
+    body.addEventListener('transitionend', handleTransitionEnd);
+
+    // Fallback in case transitionend doesn't fire
+    return () => body.removeEventListener('transitionend', handleTransitionEnd);
   }
 }, [open]);
 

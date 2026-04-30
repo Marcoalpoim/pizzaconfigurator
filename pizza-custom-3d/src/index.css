@@ -650,8 +650,8 @@ html,
 
 .config-modal.size-large .config-content {
   height: calc(75vh - 200px);
-
-  overflow: auto;
+padding: 16px 8px 16px 16px;
+  overflow-y: scroll;
 
 }
 
@@ -719,12 +719,12 @@ html,
 
 .config-content {
   width: 300px;
-  height: calc(65vh - 200px);
+  height: calc(55vh - 200px);
   margin-bottom: 135px;
   overflow-y: scroll;
   overflow-x: hidden;
   overflow-y: scroll;
-  padding: 16px;
+padding: 16px 10px 16px 20px;
   color: white;
 }
 
@@ -1371,7 +1371,7 @@ p.feedbookmark {
   .config-content {
     height: calc(50vh - 200px);
     width: auto;
-    padding: 15px;
+   padding: 15px 15px 15px 15px;
     margin-bottom: 100px;
   }
 
