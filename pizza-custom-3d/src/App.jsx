@@ -116,7 +116,7 @@ export default function App() {
           <>
             <div className="brand-logo">
               <Link to="/">
-                <img src="/icons/logotipo-pizzainator.png" alt="Pizzainator" />
+                <img src="/icons/logotipo-pizzainator.webp" alt="Pizzainator" />
               </Link>
             </div>
             <nav className="mainnav-container">

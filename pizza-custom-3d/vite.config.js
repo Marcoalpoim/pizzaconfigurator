@@ -7,7 +7,10 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes('node_modules/three')) return 'three'
+          if (id.includes('three')) return 'three'
+          if (id.includes('react-dom')) return 'react-dom'
+          if (id.includes('react-router')) return 'react-router'
+          if (id.includes('firebase')) return 'firebase'
         }
       }
     }
