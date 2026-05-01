@@ -11,7 +11,7 @@ scene.fog = new THREE.FogExp2(0x1a0f07, 0.012);
   const textureLoader = new THREE.TextureLoader();
 
   // ── FLOOR ────────────────────────────────────────────────────────────────
-  const floorTex = textureLoader.load("/textures/woodtable.jpg");
+  const floorTex = textureLoader.load("/textures/woodtable.webp");
   floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping;
   floorTex.repeat.set(12, 12);
   const floor = new THREE.Mesh(
@@ -52,7 +52,7 @@ scene.fog = new THREE.FogExp2(0x1a0f07, 0.012);
   scene.add(rightWall);
 
   // ── TABLE — centred on origin, camera looks straight at it ───────────────
-  const tableTex = textureLoader.load("/textures/woodtable.jpg");
+  const tableTex = textureLoader.load("/textures/woodtable.webp");
   tableTex.wrapS = tableTex.wrapT = THREE.RepeatWrapping;
   tableTex.repeat.set(5, 3);
 

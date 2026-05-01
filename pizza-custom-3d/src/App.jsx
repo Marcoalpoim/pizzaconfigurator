@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Auth from "./components/Auth";
-import PizzaBuilder from "./components/PizzaBuilder";
-import Feed from "./components/Feed";
-import Profile from "./components/Profile";
 import "./index.css";
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
-import RecipePage from "./components/RecipePage";
 import { db } from "./firebase";
 import {
   collection,
@@ -15,7 +11,13 @@ import {
   query,
   deleteDoc,
   doc,
-} from "firebase/firestore"; 
+} from "firebase/firestore";
+import { lazy, Suspense } from "react";
+
+const PizzaBuilder = lazy(() => import("./components/PizzaBuilder"));
+const Feed = lazy(() => import("./components/Feed"));
+const Profile = lazy(() => import("./components/Profile"));
+const RecipePage = lazy(() => import("./components/RecipePage"));
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -45,11 +47,11 @@ export default function App() {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const recipes = snapshot.docs.map((doc) => ({
         ...doc.data(),
-        id: doc.id,         
+        id: doc.id,
       }));
       setFeed(recipes);
     });
-    return () => unsubscribe();  
+    return () => unsubscribe();
   }, []);
 
   // ── Persist non-critical state to localStorage ──────────────────────────────
@@ -89,14 +91,18 @@ export default function App() {
 
   const toggleBookmark = (id) => {
     setBookmarks((prev) =>
-      prev.includes(id) ? prev.filter((b) => b !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((b) => b !== id) : [...prev, id],
     );
   };
 
   if (loading) {
     return (
       <div className="loader-screen">
-        <img src="/icons/loadingPI.gif" alt="Loading..." className="loader-gif" />
+        <img
+          src="/icons/loadingPI.gif"
+          alt="Loading..."
+          className="loader-gif"
+        />
       </div>
     );
   }
@@ -106,67 +112,84 @@ export default function App() {
       <div className="app-root">
         <Auth user={user} setUser={setUser} />
 
-        {user ? (
+        {user && (
           <>
             <div className="brand-logo">
-              <Link to="/"><img src="/icons/logotipo-pizzainator.png" alt="Pizzainator" /></Link>
+              <Link to="/">
+                <img src="/icons/logotipo-pizzainator.png" alt="Pizzainator" />
+              </Link>
             </div>
             <nav className="mainnav-container">
-              <Link to="/"><img src="/icons/Home.svg" alt="Home" /></Link>
-              <Link to="/feed"><img src="/icons/Interface.svg" alt="Feed" /></Link>
-              <Link to="/profile"><img src="/icons/user.svg" alt="user" /></Link>
+              <Link to="/">
+                <img src="/icons/Home.svg" alt="Home" />
+              </Link>
+              <Link to="/feed">
+                <img src="/icons/Interface.svg" alt="Feed" />
+              </Link>
+              <Link to="/profile">
+                <img src="/icons/user.svg" alt="user" />
+              </Link>
             </nav>
 
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <PizzaBuilder
-                    user={user}
-                    publishToFeed={publishToFeed}
-                    showConfig={showConfig}
-                    setShowConfig={setShowConfig}
+            <Suspense
+              fallback={
+                <div className="loader-screen">
+                  <img
+                    src="/icons/loadingPI.gif"
+                    alt="Loading..."
+                    className="loader-gif"
                   />
-                }
-              />
-              <Route
-                path="/feed"
-                element={
-                  <Feed
-                    feed={feed}
-                    bookmarks={bookmarks}
-                    onBookmark={toggleBookmark}
-                  />
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  <Profile
-                    user={user}
-                    feed={feed}
-                    bookmarks={bookmarks}
-                    onToggleBookmark={toggleBookmark}
-                    onDeletePublished={deletePublishedRecipe}
-                    onLogout={handleLogout}
-                  />
-                }
-              />
-              <Route
-                path="/recipe/:id"
-                element={
-                  <RecipePage
-                    feed={feed}
-                    bookmarks={bookmarks}
-                    onToggleBookmark={toggleBookmark}
-                  />
-                }
-              />
-              <Route path="/info" />
-            </Routes>
+                </div>
+              }
+            >
+              <Routes>
+                <Route
+                  path="/"
+                  element={
+                    <PizzaBuilder
+                      user={user}
+                      publishToFeed={publishToFeed}
+                      showConfig={showConfig}
+                      setShowConfig={setShowConfig}
+                    />
+                  }
+                />
+                <Route
+                  path="/feed"
+                  element={
+                    <Feed
+                      feed={feed}
+                      bookmarks={bookmarks}
+                      onBookmark={toggleBookmark}
+                    />
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <Profile
+                      user={user}
+                      feed={feed}
+                      bookmarks={bookmarks}
+                      onToggleBookmark={toggleBookmark}
+                      onDeletePublished={deletePublishedRecipe}
+                      onLogout={handleLogout}
+                    />
+                  }
+                />
+                <Route
+                  path="/recipe/:id"
+                  element={
+                    <RecipePage
+                      feed={feed}
+                      bookmarks={bookmarks}
+                      onToggleBookmark={toggleBookmark}
+                    />
+                  }
+                />
+              </Routes>
+            </Suspense>
           </>
-        ) : (
-          <div style={{ color: "white", padding: 20 }}>Log in 🍕</div>
         )}
       </div>
     </BrowserRouter>

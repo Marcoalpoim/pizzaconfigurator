@@ -58,7 +58,7 @@ export default function Auth({ user, setUser }) {
           color: "#fff", fontSize: 32, fontWeight: 700,
           margin: "0 0 10px", letterSpacing: "-0.02em",
         }}>
-          Bem-vindo ao Pizza-Inator
+          Bem-vindo ao <br /> Pizza-Inator
         </h1>
         <p style={{
           color: "#555", fontSize: 14, margin: 0, lineHeight: 1.5,

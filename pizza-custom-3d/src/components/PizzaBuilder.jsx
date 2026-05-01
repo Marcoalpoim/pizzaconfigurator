@@ -49,6 +49,9 @@ export default function PizzaBuilder({
   const baseSizeRef = useRef(baseSize);
   const showConfigRef = useRef(showConfig);
   const configContentRef = useRef(null);
+  const textureCache = useRef({});
+const cheeseMats = useRef({});
+ const texLoader = useRef(new THREE.TextureLoader());
 
   useEffect(() => {
     snapToRingsRef.current = snapToRings;
@@ -67,7 +70,31 @@ export default function PizzaBuilder({
   }, [showConfig]);
 
   // ── HELPERS ──────────────────────────────────────────────────────────────
+function loadTex(path) {
+  if (!textureCache.current[path]) {
+    const tex = texLoader.current.load(path);
+    textureCache.current[path] = tex;
+  }
+  return textureCache.current[path];
+}
+const CHEESE_PATHS = {
+  cheddar:   "/textures/cheddar.webp",
+  parmesan:  "/textures/parmesan.webp",
+  gorgonzola:"/textures/gorganzola.webp",
+};
 
+function getCheeseMat(cheeseType) {
+  if (!cheeseMats.current[cheeseType]) {
+    const texPath = CHEESE_PATHS[cheeseType] || "/textures/mozzarelacheese.webp";
+    cheeseMats.current[cheeseType] = new THREE.MeshStandardMaterial({
+      map:      loadTex(texPath),
+      roughness: 0.75,
+      metalness: 0.0,
+      emissive:  new THREE.Color(0.08, 0.05, 0.0),
+    });
+  }
+  return cheeseMats.current[cheeseType];
+}
   const getBaseDims = (type, size) => {
     const height = type === "fina" ? 0.04 : type === "média" ? 0.06 : 0.1;
     const radius = size === 28 ? 1.9 : size === 33 ? 2.2 : 2.7;
@@ -75,12 +102,12 @@ export default function PizzaBuilder({
   };
 
   function makeDoughMat() {
-    const loader = new THREE.TextureLoader();
-    const tex = loader.load("/textures/dough.jpg");
+  //  const loader = new THREE.TextureLoader();
+    const tex = loadTex("/textures/dough.webp");
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
     tex.repeat.set(4, 2);
     tex.anisotropy = 8;
-    const nrm = loader.load("/textures/dough.jpg");
+    const nrm = loadTex("/textures/dough.webp");
     nrm.wrapS = nrm.wrapT = THREE.RepeatWrapping;
     nrm.repeat.set(4, 2);
     return new THREE.MeshStandardMaterial({
@@ -249,8 +276,7 @@ export default function PizzaBuilder({
       !shape || shape === "circulo"
         ? new THREE.CircleGeometry(innerR, 64)
         : new THREE.ShapeGeometry(makeShape2D(shape, innerR));
-    const loader = new THREE.TextureLoader();
-    const tex = loader.load("/textures/sauce.jpg");
+    const tex = loadTex("/textures/sauce.webp");
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
     tex.repeat.set(2, 2);
     const key = String(sType || "").toLowerCase();
@@ -484,43 +510,30 @@ export default function PizzaBuilder({
 
   // ── CHEESE ───────────────────────────────────────────────────────────────
 
-  function createCheeseBlob(shape, radius, y, cheeseType) {
-    const geom = new THREE.SphereGeometry(0.18 + Math.random() * 0.05, 12, 8);
-    const loader = new THREE.TextureLoader();
-    const paths = {
-      cheddar: "/textures/cheddar.png",
-      parmesan: "/textures/parmesan.jpg",
-      gorgonzola: "/textures/gorganzola.jpg",
-    };
-    const texPath = paths[cheeseType] || "/textures/mozzarelacheese.jpeg";
+function createCheeseBlob(shape, radius, y, cheeseType) {
+ 
+  const geom = new THREE.SphereGeometry(0.18 + Math.random() * 0.05, 7, 6);
 
-    const mat = new THREE.MeshStandardMaterial({
-      map: loader.load(texPath),
-      // ✅ Removed: normalMap no longer reuses the color texture
-      roughness: 0.75,
-      metalness: 0.0,
-      // Slight emissive warmth so cheese doesn't look dark and muddy
-      emissive: new THREE.Color(0.08, 0.05, 0.0),
-    });
+  
+  const mat = getCheeseMat(cheeseType);
 
-    const mesh = new THREE.Mesh(geom, mat);
+  const mesh = new THREE.Mesh(geom, mat);
 
-    mesh.scale.set(
-      1.0 + Math.random() * 0.4,
-      0.08 + Math.random() * 0.04,
-      1.0 + Math.random() * 0.4,
-    );
-    mesh.castShadow = false;
-    // ✅ Random rotation so blobs look scattered, not stamped
-    mesh.rotation.y = Math.random() * Math.PI * 2;
-    mesh.rotation.z = (Math.random() - 0.5) * 0.3;
+  mesh.scale.set(
+    1.0 + Math.random() * 0.4,
+    0.08 + Math.random() * 0.04,
+    1.0 + Math.random() * 0.4,
+  );
+  mesh.rotation.y = Math.random() * Math.PI * 2;
+  mesh.rotation.z = (Math.random() - 0.5) * 0.3;
+  mesh.castShadow  = false;
+  mesh.receiveShadow = true;
 
-    const { x, z } = randomPointInShape(shape, radius);
-    mesh.position.set(x, y + Math.random() * 0.01, z);
-    mesh.castShadow = false;
-    mesh.receiveShadow = true;
-    return mesh;
-  }
+  const { x, z } = randomPointInShape(shape, radius);
+  mesh.position.set(x, y + Math.random() * 0.01, z);
+
+  return mesh;
+}
 
   function addIngredientAtWorldPos(ing, worldPos) {
     const fullIng = INGREDIENTS.find((i) => i.id === ing.id) || ing;
@@ -643,15 +656,21 @@ export default function PizzaBuilder({
     });
     resizeObserver.observe(container);
 
-    return () => {
-      cancelAnimate();
-      resizeObserver.disconnect();
-      controls.dispose();
-      renderer.dispose();
+ return () => {
+  cancelAnimate();
+  resizeObserver.disconnect();
+  controls.dispose();
+  
+  // Dispose cached textures and materials
+  Object.values(textureCache.current).forEach(t => t.dispose());
+  Object.values(cheeseMats.current).forEach(m => m.dispose());
+  textureCache.current = {};
+  cheeseMats.current = {};
 
-      if (renderer.domElement && container.contains(renderer.domElement))
-        container.removeChild(renderer.domElement);
-    };
+  renderer.dispose();
+  if (renderer.domElement && container.contains(renderer.domElement))
+    container.removeChild(renderer.domElement);
+};
   }, []);
 
   // ── REACTIVE EFFECTS ──────────────────────────────────────────────────────
