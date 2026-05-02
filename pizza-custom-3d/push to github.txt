@@ -1,0 +1,114 @@
+
+
+cd ~/Desktop/PG-2025-webfrontend/webfrontend-Projeto/pizza-custom-3d
+git add -A
+git commit -m "Fix: project files"
+
+
+
+PUSH TO GITHUB
+git push -u origin main --force
+
+...
+
+
+Ideas that work with what you already have:
+1. Pizza Battle / Duels
+Two players build a pizza simultaneously (split screen or turn-based), then the community votes on which is better. You already have the feed and user system — voting would just be a counter field on the Firestore recipe document.
+2. Pizza Challenges
+Daily/weekly challenges posted to Firestore: "Build a pizza under 500 kcal", "Use only seafood toppings", "Make a heart-shaped pizza with exactly 20 toppings". Your calorie counter, shape system, and ingredient counts already track all the data needed to validate these automatically.
+3. Guess the Pizza
+Show a screenshot of a community pizza from the feed (you already capture snapshots), hide the ingredient list, and let players guess the toppings. Each correct guess earns points. Everything you need is already in the recipe object.
+4. Pizza Speed Builder
+A timer challenge — build a specific pizza from a recipe card as fast as possible. The target recipe is shown (base, sauce, cheese, toppings) and you race to match it. Your ingredientCounts state makes comparison trivial.
+5. Ingredient Roulette
+A slot-machine style spin that locks in random ingredients one by one — you must build the best pizza you can with whatever comes up. Your generateRandomPizza() function is already halfway there.
+
+Which of these sounds most interesting to you? I can help you design the full game loop and what code changes you'd need.
+
+
+pizza calories counter, pizza receipt, cursed pizza detector, ingredient roulette, pizza shrink
+
+
+
+
+
+
+HOW TO RUN IT? 
+
+🍕 Pizza Configurator — Setup Guide
+
+1. 📦 Requirements
+
+            Before anything, make sure you have:
+
+            Node.js (recommended: v18+)
+            npm (comes with Node)
+
+            Check if installed:
+
+            node -v
+            npm -v
+
+2. 📥 Download the Project
+
+            Option A — ZIP
+            Download the project
+            Extract it
+            Option B — Git
+            git clone <your-repo-url>
+            cd your-project-folder
+
+3. 📦 Install Dependencies
+
+            Inside the project folder:
+
+            npm install
+
+            This installs things like:
+
+            React
+            Three.js
+            other required packages
+
+4. ▶️ Run the Project
+
+            npm run dev
+
+            or (depending on setup):
+
+            npm start
+
+
+ 9. 🧪 Build for Production
+            npm run build
+
+            Preview build:
+
+            npm run preview
+
+10. 🧠 Notes for Developers
+            Built with:
+            React + Three.js
+            Main logic:
+            PizzaBuilder.jsx → 3D scene
+            PizzaControls.jsx → UI controls
+
+
+            Toppings use:
+            normalized positions (important for resizing base)
+
+
+11. 🚀 Optional Improvements
+
+
+Add more ingredients (edit ingredients.js)
+Add new pizza shapes (edit createBase)
+Improve UI controls (icons, sliders, etc.)
+12. 🧼 Reset Everything
+
+If things break badly:
+
+rm -rf node_modules
+npm install
+npm run dev
