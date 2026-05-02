@@ -75,11 +75,13 @@ export default function IngredientPanel({
               className="ingredient-container-item"
             >
               <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <img
-                  src={ing.image}
-                  alt={ing.name}
-                  style={{ width: 24, height: 24, borderRadius: "5px" }}
-                />
+     <img
+  src={ing.image}
+  alt={ing.name}
+  width={24}
+  height={24}
+  style={{ borderRadius: "5px" }}
+/>
                 <span style={{ fontSize: 14 }}>{ing.name}</span>
               </span>
 
