@@ -27,7 +27,10 @@ export default function IngredientPanel({
     }
     if (open && containerRef.current) {
       setTimeout(() => {
-        containerRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        containerRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+        });
       }, 50);
     }
   }, [open]);
@@ -43,11 +46,16 @@ export default function IngredientPanel({
         </span>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ fontSize: 14, fontWeight: 500 }}>
-            {Object.values(ingredientCounts).reduce((a, b) => a + b, 0) || "Nenhum"}
+            {Object.values(ingredientCounts).reduce((a, b) => a + b, 0) ||
+              "Nenhum"}
           </span>
           <svg
-            width="14" height="14" viewBox="0 0 16 16" fill="none"
-            stroke="currentColor" strokeWidth="1.5"
+            width="14"
+            height="14"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
             style={{
               color: "#fff",
               transition: "transform 0.25s ease",
@@ -70,24 +78,24 @@ export default function IngredientPanel({
       >
         <div style={{ padding: 6 }}>
           {INGREDIENTS.map((ing) => (
-            <div
-              key={ing.id}
-              className="ingredient-container-item"
-            >
+            <div key={ing.id} className="ingredient-container-item">
               <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-     <img
-  src={ing.image}
-  alt={ing.name}
-  width={24}
-  height={24}
-  style={{ borderRadius: "5px" }}
-/>
+                <img
+                  src={ing.image}
+                  alt={ing.name}
+                  width={24}
+                  height={24}
+                  style={{ borderRadius: "5px" }}
+                  loading="lazy"
+                />
                 <span style={{ fontSize: 14 }}>{ing.name}</span>
               </span>
 
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                 <button onClick={() => removeIngredient(ing.id)}>-</button>
-                <span style={{ fontSize: 14 }}>{ingredientCounts[ing.id] || 0}</span>
+                <span style={{ fontSize: 14 }}>
+                  {ingredientCounts[ing.id] || 0}
+                </span>
                 <button onClick={() => addIngredient(ing.id)}>+</button>
               </div>
             </div>
