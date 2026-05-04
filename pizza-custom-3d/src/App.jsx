@@ -102,6 +102,7 @@ export default function App() {
           src="/icons/loadingPI.gif"
           alt="Loading..."
           className="loader-gif"
+          fetchpriority="high"
         />
       </div>
     );
@@ -115,16 +116,26 @@ export default function App() {
         {user && (
           <>
             <div className="brand-logo">
- <Link to="/">
-  <img src="/icons/logotipo-pizzainator.webp" alt="Pizzainator" width={104} height={45} />
-</Link>
+              <Link to="/">
+                <img
+                  src="/icons/logotipo-pizzainator.webp"
+                  alt="Pizzainator"
+                  width={104}
+                  height={45}
+                />
+              </Link>
             </div>
             <nav className="mainnav-container">
               <Link to="/">
                 <img src="/icons/Home.svg" alt="Home" width={24} height={24} />
               </Link>
               <Link to="/feed">
-                <img src="/icons/Interface.svg" alt="Feed" width={24} height={24} />
+                <img
+                  src="/icons/Interface.svg"
+                  alt="Feed"
+                  width={24}
+                  height={24}
+                />
               </Link>
               <Link to="/profile">
                 <img src="/icons/user.svg" alt="user" width={24} height={24} />
@@ -137,7 +148,7 @@ export default function App() {
                   <img
                     src="/icons/loadingPI.gif"
                     alt="Loading..."
-                    className="loader-gif" 
+                    className="loader-gif"
                   />
                 </div>
               }
